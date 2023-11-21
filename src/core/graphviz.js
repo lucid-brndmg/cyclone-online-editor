@@ -188,8 +188,6 @@ export const genGraphvizExecutionResultPaths = ({states, edges}, options) => {
   //   : options.direction
   // const statePaths = new Map()
 
-  // TODO: count states
-
   const dir = options.direction === DisplayDirection.Auto
     ? states.size <= 6 ? "LR" : "TB"
     : options.direction

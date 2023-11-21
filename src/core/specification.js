@@ -72,7 +72,7 @@ export const identifierNoPushTypeStackBlocks = new Set([
 //   [SemanticContextType.TransScope, [IdentifierKind.State]]
 // ])
 
-// TODO: annotation, record
+// TODO: annotation
 
 export const scopeSupportsShadowing = (() => {
   const result = new Map()
