@@ -1,0 +1,54 @@
+[
+  {
+    "label": "machine",
+    "insert": "machine ${1:Name} {\n\t$0\n}"
+  },
+  {
+    "label": "graph",
+    "insert": "graph ${1:Name} {\n\t$0\n}"
+  },
+  {
+    "label": "start",
+    "insert": "start state ${1:Name} {\n\t$0\n}"
+  },
+  {
+    "label": "abstract",
+    "insert": "abstract state ${1:Name} {\n\t$0\n}"
+  },
+  {
+    "label": "normal",
+    "insert": "normal state ${1:Name} {\n\t$0\n}"
+  },
+  {
+    "label": "state",
+    "insert": "state ${1:Name} {\n\t$0\n}"
+  },
+  {
+    "label": "node",
+    "insert": "node ${1:Name} {\n\t$0\n}"
+  },
+  {
+    "label": "goal",
+    "insert": "goal {\n\t$0\n}"
+  },
+  {
+    "label": "trans",
+    "insert": "trans { $0 }"
+  },
+  {
+    "label": "inv",
+    "insert": "invariant ${1:name} { $0 }"
+  },
+  {
+    "label": "fun",
+    "insert": "function ${1:name}:${2:type} ($3){\n\t$4\n}"
+  },
+  {
+    "label": "opt",
+    "insert": "option-${1:name} = ${2:value}"
+  },
+  {
+    "label": "trace",
+    "insert": "option-trace = true;"
+  }
+]

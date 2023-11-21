@@ -1,0 +1,16 @@
+<h1>Chapter 0: What is Cyclone ？</h1>
+<p>What is Cyclone? What can it do? Before revealing all features about Cyclone, let's begin with a classic and commonly known problem in graph theory.</p>
+<h2>Introduction - A Classic Graph Problem</h2>
+<p>In graph theory, a <strong><a href="https://en.wikipedia.org/wiki/Hamiltonian_path_problem">Hamiltonian path problem</a></strong> is about deciding/finding whether a (directed/undirected) graph contains a Hamiltonian path.</p>
+<p>So what is a Hamiltonian path?</p>
+<p>Here is an informal explanation, a Hamiltonian path is a path that covers <strong>all</strong> the vertices of a graph <strong>exactly once</strong>.</p>
+<p>Finding a Hamiltonian path in a graph is challenging. In fact, it is <a href="https://en.wikipedia.org/wiki/NP-completeness">NP-complete</a> and this means we can verify the correctness of a solution quickly but takes much more time (than verifying a solution) to find a solution.</p>
+<p>For example, does the following graph have a Hamiltonian path? If it has, how many does it have ?</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/introduction/hamilton.png" alt="img"></p>
+<p>Well, you could write a brute-force search algorithm to find all solutions to the condition: covers all the vertices of a graph exactly once. However, what happens if we have another graph with different conditions to be met such as a path must include multiple cycles or even for some nodes or edges (not) to be appeared a number of time. You certainly don't want to write a new algorithm every time when a condition is added, changed or removed. More importantly, how can you ensure the correctness of your algorithms.</p>
+<p>In our daily life, many problems can be represented as a graph such as a puzzle, a computer program or a free-falling ball.</p>
+<p>Cyclone is designed to provide a general solution to problems that can be described as a graph. Cyclone provides a specification language that allows users to describe a graphical structure along with conditions to be met and automatically solves them for you. More importantly, as long as conditions are correctly specified the correctness of returned solutions are ensured. Problems like finding Hamiltonian path in the graph above can be easily turned into a Cyclone specification and solved by Cyclone's powerful algorithms. We will come back to this problem in a later Section.</p>
+<p>Want to try Cyclone? just click <a href="https://classicwuhao.github.io/cyclone_tutorial/installation.html">Here ></a></p>
+<p>Wanna learn Cyclone? just click <a href="https://classicwuhao.github.io/cyclone_tutorial/chapter1/tutorial-basics.html">Start ></a></p>
+<p>For quick reference of Cyclone specification language, click <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html">Here ></a></p>
+<p>Watch out, Cyclone is on its way...</p>

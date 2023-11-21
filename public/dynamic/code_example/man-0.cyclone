@@ -1,0 +1,75 @@
+/* Coffee Can problem:
+ * This problem was originally by David Gries in 1987 book the Science of Programming.
+ * On page 301 section 23.2 of the same book Gries arributes the problem to a 1979 letter
+ * by Edsger W. Dijkstra, who himself credits the problem to his colleague Carel S. Scholten.
+ *
+ * This problem is also included in the TLA+ benchmark.
+ *
+ * A coffee can contains some black beans and white beans. The following
+ * process is to be repeated as long as possible:
+ * Randomly select two beans from the can. If they are the same color,
+ * throw them out, but put another black bean in. (Enough extra black
+ * beans are available to do this.) If they are different colors, place
+ * the white one back into the can and throw the black one away.
+ *
+ * Execution of this process reduces the number of beans in the can by
+ * one. Repetition of this process must terminate with exactly one bean in
+ * the can, for then two beans cannot be selected. The question is: what,
+ * if anything, can be said about the color of the final bean based on the
+ * number of white beans and the number of black beans initially in the
+ * can?
+ *
+ * We model this problem in Cyclone by building a transition graph.
+ * The hypothesis to be proved is in the <goal> section.
+ */
+
+option-trace=true;
+
+machine CoffeeCan{
+	record Can{
+		int white where white >=0;
+		int black where black >=0;
+	};
+
+	abstract start state Pick{}
+
+	normal state SameColorBlack{
+		Can.black--;
+	}
+
+	normal state SameColorWhite{
+		Can.white-=2;
+		Can.black++;
+	}
+
+	normal state DiffColor{
+		Can.black--;
+	}
+
+	abstract final state T{}
+
+	trans { Pick -> SameColorBlack }
+	trans { Pick -> SameColorWhite }
+	trans { Pick -> DiffColor }
+	trans { SameColorWhite -> T where Can.white+Can.black==1;}
+	trans { SameColorWhite -> Pick }
+	trans { SameColorBlack -> T where Can.white+Can.black==1;}
+	trans { SameColorBlack -> Pick }
+	trans { DiffColor -> T where Can.white+Can.black==1;}
+	trans { DiffColor -> Pick }
+
+	goal{
+		/**
+		 * Prove the following hypothesis.
+		 * Hypothesis: if we start with even number of white beans,
+		 * we end up with 1 black bean.
+		 * otherwise, we end up with 1 white bean.
+		 */
+		assert  !(((initial(Can.white) % 2==0) => (Can.black==1)) ||
+				((initial(Can.white) % 2!=0) => (Can.white==1)));
+
+		/* you can increase the following path length for larger number of beans. */
+		check for 4
+	}
+
+}

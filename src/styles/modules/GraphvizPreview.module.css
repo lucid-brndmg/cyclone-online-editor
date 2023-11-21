@@ -1,0 +1,8 @@
+.preview {
+    display: flex;
+    justify-content: center;
+
+    & svg {
+      width: 100%;
+    }
+}

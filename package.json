@@ -1,0 +1,64 @@
+{
+  "name": "cyclone-online-editor",
+  "description": "An online editor for cyclone specification language",
+  "author": {
+    "name": "lucid-brndmg"
+  },
+  "license": "MIT",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prep": "bash ./scripts/prepare_all.sh",
+
+    "genparser": "bash ./scripts/generate_parser.sh",
+    "gencodeexample": "node ./scripts/generate_code_example.js",
+    "genhl": "node scripts/generate_highlight.mjs",
+    "genref": "node ./scripts/generate_reference.mjs",
+    "gentheme": "node ./scripts/generate_theme.js",
+    "gentutorial": "node ./scripts/generate_tutorial.mjs",
+    "prepmonaco": "bash ./scripts/prepare_monaco.sh"
+  },
+  "dependencies": {
+    "@mantine/core": "^7.1.5",
+    "@mantine/hooks": "^7.1.5",
+    "@mantine/modals": "^7.1.7",
+    "@monaco-editor/react": "^4.6.0",
+    "@tabler/icons-react": "^2.39.0",
+    "antlr4": "^4.13.1",
+    "d3": "^7.8.5",
+    "d3-graphviz": "^5.2.0",
+    "highlight.js": "^11.9.0",
+    "html-react-parser": "^4.2.9",
+    "jszip": "^3.10.1",
+    "localforage": "^1.10.0",
+    "next": "^13.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zustand": "^4.4.4"
+  },
+  "devDependencies": {
+    "js-yaml": "^4.1.0",
+    "monaco-editor-webpack-plugin": "^7.1.0",
+    "monaco-themes": "^0.4.4",
+    "postcss": "^8.4.31",
+    "postcss-preset-mantine": "^1.9.0",
+    "postcss-simple-vars": "^7.0.1",
+    "rehype-external-links": "^3.0.0",
+    "rehype-highlight": "^7.0.0",
+    "rehype-stringify": "^10.0.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.0.0",
+    "unified": "^11.0.3",
+    "unist-util-select": "^5.0.0",
+    "monaco-editor": "^0.33.0"
+  }
+}

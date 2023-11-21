@@ -1,0 +1,32 @@
+/**
+ * A simple counting machine has three instructions only:
+ * increment the counter.
+ * decrement the counter.
+ * reset the counter.
+ */
+  machine CountingMachine {
+      int  c;
+      start normal state  R {c=0;}
+      normal state  I {c=c+1;}
+      normal state  D {c=c-1;}
+
+      trans { R -> I }
+      trans { R -> D }
+      trans { I -> R }
+      trans { I -> D }
+      trans { I -> I }
+      trans { D -> R }
+      trans { D -> I }
+      trans { D -> D }
+
+    goal{
+        /**
+         * Find all possible of instruction sequences that uses 6 instructions
+         * to make the counter=3 and must uses decrement instruction at least once.
+         */
+
+        assert c==3;
+        enumerate for 5 condition (D) reach (R,I,D)
+    }
+
+}

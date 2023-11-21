@@ -1,0 +1,1 @@
+export const round5 = n => Math.round(n / 5) * 5
