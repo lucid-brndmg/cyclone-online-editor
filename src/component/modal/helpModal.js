@@ -106,11 +106,11 @@ export const HelpModal = ({opened, onOpened}) => {
             <Box>
               <Anchor fz={"sm"} href={"https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"}>Language Reference</Anchor>
               <br/>
-              <Anchor href={"/"} fz={"sm"}>
+              <Anchor href={"https://github.com/lucid-brndmg/cyclone-online-editor"} fz={"sm"}>
                 Source code of this online editor
               </Anchor>
               <br/>
-              <Anchor href={"/"} fz={"sm"}>
+              <Anchor href={"https://github.com/classicwuhao/Cyclone"} fz={"sm"}>
                 Source code of cyclone specification language
               </Anchor>
             </Box>

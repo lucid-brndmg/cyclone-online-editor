@@ -110,7 +110,7 @@ const Copyright = () => {
             <Text c={"dimmed"} size={"sm"} mb={4} fw={500}>
               Source Codes
             </Text>
-            <Anchor fz={"sm"} href={"https://github.com/lucid-brndmg/cyclone-playground-website"}>This Website</Anchor>
+            <Anchor fz={"sm"} href={"https://github.com/lucid-brndmg/cyclone-online-editor"}>This Website</Anchor>
             <br/>
             <Anchor fz={"sm"} href={"https://github.com/classicwuhao/Cyclone"}>Cyclone Language</Anchor>
           </Box>

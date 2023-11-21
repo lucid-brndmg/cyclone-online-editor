@@ -11,6 +11,7 @@ This project is a final year project (CS440[A]) at Maynooth University.
 - Add more code examples
 - Add more tutorials
 - Styling improvement
+- Fix bugs & finish TODOs
 
 ## Features
 
