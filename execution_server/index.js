@@ -1,8 +1,8 @@
-const server = require("./src/server")
-const fs = require("fs")
-const config = require("./src/config");
-const { exit } = require("process");
-const path = require("path");
+import path from "node:path";
+import fs from "node:fs";
+import {serve} from "./src/server.js"
+import config from "./src/config.js"
+import {exit} from "node:process"
 
 const initEnv = () => {
   const exec = path.join(config.cyclonePath, config.cycloneExecutable)
@@ -18,12 +18,16 @@ const initEnv = () => {
     fs.mkdirSync(config.tempDir, {recursive: true})
   }
 
+  if (config.cycloneMandatoryTimeoutMs <= 0) {
+    console.log("WARN: No valid timeout seconds was set, a program could take forever to execute!!")
+  }
+
   console.log("env initialized");
 }
 
 const run = () => {
   initEnv()
-  server.serve()
+  serve()
 }
 
 run()

@@ -48,7 +48,7 @@ const genGraphvizStatesDef = (states, options, resultPaths = null) => {
     labels.push(isNode ? "node" : "state")
     const props = labels.join(" ")
     const color = resultPaths?.states.has(identifier)
-      ? ", color=green, fontcolor=green"
+      ? ", color=darkorange, fontcolor=darkorange"
       : ""
     codePieces.push(`// ${props} ${identifier}\n${identifier}[label="${identifier}${options.showStateProps ? `\\n[${props}]` : ""}"${color}];`)
   }
@@ -74,7 +74,7 @@ export const availableGraphvizEngines = [
 export const graphvizForEditorOptions = {
   showStateProps: true,
   showLabelLiteral: true,
-  showWhereExpr: true,
+  // showWhereExpr: true,
   paddingEdgeText: true
 }
 
@@ -129,18 +129,18 @@ export const genGraphvizPreview = ({states, trans}, options, resultPaths = null)
         attrs.push(`dir=both`)
       }
       if (resultEdgesDef.has(`${fromState},${sTo}`) || (isBiWay && resultEdgesDef.has(`${sTo},${fromState}`))) {
-        attrs.push(`color=green`, `fontcolor=green`)
+        attrs.push(`color=darkorange`, `fontcolor=darkorange`)
       }
-      if (whereExpr) {
-        attrs.push(`style=dashed`)
-      }
+      // if (whereExpr) {
+      //   attrs.push(`style=dashed`)
+      // }
 
       let descriptions = []
       if (identifier) {
         descriptions.push(identifier)
       }
 
-      const showWhere = whereExpr && previewOptions.showWhereExpr
+      const showWhere = !!whereExpr // && previewOptions.showWhereExpr
       const showLabel = previewOptions.showLabelLiteral
       if (showWhere && label) {
         const content = `where ${whereExpr}, ${showLabel ? "label: " : ""}${label}`
@@ -261,7 +261,7 @@ export const genGraphvizTrace = (traces, options) => {
       const bg = fields.length ? "white" : "black"
       const label = `<table border="0" cellborder="0" cellpadding="3" bgcolor="${bg}"><tr><td bgcolor="black" align="center" colspan="2"><font color="white">${raw}</font></td></tr>${fields.map(({key, value}) => `<tr><td align="left" port="r1">${key} = ${value}</td></tr>`)}</table>`
       states.push(`${id}[style = "filled" penwidth = 1 fillcolor = "${bg}" fontname = "Courier New" shape = "Mrecord" label =<${label}>];`)
-//       states.push(`${id} [color="black", style="rounded, filled" , fillcolor="orange" , shape="rect", label= <
+//       states.push(`${id} [color="black", style="rounded, filled" , fillcolor="darkorange" , shape="rect", label= <
 //  \t\t <table border='0' cellborder='0' style='rounded'>
 // \t\t\t <tr><td align="center" colspan="2" > <b>${raw}</b></td></tr>
 // \t\t\t ${fields.map(({key, value}) => `<tr><td align="center">${key} :</td><td>${value}</td></tr>`).join("\n\t\t\t")}

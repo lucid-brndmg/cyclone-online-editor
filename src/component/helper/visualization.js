@@ -28,7 +28,7 @@ import classes from "../../styles/modules/GraphvizPreview.module.css";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {graphviz} from "d3-graphviz";
 import {GraphvizMultiPreview, GraphvizSinglePreview} from "@/component/utils/graphviz";
-import {parseExecutionResultPaths, parseTrace} from "@/core/result";
+import {parseExecutionResultPaths, parseTrace} from "@/core/execution";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import {isGraphviz} from "@/core/utils/language";
 

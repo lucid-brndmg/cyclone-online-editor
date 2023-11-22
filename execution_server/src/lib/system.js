@@ -1,5 +1,6 @@
-const execShellCommand = (cmd, opts) => {
-  const exec = require('child_process').exec;
+import {exec, spawn, execFile} from "node:child_process"
+
+export const execShellCommand = (cmd, opts) => {
   return new Promise((resolve, reject) => {
     exec(cmd, opts, (error, stdout, stderr) => {
       // console.log("stderr", stderr);
@@ -7,14 +8,24 @@ const execShellCommand = (cmd, opts) => {
       if (error) {
         reject(error)
       }
-      console.error("exec:", stderr, stdout)
       resolve([stderr, stdout].filter(s => !!s).join("\n"));
     });
   });
 }
 
-const spawnAsync = (cmd, args, onData, opts) => new Promise((resolve, reject) => {
-  const s = childProcess.spawn(cmd, args, opts)
+export const execFileAsync = (cmd, args, opts) => {
+  return new Promise((resolve, reject) => {
+    execFile(cmd, args, opts, (error, stdout, stderr) => {
+      if (error) {
+        reject(error)
+      }
+      resolve([stderr, stdout].filter(s => !!s).join("\n"));
+    });
+  });
+};
+
+export const spawnAsync = (cmd, args, onData, opts) => new Promise((resolve, reject) => {
+  const s = spawn(cmd, args, opts)
   s.stdout.on('data', onData)
 
   s.stderr.on('data', (data) => {
@@ -28,8 +39,3 @@ const spawnAsync = (cmd, args, onData, opts) => new Promise((resolve, reject) =>
 
   return s
 })
-
-module.exports = {
-  execShellCommand,
-  spawnAsync,
-}

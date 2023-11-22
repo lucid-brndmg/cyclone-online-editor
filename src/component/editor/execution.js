@@ -1,7 +1,7 @@
 import {useEditorStore} from "@/state/editorStore";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import Config from "../../../resource/config.json";
-import {parseExecutionResultPaths, sanitizeResult} from "@/core/result";
+import {parseExecutionResultPaths, ResponseCode, sanitizeResult, translateErrorResponse} from "@/core/execution";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {IconArrowsMaximize, IconCopy, IconTerminal2} from "@tabler/icons-react";
 import {
@@ -22,7 +22,7 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 
 export const CodeExecutionButton = ({...props}) => {
   const {code, setCode, editorCtx} = useEditorStore()
-  const {setIsLoading, setIsError, setStateTransCopy, setExecutionResult, isLoading, executionResult, setParsedPaths} = useEditorExecutionStore()
+  const {setIsLoading, setIsError, setStateTransCopy, setExecutionResult, isLoading, executionResult, setParsedPaths, setErrorMessage} = useEditorExecutionStore()
   const invalidCode = useMemo(() => code.trim().length === 0, [code])
   const {executionServer} = useEditorSettingsStore()
 
@@ -31,32 +31,37 @@ export const CodeExecutionButton = ({...props}) => {
       return
     }
     setIsLoading(true)
+    setExecutionResult(null)
     setIsError(false)
+    setErrorMessage("")
     setStateTransCopy({
       states: editorCtx.getDefinedStates(),
       trans: editorCtx.getDefinedTransitions()
     })
-    const resp = await fetch(`${executionServer.trim() || Config.executionServer.url}/run`, {
-      method: "POST",
-      body: JSON.stringify({program: code}),
-      mode: 'cors',
-      headers: {
-        'Access-Control-Allow-Origin':'*',
-        'Content-Type' : 'application/json; charset=UTF-8'
-      }
-    })
-      .then(r => r.json())
-      .catch(e => {
-        console.log(e)
-        setIsLoading(false)
-        setIsError(true)
-      })
 
-    setIsLoading(false)
-    if (resp && resp.hasOwnProperty("success")) {
-      setExecutionResult(resp)
-    } else {
+    try {
+      const resp = await fetch(`${executionServer.trim() || Config.executionServer.url}/run`, {
+        method: "POST",
+        body: JSON.stringify({program: code}),
+        mode: 'cors',
+        headers: {
+          'Access-Control-Allow-Origin':'*',
+          'Content-Type' : 'application/json; charset=UTF-8'
+        }
+      }).then(r => r.json())
+
+      setIsLoading(false)
+      if (resp && resp.code === ResponseCode.Success) {
+        setExecutionResult(resp.data)
+      } else {
+        setIsError(true)
+        setErrorMessage(translateErrorResponse(resp.code, resp.data))
+      }
+    } catch (e) {
+      console.log(e)
+      setIsLoading(false)
       setIsError(true)
+      setErrorMessage("Network error: failed to send request to remote server")
     }
   }
 
@@ -88,7 +93,7 @@ export const CodeExecutionButton = ({...props}) => {
 export const CodeConsoleResultSection = () => {
   // const placeholder = `Code execution result will be presented here ...`
   const [resultMode, setResultMode] = useState("Result")
-  const { executionResult, isError, isLoading } = useEditorExecutionStore()
+  const { executionResult, isError, isLoading , errorMessage} = useEditorExecutionStore()
   const {resultHeight, executionServer} = useEditorSettingsStore()
   const {setErrors} = useEditorStore()
   const viewport = useRef(null)
@@ -125,7 +130,7 @@ export const CodeConsoleResultSection = () => {
         </Group>
         <Group>
           {
-            executionResult?.success
+            executionResult// ?.success
               ? <>
                 <CopyButton value={resultMode === "Result" ? executionResult.result : executionResult.trace}>
                   {({ copied, copy }) => (
@@ -146,26 +151,22 @@ export const CodeConsoleResultSection = () => {
       <Divider />
 
       {
-        executionResult?.success === false
-          ? <Text c={"red"} size={"sm"} fw={500}>
-            Error occurred when executing code on remote server. Please try again later
-          </Text>
-          : executionResult
-            ? <ScrollArea.Autosize viewportRef={viewport} mah={`${resultHeight - 9}svh`} p={0} type="auto" mt={"sm"}>
-              {resultMode === "Result"
-                ? <TypographyStylesProvider fz={"sm"} p={0}>
-                  <div dangerouslySetInnerHTML={{__html: sanitized.sanitized}} />
-                </TypographyStylesProvider>
-                : <Code block={true}>{executionResult.trace}</Code>
-              }
-            </ScrollArea.Autosize>
-            : isError
-              ? <Text c={"red"} size={"sm"} fw={500}>
-                Error connecting server. Please check network connection. {executionServer ? `Execution Server: ${executionServer}` : ""}
-              </Text>
-              : <Text c={"dimmed"} size={"sm"}>
-                Press 'run' to execute the code and see execution code.
-              </Text>
+        executionResult
+          ? <ScrollArea.Autosize viewportRef={viewport} mah={`${resultHeight - 9}svh`} p={0} type="auto" mt={"sm"}>
+            {resultMode === "Result"
+              ? <TypographyStylesProvider fz={"sm"} p={0}>
+                <div dangerouslySetInnerHTML={{__html: sanitized.sanitized}} />
+              </TypographyStylesProvider>
+              : <Code block={true}>{executionResult.trace}</Code>
+            }
+          </ScrollArea.Autosize>
+          : isError
+            ? <Text c={"red"} size={"sm"} fw={500}>
+              {errorMessage}
+            </Text>
+            : <Text c={"dimmed"} size={"sm"}>
+              Press 'run' to execute the code and see execution code.
+            </Text>
       }
 
     </Stack>
@@ -183,7 +184,7 @@ export const ExamineModal = ({opened, onOpened}) => {
 
   return (
     <Modal size={"lg"} opened={opened} onClose={() => onOpened(false)} title="Execution Result" centered>
-      {executionResult?.success
+      {executionResult// ?.success
         ? <Stack>
           <Divider />
           {executionResult?.trace ? <SegmentedControl data={["Result", "Trace"]} value={resultMode} onChange={setResultMode} /> : null}

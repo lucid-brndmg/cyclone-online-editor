@@ -221,14 +221,14 @@ export const SettingsPopover = ({children}) => {
                   preview: {...graphviz.preview, showStateProps: e.currentTarget.checked}
                 })}
               />
-              <Switch
-                label={"Display full 'where' expression"}
-                checked={graphviz.preview.showWhereExpr}
-                onChange={e => setGraphviz({
-                  ...graphviz,
-                  preview: {...graphviz.preview, showWhereExpr: e.currentTarget.checked}
-                })}
-              />
+              {/* <Switch */}
+              {/*   label={"Display full 'where' expression"} */}
+              {/*   checked={graphviz.preview.showWhereExpr} */}
+              {/*   onChange={e => setGraphviz({ */}
+              {/*     ...graphviz, */}
+              {/*     preview: {...graphviz.preview, showWhereExpr: e.currentTarget.checked} */}
+              {/*   })} */}
+              {/* /> */}
 
               <Switch
                 label={"Set padding on edge's text"}

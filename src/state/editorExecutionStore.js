@@ -17,5 +17,8 @@ export const useEditorExecutionStore = create((set, get) => ({
   // setPaths: paths => set({paths})
 
   parsedPaths: null,
-  setParsedPaths: parsedPaths => set({parsedPaths})
+  setParsedPaths: parsedPaths => set({parsedPaths}),
+
+  errorMessage: "",
+  setErrorMessage: errorMessage => set({errorMessage})
 }))

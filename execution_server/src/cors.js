@@ -9,7 +9,7 @@
  * @return {GeneratorFunction}
  * @api public
  */
-module.exports = (options) => {
+export default (options) => {
   
   options = options || {};
 

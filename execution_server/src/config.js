@@ -1,5 +1,5 @@
-const path = require("path")
-const os = require("os")
+import path from "node:path"
+import os from "node:os"
 
 const config = {
   isProxy: false,
@@ -10,7 +10,12 @@ const config = {
   cycloneTraceKeyword: "Trace Generated:",
   tempDir: path.join(os.tmpdir(), "cyclone_tutorial_backend"),
   deleteAfterRun: false,
-  cycloneExtension: ".cyclone"
+  cycloneExtension: ".cyclone",
+  cycloneDisabledOptions: new Set([
+    "debug",
+    "log",
+  ]),
+  cycloneMandatoryTimeoutMs: 2000
 }
 
-module.exports = config
+export default config

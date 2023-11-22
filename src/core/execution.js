@@ -5,6 +5,24 @@ const regexFindPathInResult = /\w+->\w+(->\w+)*/g
 const regexFindStateInTrace = /\[\d+\]\.@\w+/
 const regexFindErrorInResult = /(line\s*:\s*\d+)|(position\s*:\d+)/g
 
+export const ResponseCode = {
+  Success: 1,
+  SyntaxError: 2,
+  InvalidOptions: 3,
+  UnsuccessfulExecution: 4,
+  InternalError: 5,
+  ExecutionTimeout: 6,
+}
+
+export const translateErrorResponse = (code, data) => {
+  switch (code) {
+    case ResponseCode.SyntaxError: return "There are syntax errors in the source code, please try to fix them before execution"
+    case ResponseCode.InvalidOptions: return data ? `These compiler options are not allowed by the server: ${data.join(", ")}` : "Disallowed options exists in source code"
+    case ResponseCode.UnsuccessfulExecution: return "Unsuccessful execution, please try again later"
+    case ResponseCode.InternalError: return "Internal error. Please try again later"
+    case ResponseCode.ExecutionTimeout: return `Execution timeout: it takes too long to execute the source code. ${data ? `(over ${data}ms, this value is set by the server)` : ""}`
+  }
+}
 
 export const parseTrace = traceContent => {
   const lines = traceContent.split(/[\r\n]+/)

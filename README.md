@@ -291,7 +291,18 @@ const config = {
   deleteAfterRun: false,
   
   // Cyclone's extension
-  cycloneExtension: ".cyclone"
+  cycloneExtension: ".cyclone",
+
+  // Options that the server doesn't allow to set
+  // These option might create additional meaningless files, not good in production
+  cycloneDisabledOptions: new Set([
+    "debug",
+    "log",
+  ]),
+  
+  // A mandatory timeout for cyclone's execution in ms
+  // Set this to 0 to disable this feature
+  cycloneMandatoryTimeoutMs: 2000
 }
 ```
 
@@ -318,18 +329,47 @@ The server is required to have a `POST /run` API that accepts a JSON structure o
 
 The only parameter `program` is the source code and the json will be sent via the request body. CORS is recommended to enable since the frontend address might be different from the backend.
 
-For the response structure, the `/run` API takes this format:
+After received `program` as source code, server should find a way to execute it as Cyclone program. There are various methods to do this, including creating sub-process, import JAR by Java's class loader, direct call cyclone's method from its compiler, etc...
+
+In the end, a result and an optional trace string should be obtained as the code's execution result inside console, and the code's optional trace file. These 2 strings should be put inside response.
+
+For the response structure, the `/run` API takes this JSON format:
 ```json5
 {
-  // Boolean value
-  // false, if failed to execute (not resolve) the source code
-  // This has nothing to do with the compiler's result output
-  "success": true ,
-  
-  // String | null | undefined
-  "result": "Result output on the terminal",
-  // String | null | undefined
-  "trace": "Possible trace file content, if user enabled trace"
+  // Response status, enum value
+  // possible values are defined in execution_server/src/definitions.js
+  "code": 1,
+
+  // Response data, any type
+  // When code = 1 (success), it's the execution result and trace
+  // When code = 3 (InvalidOptions), it should be the options that disallowed on the server config, or nothing
+  // When code = 6 (ExecutionTimeout), it should be the timeout that server accepts in ms
+  "data": {
+    // Example response data structure for success result
+    
+    // String | null | undefined
+    "result": "Result output on the terminal",
+    // String | null | undefined
+    "trace": "Possible trace file content, if user enabled trace"
+  }
+}
+```
+
+During execution there might be errors. The frontend now can handle 6 kinds of response status, which was defined at `execution_server/src/definitions.js`. There are these status:
+```javascript
+export const ResponseCode = {
+  // Executed successfully and result was obtained
+  Success: 1,
+  // The code has some kind of syntax error
+  SyntaxError: 2,
+  // Some options are not supported on the remote server
+  InvalidOptions: 3,
+  // Execution failed
+  UnsuccessfulExecution: 4,
+  // Other internal errors
+  InternalError: 5,
+  // It took too long to execute the cyclone program
+  ExecutionTimeout: 6
 }
 ```
 

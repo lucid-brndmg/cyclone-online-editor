@@ -37,12 +37,10 @@ const getSymbolPosition = (symbol, length) => {
 
 export class SemanticListener extends CycloneParserListener {
   analyzer
-  code
 
-  constructor(semanticAnalyzer, code) {
+  constructor(semanticAnalyzer) {
     super();
     this.analyzer = semanticAnalyzer
-    this.code = code
   }
 
   enterMachine(ctx) {
