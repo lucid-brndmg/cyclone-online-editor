@@ -11,7 +11,7 @@ const execCycloneProgram = async (program) => {
   console.log("write file to", tmpPath);
   await fs.promises.writeFile(tmpPath, program, "utf-8")
   const command = `java -jar ${config.cycloneExecutable} ${tmpPath}`
-  const deferRemove = [tmpPath]
+  const tmpFiles = [tmpPath]
   
   let traceContent = null
   let result = await execShellCommand(command, {cwd: config.cyclonePath})
@@ -28,7 +28,7 @@ const execCycloneProgram = async (program) => {
     console.log("read trace file", tracePath);
     // const existsTrace = tracePath // && (await fs.promises.access(tracePath, fs.constants.F_OK))
     if (tracePath) {
-      deferRemove.push(tracePath)
+      tmpFiles.push(tracePath)
       try {
         traceContent = await fs.promises.readFile(tracePath, "utf-8")
       } catch (e) {
@@ -39,17 +39,32 @@ const execCycloneProgram = async (program) => {
 
   // DEFER
   if (config.deleteAfterRun) {
-    await Promise.all(deferRemove.map(p => fs.promises.rm(p, {force: true})))    
+    await Promise.all(tmpFiles.map(p => fs.promises.rm(p, {force: true})))    
   }
-  
+
+  let sanitizedResult = result, sanitizedTrace = traceContent
+  const paths = [...tmpFiles, config.cyclonePath, config.tempDir, path.resolve(config.cyclonePath), path.resolve(config.tempDir), path.normalize(config.cyclonePath)]
+
+  for (let p of paths) {
+    sanitizedResult = sanitizedResult.replaceAll(p, "<path>")
+    if (sanitizedTrace) {
+      sanitizedTrace = sanitizedTrace.replaceAll(p, "<path>")
+    }
+  }
+
   return {
     success: true, // successfully executed the shell command, NOT successfully COMPILED
-    trace: traceContent
-      ?.replace(/[a-zA-Z]:[\\\/](?:[\w\s\.-]+[\\\/])*([\w\s\.-]+\.(cyclone|trace|jar|js))/g, "<path>")
-      ?.replace(/(\/[\w-]+)*([\w-]+)*\.(trace|cyclone|jar|js)/g, "<path>"),
-    result: result
-      .replace(/[a-zA-Z]:[\\\/](?:[\w\s\.-]+[\\\/])*([\w\s\.-]+\.(cyclone|trace|jar|js))/g, "<path>")
-      .replace(/(\/[\w-]+)*([\w-]+)*\.(trace|cyclone|jar|js)/g, "<path>"),
+    // trace: traceContent
+    //   ?.replace(/[a-zA-Z]:[\\\/](?:[\w\s\.-]+[\\\/])*([\w\s\.-]+\.(cyclone|trace|jar|dot))/g, "<path>")
+    //   ?.replace(/(\/[\w-]+)*([\w-]+)\.(trace|cyclone|jar|dot)/g, "<path>"),
+    // result: result
+    //   .replace(/[a-zA-Z]:[\\\/](?:[\w\s\.-]+[\\\/])*([\w\s\.-]+\.(cyclone|trace|jar|dot))/g, "<path>")
+    //   .replace(/(\/[\w-]+)*([\w-]+)\.(trace|cyclone|jar|dot)/g, "<path>"),
+    
+    // trace: traceContent?.replaceAll(tracePath)
+
+    result: sanitizedResult,
+    trace: sanitizedTrace
   }
 }
 

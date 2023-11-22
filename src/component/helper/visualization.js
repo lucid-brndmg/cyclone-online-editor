@@ -168,6 +168,7 @@ const TracePanel = () => {
 
     // const isGraphviz = /^digraph\s+\w*\s+\{\s*/gm
     if (isGraphviz(trace)) {
+      console.log("isGraphviz")
       return {
         isRemote: true,
         traces: [{
@@ -209,6 +210,10 @@ const TracePanel = () => {
   }, [traceCtx]);
 
   const filtered = useMemo(() => {
+    if (traceCtx?.isRemote) {
+      return traceCtx?.traces
+    }
+
     return traceCtx?.traces.filter((_, i) => selectedPath.includes(i.toString()))
   }, [traceCtx, selectedPath])
 

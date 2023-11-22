@@ -34,7 +34,7 @@ export const CycloneMonacoConfig = {
   },
 
   // this regex will match every keyword, identifier, enum reference and operator in order to display reference info for each
-  wordPattern: new RegExp(`(([#a-zA-Z_])[\\w.]*)|(${cycloneOperators.sort((a, b) => b.length - a.length).map(op => [...op].map(c => "\\" + c).join("")).join("|")})`, "g") // IMPORTANT: INCLUDES #ENUM && A.B
+  wordPattern: /([#a-zA-Z_])[\w.]*/g // new RegExp(`(([#a-zA-Z_])[\\w.]*)|(${cycloneOperators.sort((a, b) => b.length - a.length).map(op => [...op].map(c => "\\" + c).join("")).join("|")})`, "g") // IMPORTANT: INCLUDES #ENUM && A.B
 }
 
 
