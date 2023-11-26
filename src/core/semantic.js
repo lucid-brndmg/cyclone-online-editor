@@ -100,6 +100,7 @@ export class SemanticAnalyzer {
     // scopePosition: new PositionTable(),
     definedOptions: new Set(),
     enumFields: new Set(),
+    transitionSet: new Set(),
 
     startNodeIdentifier: null,
     goalDefined: false,
@@ -128,6 +129,7 @@ export class SemanticAnalyzer {
       typeStack: [],
       // scopePosition: new PositionTable(),
       definedOptions: new Set(),
+      transitionSet: new Set(),
       enumFields: new Set(),
       startNodeIdentifier: null,
       goalDefined: false,
@@ -971,7 +973,7 @@ export class SemanticAnalyzer {
       .replace(/\s\s+/g, " ")
   }
 
-  handleTrans(block) {
+  handleTrans(block, position) {
     const md = block.metadata
     this.context.editorCtx.defineTransition(
       md.identifier,
@@ -982,5 +984,19 @@ export class SemanticAnalyzer {
       md.operators,
       md.excludedStates
     )
+
+    if (!md.whereExpr) {
+      const label = `${md.fromState ?? ""}|${[...md.toStates].sort().join(",")}|${[...md.operators].sort().join(",")}|${[...md.excludedStates].sort().join(",")}`
+      if (this.context.transitionSet.has(label)) {
+        this.context.errorStorage.setError({
+          source: ErrorSource.Semantic,
+          kind: ErrorKind.SemanticWarning,
+          ...position,
+          msg: "duplicated non-conditional edge definition"
+        })
+      } else {
+        this.context.transitionSet.add(label)
+      }
+    }
   }
 }

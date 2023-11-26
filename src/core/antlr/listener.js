@@ -132,7 +132,7 @@ export class SemanticListener extends CycloneParserListener {
 
   exitTrans(ctx) {
     const block = this.analyzer.popBlock()
-    this.analyzer.handleTrans(block)
+    this.analyzer.handleTrans(block, getBlockPositionPair(ctx))
   }
 
   enterTransScope(ctx) {
