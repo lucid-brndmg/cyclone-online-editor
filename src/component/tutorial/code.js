@@ -3,16 +3,16 @@ import {IconCopy, IconPlayerPlayFilled} from "@tabler/icons-react";
 import {useEditorStore} from "@/state/editorStore";
 import {locateToCode} from "@/core/utils/monaco";
 
-export const ExecutableCode = ({children, execCode, attribs}) => {
-  const {setCode} = useEditorStore()
-
-  const onTry = () => {
-    setCode(execCode)
-  }
+export const ExecutableCode = ({children, execCode, onTry}) => {
+  // const {setCode} = useEditorStore()
+  //
+  // const onTryBtn = () => {
+  //   setCode(execCode)
+  // }
 
   return (
     <Box pos={"relative"}>
-      <Group justify={"right"} mb={"sm"} pos={"absolute"} style={{top: 0, right: 0}}>
+      <Group justify={"right"} mb={"sm"} pos={"absolute"} style={{top: 4, right: 4}}>
         <CopyButton value={execCode}>
           {({ copied, copy }) => (
             <Button size={"compact-sm"} variant={"default"} leftSection={<IconCopy size={14} />} onClick={copy}>
@@ -24,9 +24,7 @@ export const ExecutableCode = ({children, execCode, attribs}) => {
           <Button size={"compact-sm"} rightSection={<IconPlayerPlayFilled size={14} />} onClick={onTry}>Try</Button>
         </Tooltip>
       </Group>
-      <code className={attribs.class} >
-        {children}
-      </code>
+      {children}
     </Box>
   )
 }

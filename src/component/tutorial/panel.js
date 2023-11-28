@@ -30,6 +30,7 @@ import {isCycloneExecutableCode} from "@/core/utils/language";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {CycloneLanguageId} from "@/core/monaco/language";
 import {tutorialTable} from "@/core/tutorial";
+import {useEditorStore} from "@/state/editorStore";
 
 const manifestSelectionData = tutorialManifest.map(t => ({label: t.title, value: t.id}))
 
@@ -138,6 +139,7 @@ const NotFoundPrompt = () => (
 export const TutorialPanel = ({html, id}) => {
   const viewport = useRef(null);
   const {width, height, resultHeight} = useEditorSettingsStore()
+  const {setCode} = useEditorStore()
   const router = useRouter();
 
   useEffect(() => {
@@ -154,8 +156,10 @@ export const TutorialPanel = ({html, id}) => {
         const code = extractTextFromElement(domNode)
         if (isCycloneExecutableCode(code)) {
           return (
-            <ExecutableCode execCode={code} attribs={domNode.attribs}>
-              {domToReact(domNode.children, options)}
+            <ExecutableCode execCode={code} onTry={() => setCode(code)}>
+              <code className={domNode.attribs.class} >
+                {domToReact(domNode.children, options)}
+              </code>
             </ExecutableCode>
           )
         }

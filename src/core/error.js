@@ -5,16 +5,15 @@ export class ErrorStorage {
   max = 0
 
   events = {
-    onError: null,
     onErrors: null,
     onClear: null
   }
 
   // length = 0
 
-  constructor(max = 0, {onError, onClear, onErrors}) {
+  constructor(max = 0, {onClear, onErrors}) {
     this.max = max
-    this.events.onError = onError
+    // this.events.onError = onError
     this.events.onClear = onClear
     this.events.onErrors = onErrors
   }
@@ -36,21 +35,25 @@ export class ErrorStorage {
     }
 
     this.storage.push(e)
-    if (this.events.onError) {
-      this.events.onError()
+    if (this.events.onErrors) {
+      this.events.onErrors()
     }
     // console.log(e)
   }
 
   setErrors(es) {
-    if (this.max > 0 && this.storage.length >= this.max) {
+    const hasMax = this.max > 0
+    const maxErrors = this.max
+    if (hasMax && this.storage.length >= maxErrors) {
+      console.log("warn: error storage full", this)
       return
     }
     for (let e of es) {
-      if (this.max > 0 && this.storage.length >= this.max) {
+      this.storage.push(e)
+      if (hasMax && this.storage.length >= maxErrors) {
+        console.log("warn: error storage full", this)
         break
       }
-      this.storage.push(e)
       // this.setError(e)
     }
 

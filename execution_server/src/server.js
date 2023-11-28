@@ -12,7 +12,6 @@ import logger from "./logger.js";
 import crypto from "node:crypto";
 import redis from "./redis.js";
 import cycloneQueue from "./queue.js";
-import fs from "node:fs";
 
 const app = new Koa()
 const router = koaRouter()

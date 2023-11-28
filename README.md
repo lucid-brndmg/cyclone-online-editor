@@ -471,7 +471,11 @@ The website config is the `resource/config.json` file. In this file you could ch
 {
   "editor": {
     // Editor's maximum error display amount
-    "errorStorageLimit": 1000
+    "errorStorageLimit": 1000,
+    // Which tab to initialize when /playground page gets refreshed
+    // available values:
+    // browser, reference, outline, visual
+    "playgroundDefaultTab": "browser"
   },
   "executionServer": {
     // Execution server's default URL, should change this in production

@@ -3,7 +3,8 @@ import {Editor, loader} from "@monaco-editor/react";
 import {ErrorStorage} from "@/core/error";
 import {SemanticListener} from "@/core/antlr/listener";
 import Config from "../../../resource/config.json";
-import {SemanticAnalyzer} from "@/core/semantic";
+import SemanticAnalyzer from "@/core/semanticAnalyzer";
+import EditorSemanticContext from "@/core/editorSemanticContext";
 import {ParseTreeWalker} from "antlr4";
 import {
   cycloneCodeMD,
@@ -50,11 +51,11 @@ export const CycloneCodeEditor = ({
   const [monacoCtx, setMonacoCtx] = useState(null)
 
   const errorsRef = useRef(new ErrorStorage(Config.editor.errorStorageLimit, {
-    onError: () => onErrors(errorsRef.current.getAll()),
+    // onError: () => onErrors(errorsRef.current.getAll()),
     onErrors: () => onErrors(errorsRef.current.getAll()),
     onClear: () => onErrors([])
   }))
-  const semanticAnalyzerRef = useRef(new SemanticAnalyzer())
+  // const semanticAnalyzerRef = useRef(new SemanticAnalyzer())
   const editorSemanticContextRef = useRef(null)
   const disposersRef = useRef([])
 
@@ -78,13 +79,15 @@ export const CycloneCodeEditor = ({
     }
 
     const maxLine = monacoCtx.model.getLineCount()
+    const editorCtx = new EditorSemanticContext()
+    const analyzer = new SemanticAnalyzer() // semanticAnalyzerRef.current
+    const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
 
     errorsRef.current.clear()
-    semanticAnalyzerRef.current.init(
-      errorsRef.current,
-      maxLine,
-      monacoCtx.model.getLineMaxColumn(maxLine)
-    )
+    editorCtx.attach(analyzer)
+    analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es))
+    analyzer.ready(endPos)
+
     if (debouncedCode.trim().length === 0) {
       editorSemanticContextRef.current = null
       onEditorContext && onEditorContext(null)
@@ -96,9 +99,8 @@ export const CycloneCodeEditor = ({
     })
 
     if (result.syntaxErrorsCount === 0) {
-      ParseTreeWalker.DEFAULT.walk(new SemanticListener(semanticAnalyzerRef.current, code), result.tree)
-      // scopePositionRef.current = semanticAnalyzerRef.current.getScopePosition()
-      editorSemanticContextRef.current = semanticAnalyzerRef.current.getEditorSemanticContext()
+      ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
+      editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
       onEditorContext && onEditorContext(editorSemanticContextRef.current)
     }
   }

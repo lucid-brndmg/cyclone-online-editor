@@ -1,6 +1,7 @@
 {
   "editor": {
-    "errorStorageLimit": 1000
+    "errorStorageLimit": 1000,
+    "playgroundDefaultTab": "browser"
   },
   "executionServer": {
     "url": "http://127.0.0.1:9000",

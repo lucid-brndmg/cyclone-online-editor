@@ -7,7 +7,7 @@ CODE FROM https://ui.mantine.dev/category/hero/
     justify-content: space-between;
     align-items: center;
     padding-top: var(--mantine-spacing-xl);
-    padding-bottom: calc(var(--mantine-spacing-xl) * 4);
+    padding-bottom: var(--mantine-spacing-lg);
 }
 
 .content {
