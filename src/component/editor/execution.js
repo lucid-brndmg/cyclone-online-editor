@@ -1,7 +1,12 @@
 import {useEditorStore} from "@/state/editorStore";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import Config from "../../../resource/config.json";
-import {parseExecutionResultPaths, ResponseCode, sanitizeResult, translateErrorResponse} from "@/core/execution";
+import {
+  parseExecutionResultPaths,
+  ResponseCode,
+  sanitizeResult,
+  translateErrorResponse
+} from "@/core/execution";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {IconArrowsMaximize, IconCopy, IconTerminal2} from "@tabler/icons-react";
 import {
@@ -9,7 +14,7 @@ import {
   Code,
   CopyButton,
   Divider,
-  Group,
+  Group, Loader,
   LoadingOverlay,
   Modal,
   ScrollArea,
@@ -22,9 +27,62 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 
 export const CodeExecutionButton = ({...props}) => {
   const {code, setCode, editorCtx} = useEditorStore()
-  const {setIsLoading, setIsError, setStateTransCopy, setExecutionResult, isLoading, executionResult, setParsedPaths, setErrorMessage} = useEditorExecutionStore()
+  const {setIsLoading, setIsError, setStateTransCopy, setExecutionResult, isLoading, executionResult, setParsedPaths, setErrorMessage, setIsPolling, isPolling} = useEditorExecutionStore()
+  const isPollingRef = useRef(isPolling)
   const invalidCode = useMemo(() => code.trim().length === 0, [code])
-  const {executionServer} = useEditorSettingsStore()
+  const {executionServer, execPollWait} = useEditorSettingsStore()
+
+  useEffect(() => {
+    isPollingRef.current = isPolling
+  }, [isPolling]);
+
+  const preparePoll = (id) => {
+    const begin = Date.now()
+    setIsPolling(true)
+    setIsLoading(true)
+    isPollingRef.current = true
+    const handle = setInterval(async () => {
+      if (!isPollingRef.current) {
+        clearInterval(handle)
+        setIsLoading(false)
+        setIsError(true)
+        setErrorMessage("Execution canceled")
+        return
+      }
+
+      if (Date.now() - begin > execPollWait * 1000) {
+        clearInterval(handle)
+        setIsError(true)
+        setErrorMessage("Execution timeout: No response from server. Please retry later")
+        setIsPolling(false)
+        return
+      }
+      try {
+        const resp = await fetch(`${executionServer.trim() || Config.executionServer.url}/get?id=${id}`, {
+          mode: "cors"
+        }).then(it => it.json())
+        switch (resp?.code) {
+          case ResponseCode.Success: {
+            setIsLoading(false)
+            setExecutionResult(resp.data)
+            break
+          }
+          case ResponseCode.NotFound: break;
+          default: {
+            console.log(resp)
+            throw new Error("unknown response code")
+          }
+        }
+      } catch (e) {
+        console.log(e)
+        setIsLoading(false)
+        setIsError(true)
+        setErrorMessage("Network error: failed to send request to remote server")
+        clearInterval(handle)
+        setIsPolling(false)
+      }
+    }, Config.executionServer.pollInterval)
+  }
 
   const runCode = async () => {
     if (invalidCode || !editorCtx) {
@@ -40,7 +98,7 @@ export const CodeExecutionButton = ({...props}) => {
     })
 
     try {
-      const resp = await fetch(`${executionServer.trim() || Config.executionServer.url}/run`, {
+      const resp = await fetch(`${executionServer.trim() || Config.executionServer.url}/exec`, {
         method: "POST",
         body: JSON.stringify({program: code}),
         mode: 'cors',
@@ -53,9 +111,11 @@ export const CodeExecutionButton = ({...props}) => {
       setIsLoading(false)
       if (resp && resp.code === ResponseCode.Success) {
         setExecutionResult(resp.data)
+      } else if (resp && resp.code === ResponseCode.Enqueued) {
+        preparePoll(resp.data)
       } else {
         setIsError(true)
-        setErrorMessage(translateErrorResponse(resp.code, resp.data))
+        setErrorMessage(translateErrorResponse(resp?.code, resp?.data))
       }
     } catch (e) {
       console.log(e)
@@ -93,7 +153,7 @@ export const CodeExecutionButton = ({...props}) => {
 export const CodeConsoleResultSection = () => {
   // const placeholder = `Code execution result will be presented here ...`
   const [resultMode, setResultMode] = useState("Result")
-  const { executionResult, isError, isLoading , errorMessage} = useEditorExecutionStore()
+  const { executionResult, isError, isLoading , errorMessage, isPolling, setIsPolling} = useEditorExecutionStore()
   const {resultHeight, executionServer} = useEditorSettingsStore()
   const {setErrors} = useEditorStore()
   const viewport = useRef(null)
@@ -118,10 +178,24 @@ export const CodeConsoleResultSection = () => {
     }
   }, [executionResult]);
 
+  const cancelPoll = () => {
+    setIsPolling(false)
+  }
+
   return (
-    <Stack gap={12} pos={"relative"}>
+    <Stack gap={12} pos={"relative"} h={"100%"}>
       <ExamineModal opened={examineOpened} onOpened={setExamineOpened} />
-      <LoadingOverlay visible={isLoading} />
+      <LoadingOverlay
+        visible={isLoading}
+        loaderProps={isPolling ? {
+          children: (
+            <Stack style={{alignItems: "center"}}>
+              <Loader color="blue" />
+              <Button variant={"default"} onClick={cancelPoll}>Cancel</Button>
+            </Stack>
+          )
+        } : undefined}
+      />
       <Group justify={"space-between"}>
         <Group>
           <IconTerminal2 />

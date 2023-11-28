@@ -2,9 +2,9 @@
 
 Cyclone online editor is an online development environment for the [Cyclone Specification Language](https://classicwuhao.github.io/cyclone_tutorial/tutorial-content.html). 
 
-The website includes an online editor, a tutorial page and a playground designed for learning cyclone & developing cyclone source code online.
+The website includes an interactive online editor, a tutorial page and a playground designed for learning the cyclone language & developing cyclone source code online.
 
-This project is a final year project (CS440[A]) at Maynooth University.
+*This project is a final year project (CS440[A]) at Maynooth University.*
 
 ## TODO
 - This Document
@@ -70,7 +70,15 @@ npm install
 ```
 Please make sure that java environment is installed and cyclone's compiler could be executed locally.
 
-Then configure the cyclone environment by editing `execution_server/src/config.js`. Please notice that `cyclonePath` must be correctly set to cyclone's compiler path.
+Then configure the cyclone environment by editing `execution_server/config.json`. Please notice that `cyclone.path` must be correctly set to cyclone's compiler path, and `cyclone.sourcePath` should be a valid temporary directory where all the temp files will be stored.
+
+By default, no extra dependency is needed to run the execution server. However, if performance and concurrency are considered, please configure this server by reading [execution server](#execution-server-1).
+
+Launch the execution server by entering this inside execution server's root:
+```shell
+# execute this inside execution_server/
+npm run start
+```
 
 ### Launch Frontend
 The environment is now ready. To start the dev server, run:
@@ -208,7 +216,7 @@ Reference documents are simple documents that describes the language components 
 - User is at playground's reference panel, and user could visit all reference documents
 - User's mouse is hovering on some keyword, identifier or operator on the editor, and the document (if exists) will be popped up for user to examine its info (like VSCode)
 
-These documents are separated by categories and called *groups* inside manifest. A group is just a folder containing markdown files that describes a certain keyword. For example, 'Builtin Functions' could be a group, and each builtin function should be a separate Markdown document. 
+These documents are separated by categories which named by *groups* inside manifest. A group is just a folder containing markdown files that describes a certain keyword. For example, 'Builtin Functions' could be a group, and each builtin function should be a separate Markdown document. 
 
 The root folder for reference documents is at `raw/reference`. Each sub-folder inside that directory represents a group. 
 
@@ -263,64 +271,121 @@ The execution server is a simple server that provide the ability to execute cycl
 The default execution server is written in Node.js & Koa.js and locates at `execution_server/`.
 
 #### Configuration
-In the source code of the server there is a configuration module called `src/cofig.js`. This file contains a basic config of the execution server:
-
-```javascript
-const config = {
-  // is this server been deployed using a reverse proxy (koa options)
-  isProxy: false,
-  
-  // server host and port
-  host: "127.0.0.1",
-  port: 9000,
-  
-  // Cyclone executable file, used with cyclonePath
-  cycloneExecutable: "cyclone.jar",
-  
-  // Cyclone executable file's location
-  cyclonePath: "path/to/cyclone/folder/",
-  
-  // The keyword in the execution result that indicates there is a trace generated
-  // Modify this only when cyclone's output format has been changed in future versions
-  cycloneTraceKeyword: "Trace Generated:",
-  
-  // Temporary directory that contains
-  tempDir: path.join(os.tmpdir(), "cyclone_tutorial_backend"),
-  
-  // Should the sever delete temp files immediatly after each execution (might slow down performance)
-  deleteAfterRun: false,
-  
-  // Cyclone's extension
-  cycloneExtension: ".cyclone",
-
-  // Options that the server doesn't allow to set
-  // These option might create additional meaningless files, not good in production
-  cycloneDisabledOptions: new Set([
-    "debug",
-    "log",
-  ]),
-  
-  // A mandatory timeout for cyclone's execution in ms
-  // Set this to 0 to disable this feature
-  cycloneMandatoryTimeoutMs: 2000
+In the source code of the server there is a configuration file named `config.json`. This file contains a basic config of the execution server:
+```json5
+{
+  "cyclone": {
+    // Cyclone executable file's location
+    "path": "/path/to/cyclone",
+    // Cyclone executable file, used with cyclonePath
+    "executable": "cyclone.jar",
+    // The keyword in the execution result that indicates there is a trace generated
+    // Modify this only when cyclone's output format has been changed in future versions
+    "traceKeyword": "Trace Generated:",
+    // Temporary directory that contains source code and trace files while running
+    "sourcePath": "/path/to/tmp/files",
+    // Should the sever or worker delete temp files immediately after each execution 
+    // Might slow down performance, disable this and set queue.autoClearFileIntervalMs is recommended
+    "deleteAfterExec": false,
+    // Cyclone's extension
+    "extension": ".cyclone",
+    // Options that the server doesn't allow to set
+    // These option might create additional meaningless files, not good in production
+    "disabledOptions": ["debug", "log"],
+    // A mandatory timeout for cyclone's execution in ms
+    // Set this to 0 to disable this feature
+    "mandatoryTimeoutMs": 2000,
+    // Add cyclone.path into environment PATH temporarily when executing program
+    // Recommended, otherwise cyclone.path should be manually set to PATH
+    "appendEnvPath": true,
+    // the length of each request id
+    // depends on the amount of users
+    "idLength": 8
+  },
+  // Config for queue mode
+  "queue": {
+    // enable async queue mode
+    // if enabled, redis needed to be configured
+    "enabled": false,
+    // worker concurrency
+    // how many program could be executed in a batch
+    "concurrency": 50,
+    // store the execution result into redis for how long (seconds)
+    "resultTTLSecs": 300,
+    // automatically clear temp source code files in interval (ms)
+    // set to 0 to disable this
+    // running inside worker
+    "autoClearFileIntervalMs": 300000
+  },
+  // Connection detail to redis
+  // Could be null if queue.enabled = false
+  // see https://github.com/redis/node-redis for more
+  "redis": {
+    "url": "redis://127.0.0.1:6379"
+  },
+  "server": {
+    // server host and port
+    "host": "127.0.0.1",
+    "port": 9000,
+    // is this server been deployed using a reverse proxy like nginx (koa options)
+    "isProxy": false
+  },
+  "logger": {
+    // logger's logging level
+    "level": "debug",
+    // output a piece of information to console
+    "console": true,
+    // log file's path
+    "path": "./",
+    // config for rotate files
+    // see https://github.com/winstonjs/winston-daily-rotate-file
+    "file": {
+      "filename": "exec_server-%DATE%.log",
+      "datePattern": "YYYY-MM-DD-HH",
+      "zippedArchive": false,
+      "maxSize": "20m",
+      "maxFiles": "14d"
+    }
+  }
 }
 ```
 
-Mainly when you're deploying the server, the `tempDir` and `cyclonePath` is worth noticing.
+Mainly when you're using the server, the `cyclone.sourcePath` and `cyclone.path` is worth noticing.
+
+#### Execution Modes
+This server got 2 modes for program execution: sync mode and queue mode (`queue.enabled = true`). In development the sync mode should be fine, but in production mode the queue mode is recommended.
+
+In sync mode (`queue.enabled = false`), the Cyclone program from request will be immediately executed for each frontend request. The server will set the result and trace into response after execution. When the program requires lots of calculations, the server will be slow because each request will keep waiting for each program's execution result until executed or timeout. 
+
+There is an async mode exists in the execution server via a task queue. In the queue mode, the execution result will not be responded immediately and the execution request will be enqueued (the server will respond a `Enqueued` status). Then the frontend will poll another API for the execution result. This is a better mode in production.
+
+To enable this mode, make sure redis server is installed on server, then configure `redis` using [node-redis's config](https://github.com/redis/node-redis) and set `queue.enabled` to `true`. 
+
+The queue mode comes with 2 programs, `server` and `worker`. The `server` will accept programs from the request and put them into a task queue (queue producer) and `worker` will consume tasks inside the queue by execute those program. Once an execution is completed, the `worker` will put the result into redis for a while (see `queue.resultTTLSecs` in config) and those result are available for the server to query.
+
+When using queue mode, please ensure both `server` and `worker` is launched and ready:
+```shell
+# execute inside execution_server/
+npm run start
+
+# in a separate terminal, inside execution_server/
+npm run worker
+```
 
 #### Clearing Files
 During each round of execution (each request) there will be 2 possible temp files generated. One is the source code and the other is a `.trace` file if user enabled trace option.
 
-There are 2 strategies for clearing these files:
+There are 3 strategies for clearing these files:
 - Set `deleteAfterRun` option to `true` in config and files will be deleted every execution, which will slow down performance a little bit.
-- Write a scheduled task with cron (or other methods) to routinely clear these files.
+- Using queue mode and set `autoClearFileIntervalMs` in config. The worker end will automatically delete those files routinely in batch. (recommended)
+- Manually write a scheduled task with cron (or other methods) to routinely clear these files.
 
 The second method is recommended in production.
 
 #### Build Your Own Server
 If you don't like the existing execution server, you could build your own. Just make sure that the server could execute Cyclone's source code and get the result & trace.
 
-The server is required to have a `POST /run` API that accepts a JSON structure of:
+The server is required to have a `POST /exec` API that accepts a JSON structure of:
 ```json
 {
   "program": "machine ExampleCycloneProgram {...}"
@@ -333,7 +398,7 @@ After received `program` as source code, server should find a way to execute it 
 
 In the end, a result and an optional trace string should be obtained as the code's execution result inside console, and the code's optional trace file. These 2 strings should be put inside response.
 
-For the response structure, the `/run` API takes this JSON format:
+The response structure takes this JSON format:
 ```json5
 {
   // Response status, enum value
@@ -344,6 +409,7 @@ For the response structure, the `/run` API takes this JSON format:
   // When code = 1 (success), it's the execution result and trace
   // When code = 3 (InvalidOptions), it should be the options that disallowed on the server config, or nothing
   // When code = 6 (ExecutionTimeout), it should be the timeout that server accepts in ms
+  // When code = 7 (Enqueued), it should be the request ID that needs to be polled later
   "data": {
     // Example response data structure for success result
     
@@ -355,9 +421,11 @@ For the response structure, the `/run` API takes this JSON format:
 }
 ```
 
-During execution there might be errors. The frontend now can handle 6 kinds of response status, which was defined at `execution_server/src/definitions.js`. There are these status:
+During execution there might be errors. The frontend now can handle various kinds of response status, which was defined at `execution_server/src/definitions.js`. There are these status:
 ```javascript
 export const ResponseCode = {
+  // Request parameter is not valid
+  InvalidParameter: 0,
   // Executed successfully and result was obtained
   Success: 1,
   // The code has some kind of syntax error
@@ -369,11 +437,22 @@ export const ResponseCode = {
   // Other internal errors
   InternalError: 5,
   // It took too long to execute the cyclone program
-  ExecutionTimeout: 6
+  ExecutionTimeout: 6,
+  // The program has enqueued and ready to poll
+  Enqueued: 7,
+  // The API is not supported
+  NotSupported: 8,
+  // Nothing found (during polling)
+  NotFound: 9
 }
 ```
 
 Please do notice that Cyclone exposed certain sensitive file paths in the execution result and trace file. It is recommended to replace them using Regex or other methods to prevent leaking sensitive information.
+
+##### Async Execution
+You may design your server asynchronously, and it doesn't have to return the result and trace immediately at `POST /exec`.
+
+If you want to execute Cyclone program in async mode, return `ResponseCode.Enqueued` (integer: 7) as `code` inside `POST /exec`'s response and put a generated request id as string inside `data`. Then implement the `GET /get` API which takes the query parameter `id` and returning its execution result when ready. For more, please read [execution server](#execution-server-1).
 
 ### Configurations
 
@@ -382,7 +461,7 @@ Certain levels of configurations are available for the editor. Apart from `next.
 *Please do not touch any files that ends with `_manifest` inside that directory since these files are generated automatically.*
 
 #### Cyclone's Language Config
-In case Cyclone adding new keywords and operators, there is a file called `resource/cyclone_spec.json` that contains all cyclone's existing keywords, literals, types, options and operators.
+In case Cyclone adding new keywords and operators, there is a file named `resource/cyclone_spec.json` that contains all cyclone's existing keywords, literals, types, options and operators.
 
 If cyclone added new keywords in the future, remember to update this file.
 
@@ -396,7 +475,9 @@ The website config is the `resource/config.json` file. In this file you could ch
   },
   "executionServer": {
     // Execution server's default URL, should change this in production
-    "url": "http://127.0.0.1:9000"
+    "url": "http://127.0.0.1:9000",
+    // The polling interval when execution server respond the "Enqueued" state
+    "pollInterval": 1000
   },
   "home": {
     // The code example that on the home page
@@ -449,6 +530,9 @@ This project mainly uses these third party dependencies:
 - *Zustand:* State managing library for React
 - *Unified, Remark:* Generating Markdown documents to HTML
 - *Localforage:* Browser's persistent data management library
+- *Bee-queue:* Task queue for the execution server
+- *Winston:* Logger component for the execution server
+- *Redis & Node-Redis:* Cache & queue service for the execution server
 
 There are other dependencies used, please see `package.json` for details.
 

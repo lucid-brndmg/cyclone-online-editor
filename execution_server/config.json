@@ -1,0 +1,40 @@
+{
+  "cyclone": {
+    "path": "D:\\mu\\cyclone-tutorial\\cyclone\\",
+    "executable": "cyclone.jar",
+    "traceKeyword": "Trace Generated:",
+    "sourcePath": "D:\\tmp\\cyclone_src_backend",
+    "deleteAfterExec": false,
+    "extension": ".cyclone",
+    "disabledOptions": ["debug", "log"],
+    "mandatoryTimeoutMs": 2000,
+    "appendEnvPath": true,
+    "idLength": 8
+  },
+  "queue": {
+    "enabled": false,
+    "concurrency": 50,
+    "resultTTLSecs": 300,
+    "autoClearFileIntervalMs": 300000
+  },
+  "redis": {
+    "url": "redis://127.0.0.1:6379"
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 9000,
+    "isProxy": false
+  },
+  "logger": {
+    "level": "debug",
+    "console": true,
+    "path": "./",
+    "file": {
+      "filename": "exec_server-%DATE%.log",
+      "datePattern": "YYYY-MM-DD-HH",
+      "zippedArchive": false,
+      "maxSize": "20m",
+      "maxFiles": "14d"
+    }
+  }
+}

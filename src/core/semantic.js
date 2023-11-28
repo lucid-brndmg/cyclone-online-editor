@@ -85,32 +85,20 @@ export class EditorSemanticContext {
 
 export class SemanticAnalyzer {
   context = {
-    // identifierTable: new Map(),
-    // Map<Type, Map<String, Int>>
-    // identifierCounts: new CategorizedCountTable(),
-    // recordCounts: new CategorizedCountTable(),
     recordFieldStack: new CategorizedStackTable(),
     identifierStack: new StackedTable(),
-    // {type, col, line}
     blockContextStack: [],
     currentRecordIdent: [],
     scopedBlocks: [],
     actionTable: new CategorizedStackTable(builtinActions),
     typeStack: [],
-    // scopePosition: new PositionTable(),
     definedOptions: new Set(),
     enumFields: new Set(),
     transitionSet: new Set(),
-
     startNodeIdentifier: null,
     goalDefined: false,
-
-    // scopeCoords: [0, 0],
-    // identifierCoordsTable: new FixedCoordinateTable(),
-
     editorCtx: new EditorSemanticContext(),
     errorStorage: null
-    // lastScopeLayer: 0,
   }
 
   init(errorStorage, maxLine, maxCol) {

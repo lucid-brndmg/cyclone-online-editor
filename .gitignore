@@ -5,6 +5,9 @@ node_modules
 /.pnp
 .pnp.js
 
+*-audit.json
+*.log
+
 # testing
 /coverage
 

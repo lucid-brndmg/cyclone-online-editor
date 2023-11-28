@@ -7,6 +7,11 @@ export const MIN_H = 10
 
 export const MIN_RESULT_H = 15
 
+export const MIN_POLL_WAIT = 5
+export const MAX_POLL_WAIT = 60
+const DEFAULT_POLL_WAIT = 30
+
+
 export const useEditorSettingsStore = create((set, get) => ({
   init: false,
   setInit: init => set({init}),
@@ -24,6 +29,9 @@ export const useEditorSettingsStore = create((set, get) => ({
 
   executionServer: "",
   setExecutionServer: executionServer => set({executionServer}),
+
+  execPollWait: DEFAULT_POLL_WAIT,
+  setExecPollWait: execPollWait => set({execPollWait}),
 
   monacoOptions: {
     minimap: {enabled: false},
@@ -60,7 +68,7 @@ export const useEditorSettingsStore = create((set, get) => ({
       monacoTheme,
       graphviz,
       executionServer,
-
+      execPollWait,
       init
     } = get()
 
@@ -75,14 +83,15 @@ export const useEditorSettingsStore = create((set, get) => ({
       monacoOptions,
       monacoTheme,
       graphviz,
-      executionServer
+      executionServer,
+      execPollWait
     }
 
 
     await localforage.setItem("editor_settings", save)
   },
 
-  setSettings: ({height, width, monacoOptions, monacoTheme, graphviz, resultHeight, executionServer}) => {
-    set({height, width, monacoOptions, monacoTheme, graphviz, resultHeight, executionServer})
+  setSettings: ({height, width, monacoOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait}) => {
+    set({height, width, monacoOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait})
   }
 }))

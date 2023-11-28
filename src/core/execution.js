@@ -6,21 +6,32 @@ const regexFindStateInTrace = /\[\d+\]\.@\w+/
 const regexFindErrorInResult = /(line\s*:\s*\d+)|(position\s*:\d+)/g
 
 export const ResponseCode = {
+  InvalidParams: 0,
   Success: 1,
   SyntaxError: 2,
   InvalidOptions: 3,
   UnsuccessfulExecution: 4,
   InternalError: 5,
   ExecutionTimeout: 6,
+  Enqueued: 7,
+  NotSupported: 8,
+  NotFound: 9
 }
+
+// export const POLL_INTERVAL = 2000
 
 export const translateErrorResponse = (code, data) => {
   switch (code) {
+    case ResponseCode.InvalidParams: return "Invalid parameters sent to server"
     case ResponseCode.SyntaxError: return "There are syntax errors in the source code, please try to fix them before execution"
     case ResponseCode.InvalidOptions: return data ? `These compiler options are not allowed by the server: ${data.join(", ")}` : "Disallowed options exists in source code"
     case ResponseCode.UnsuccessfulExecution: return "Unsuccessful execution, please try again later"
     case ResponseCode.InternalError: return "Internal error. Please try again later"
     case ResponseCode.ExecutionTimeout: return `Execution timeout: it takes too long to execute the source code. ${data ? `(over ${data}ms, this value is set by the server)` : ""}`
+    case ResponseCode.NotSupported: return "API not supported"
+    case ResponseCode.NotFound: return "Resource not exists"
+
+    default: return "Unknown Error"
   }
 }
 

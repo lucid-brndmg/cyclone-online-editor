@@ -2,12 +2,13 @@ import path from "node:path"
 import fs from "node:fs"
 import crypto from "node:crypto";
 import antlr4, {ParseTreeWalker} from "antlr4";
-import config from "./config.js";
+import config from "../config.json" assert { type: "json" };
 import {execFileAsync, execShellCommand, spawnAsync} from "./lib/system.js"
 import CycloneLexer from "./generated/antlr/CycloneLexer.js";
 import CycloneParser from "./generated/antlr/CycloneParser.js";
 import CycloneParserListener from "./generated/antlr/CycloneParserListener.js";
 import {ResponseCode} from "./definitions.js";
+import logger from "./logger.js";
 
 // const regexOption = /option-\s*\w+\s*=.*[^;];/gm
 
@@ -24,7 +25,7 @@ class ValidationListener extends CycloneParserListener {
   }
 }
 
-const checkProgram = program => {
+export const checkProgram = program => {
   const stream = new antlr4.InputStream(program)
   const lexer = new CycloneLexer(stream)
   lexer.removeErrorListeners()
@@ -42,7 +43,7 @@ const checkProgram = program => {
   const invalidOptions = []
 
   for (let opt of listener.options) {
-    if (config.cycloneDisabledOptions.has(opt)) {
+    if (config.cyclone.disabledOptions.includes(opt)) {
       invalidOptions.push(opt)
     }
   }
@@ -54,20 +55,10 @@ const checkProgram = program => {
   return {}
 }
 
-export const execCycloneProgram = async (program) => {
-  const {invalidOptions, syntaxError} = checkProgram(program)
-
-  if (syntaxError) {
-    return {code: ResponseCode.SyntaxError}
-  }
-
-  if (invalidOptions) {
-    return {code: ResponseCode.InvalidOptions, data: invalidOptions}
-  }
-
-  const tmpFileId = crypto.randomUUID()
-  const tmpFilename = tmpFileId + config.cycloneExtension
-  const tmpPath = path.join(config.tempDir, tmpFilename)
+export const execCycloneProgram = async (program, id) => {
+  const tmpFilename = id + config.cyclone.extension
+  const srcPath = config.cyclone.sourcePath
+  const tmpPath = path.join(srcPath, tmpFilename)
   await fs.promises.writeFile(tmpPath, program, "utf-8")
   // const command = `java -jar ${config.cycloneExecutable} ${tmpPath}`
   const tmpFiles = [tmpPath]
@@ -76,7 +67,7 @@ export const execCycloneProgram = async (program) => {
   // let result = await execShellCommand(command, {cwd: config.cyclonePath, timeout: config.cycloneMandatoryTimeoutMs})
 
   try {
-    let result = await execFileAsync("java", ["-jar", config.cycloneExecutable, tmpPath], {cwd: config.cyclonePath, timeout: config.cycloneMandatoryTimeoutMs})
+    let result = await execFileAsync("java", ["-jar", path.join(config.cyclone.path, config.cyclone.executable), tmpPath], {cwd: srcPath, timeout: config.cyclone.mandatoryTimeoutMs}) // cwd: config.cyclone.path,
 
     if (!result) {
       // failed to execute, NOT failed to solve
@@ -84,32 +75,32 @@ export const execCycloneProgram = async (program) => {
     }
 
     const spl = result.split(/[\r\n]+/)
-    const traceLine = spl.find(line => line.startsWith(config.cycloneTraceKeyword))
+    const traceLine = spl.find(line => line.startsWith(config.cyclone.traceKeyword))
     if (traceLine) {
-      const tracePath = traceLine.slice(config.cycloneTraceKeyword.length).trim()
+      const tracePath = traceLine.slice(config.cyclone.traceKeyword.length).trim()
       // const existsTrace = tracePath // && (await fs.promises.access(tracePath, fs.constants.F_OK))
       if (tracePath) {
         tmpFiles.push(tracePath)
         try {
           traceContent = await fs.promises.readFile(tracePath, "utf-8")
-        } catch (e) {
-          console.log("error reading trace", e);
+        } catch (error) {
+          logger.error("error reading trace", {error});
         }
       }
     }
 
     // DEFER
-    if (config.deleteAfterRun) {
+    if (config.cyclone.deleteAfterExec && tmpFiles.length) {
       await Promise.all(tmpFiles.map(p => fs.promises.rm(p, {force: true})))
     }
 
     let sanitizedResult = result, sanitizedTrace = traceContent
-    const paths = [...tmpFiles, config.cyclonePath, config.tempDir, path.resolve(config.cyclonePath), path.resolve(config.tempDir), path.normalize(config.cyclonePath)]
+    const paths = [...tmpFiles, config.cyclone.path, config.cyclone.sourcePath, path.resolve(config.cyclone.path), path.resolve(config.cyclone.sourcePath), path.normalize(config.cyclone.path)]
 
     for (let p of paths) {
-      sanitizedResult = sanitizedResult.replaceAll(p, "<path>")
+      sanitizedResult = sanitizedResult.replaceAll(p, "<censored-path>")
       if (sanitizedTrace) {
-        sanitizedTrace = sanitizedTrace.replaceAll(p, "<path>")
+        sanitizedTrace = sanitizedTrace.replaceAll(p, "<censored-path>")
       }
     }
 
@@ -133,14 +124,15 @@ export const execCycloneProgram = async (program) => {
       data: {
         trace: sanitizedTrace,
         result: sanitizedResult,
-      }
+      },
+      garbage: tmpFiles
     }
   } catch (e) {
     if (e?.killed && e?.signal === "SIGTERM") {
-      return {code: ResponseCode.ExecutionTimeout, data: config.cycloneMandatoryTimeoutMs}
+      return {code: ResponseCode.ExecutionTimeout, data: config.cyclone.mandatoryTimeoutMs}
     }
 
-    console.log(e)
+    logger.error("cyclone execution error", {error: e})
     return {code: ResponseCode.InternalError}
   }
 }

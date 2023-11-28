@@ -5,7 +5,7 @@ import {
   FileButton,
   Group,
   NativeSelect,
-  Popover,
+  Popover, Slider,
   Stack,
   Switch,
   Text,
@@ -13,7 +13,7 @@ import {
   useComputedColorScheme
 } from "@mantine/core";
 import {IconDownload, IconMinus, IconPlus, IconUpload} from "@tabler/icons-react";
-import {MIN_H, MIN_W, useEditorSettingsStore} from "@/state/editorSettingsStore";
+import {MAX_POLL_WAIT, MIN_H, MIN_POLL_WAIT, MIN_W, useEditorSettingsStore} from "@/state/editorSettingsStore";
 import thirdPartyThemes from "../../../resource/theme_manifest.json"
 import {useEffect, useMemo, useState} from "react";
 import {useEditorStore} from "@/state/editorStore";
@@ -21,6 +21,7 @@ import {dynamicTheme} from "@/core/utils/resource";
 import {downloadTextFile} from "@/lib/dom";
 import {animationSpeedOptions, availableGraphvizEngines, displayDirectionOptions} from "@/core/graphviz";
 import {useDebouncedValue} from "@mantine/hooks";
+import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 
 const themeSelectData = [
   {title: "Default", ident: ""},
@@ -32,12 +33,12 @@ const themeSelectData = [
   }
 })
 export const SettingsPopover = ({children}) => {
-  const {height, width, monacoOptions, setMonacoOptions, setHeight, monacoTheme, setMonacoTheme, setWidth, setSettings, graphviz, setGraphviz, executionServer, setExecutionServer} = useEditorSettingsStore()
+  const {height, width, monacoOptions, setMonacoOptions, setHeight, monacoTheme, setMonacoTheme, setWidth, setSettings, graphviz, setGraphviz, executionServer, setExecutionServer, execPollWait, setExecPollWait} = useEditorSettingsStore()
   const [isLoadingTheme, setIsLoadingTheme] = useState(false)
 
   const [uExecServer, setUExecServer] = useState(executionServer)
   const [debouncedExecServer] = useDebouncedValue(uExecServer, 200)
-
+  const {isLoading, pollId} = useEditorExecutionStore()
   const {monacoCtx} = useEditorStore()
 
   const minHeight = height <= MIN_H
@@ -47,6 +48,10 @@ export const SettingsPopover = ({children}) => {
   const execServerValid = useMemo(() => uExecServer.trim().length === 0 || /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/.test(uExecServer), [uExecServer])
 
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
+
+  const isExec = useMemo(() => {
+    return isLoading || !!pollId
+  }, [isLoading, pollId])
 
   useEffect(() => {
     if (monacoCtx) {
@@ -167,8 +172,22 @@ export const SettingsPopover = ({children}) => {
                   onChange={e => setUExecServer(e.currentTarget.value)}
                   value={uExecServer}
                   error={execServerValid ? "" : "Invalid url format"}
+                  disabled={isExec}
                 />
               </Group>
+
+              <div>
+                <Text size={"sm"}>Execution Timeout</Text>
+                <Slider
+                  disabled={isExec}
+                  maw={220}
+                  value={execPollWait}
+                  onChange={setExecPollWait}
+                  label={(value) => `${value} Sec`}
+                  min={MIN_POLL_WAIT}
+                  max={MAX_POLL_WAIT}
+                />
+              </div>
 
             </Stack>
 
