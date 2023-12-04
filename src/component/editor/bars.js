@@ -19,8 +19,8 @@ import {SettingsPopover} from "@/component/editor/settings";
 import {locateToCode} from "@/core/utils/monaco";
 import {pos} from "@/lib/position";
 import {sieveCount} from "@/lib/list";
-import {ErrorKind} from "@/core/definitions";
 import {useMemo, useState} from "react";
+import {isWarning} from "@/core/specification";
 
 const OpenInPlaygroundButton = () => {
   const {code} = useEditorStore()
@@ -133,7 +133,7 @@ const PositionLocator = () => {
 
 export const StatusBar = () => {
   const {errors} = useEditorStore()
-  const [errorCount, warningCount] = useMemo(() => sieveCount(errors, e => e.kind !== ErrorKind.SemanticWarning), [errors])
+  const [errorCount, warningCount] = useMemo(() => sieveCount(errors, e => !isWarning(e.type)), [errors])
 
   return (
     <Group justify={"space-between"}>

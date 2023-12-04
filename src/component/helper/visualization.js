@@ -22,9 +22,6 @@ import {
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useEditorStore} from "@/state/editorStore";
 import {genGraphvizExecutionResultPaths, genGraphvizPreview, genGraphvizTrace} from "@/core/graphviz";
-// import {Graphviz} from "@/component/utils/graphviz";
-import {downloadTextFile} from "@/lib/dom";
-import classes from "../../styles/modules/GraphvizPreview.module.css";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {graphviz} from "d3-graphviz";
 import {GraphvizMultiPreview, GraphvizSinglePreview} from "@/component/utils/graphviz";
@@ -35,23 +32,20 @@ import {isGraphviz} from "@/core/utils/language";
 const PreviewPanel = () => {
   const {editorCtx} = useEditorStore()
   const {graphviz} = useEditorSettingsStore()
-  const [definedStateTrans, setDefinedStateTrans] = useState(null)
+  const [visualData, setVisualData] = useState(null)
   const [definedStatesGraphviz, tip] = useMemo(() => {
-    if (definedStateTrans?.states.size || definedStateTrans?.trans.length) {
-      return [genGraphvizPreview(definedStateTrans, graphviz), <Text c={"dimmed"} maw={"70%"} size={"sm"}><b>Got {definedStateTrans.states.size} states with {definedStateTrans.trans.length} edges.</b> Try execute the code by click "run" to see the final result.</Text>]
+    if (visualData?.states.size || visualData?.trans.length) {
+      return [genGraphvizPreview(visualData, graphviz), <Text c={"dimmed"} maw={"70%"} size={"sm"}><b>Got {visualData.states.size} states with {visualData.trans.length} edges.</b> Try execute the code by click "run" to see the final result.</Text>]
     } else {
       return ["", <Text size={"sm"} c={"dimmed"}>Got no defined states. Define some in code to see result.</Text>]
     }
-  }, [definedStateTrans, graphviz])
+  }, [visualData, graphviz])
 
   useEffect(() => {
     if (editorCtx) {
-      setDefinedStateTrans({
-        states: editorCtx.getDefinedStates(),
-        trans: editorCtx.getDefinedTransitions()
-      })
+      setVisualData(editorCtx.getVisualData())
     } else {
-      setDefinedStateTrans(null)
+      setVisualData(null)
     }
   }, [editorCtx]);
 
@@ -69,7 +63,6 @@ const PreviewPanel = () => {
                 <li>Use mouse wheels to zoom up / down the graph</li>
                 <li>Drag the border to expand the height</li>
                 <li>Change display options in 'settings' menu</li>
-                <li>Dashed arrows means that the edge is conditional (has a 'where' expression inside). </li>
                 <li>Red-texted nodes means that there are certain states undefined.</li>
               </ul>
             </Text>
@@ -81,7 +74,7 @@ const PreviewPanel = () => {
 }
 
 const ExecPanel = () => {
-  const {stateTransCopy, parsedPaths} = useEditorExecutionStore()
+  const {visualDataCopy, parsedPaths} = useEditorExecutionStore()
   const {graphviz} = useEditorSettingsStore()
   const [blendIn, setBlendIn] = useState(false)
   const [incPath, setIncPath] = useState([])
@@ -92,7 +85,7 @@ const ExecPanel = () => {
       return []
     }
     const graphs = blendIn
-      ? parsedPaths.edges.map(edge => genGraphvizPreview(stateTransCopy, graphviz, {states: parsedPaths.states, edge}))
+      ? parsedPaths.edges.map(edge => genGraphvizPreview(visualDataCopy, graphviz, {states: parsedPaths.states, edge}))
       : genGraphvizExecutionResultPaths(parsedPaths, graphviz)
     return graphs.map((code, i) => ({
       filename: `path-${i}`,
@@ -124,7 +117,7 @@ const ExecPanel = () => {
     <Switch
       label={"Blend-In Mode"}
       checked={blendIn}
-      disabled={!stateTransCopy}
+      disabled={!visualDataCopy}
       onChange={e => setBlendIn(e.currentTarget.checked)}
     />
   )

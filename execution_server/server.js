@@ -3,7 +3,7 @@ import fs from "node:fs";
 import {serve} from "./src/server.js"
 import {exit} from "node:process"
 import logger from "./src/logger.js";
-import {prepareEnv} from "./src/env.js";
+import {prepareDependencies} from "./src/dependencies.js";
 
 // const initEnv = () => {
 //   const exec = path.join(config.cyclonePath, config.cycloneExecutable)
@@ -27,7 +27,7 @@ import {prepareEnv} from "./src/env.js";
 // }
 
 const run = () => {
-  prepareEnv()
+  prepareDependencies()
   serve()
 }
 

@@ -2,7 +2,7 @@ import {TutorialPanel} from "@/component/tutorial/panel";
 import fs from "fs"
 import path from "path";
 import tutorialManifest from "../../../../resource/tutorial_manifest.json"
-import {tutorialTable} from "@/core/tutorial";
+import {tutorialTable} from "@/core/resources/tutorial";
 import Head from "next/head";
 
 export async function getStaticPaths() {

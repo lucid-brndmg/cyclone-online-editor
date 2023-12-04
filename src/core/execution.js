@@ -1,4 +1,4 @@
-import {ErrorKind, ErrorSource} from "@/core/definitions";
+import {ErrorSource, ErrorType} from "@/core/definitions";
 import {posPair} from "@/lib/position";
 
 const regexFindPathInResult = /\w+->\w+(->\w+)*/g
@@ -122,12 +122,14 @@ export const sanitizeResult = result => {
       const [line, col] = lineCol
       errors.push({
         source: ErrorSource.Remote,
-        kind: ErrorKind.Remote,
         ...posPair(
           line, col,
           line, col + 1
         ),
-        msg: trimmed
+        msg: trimmed,
+
+        type: ErrorType.RemoteError,
+        params: {msg: trimmed}
       })
 
       sanitized.push(`<span style='color: red'>${trimmed}</span>`)

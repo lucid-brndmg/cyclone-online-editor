@@ -1,19 +1,180 @@
-import {ErrorKind, IdentifierKind, IdentifierType, SemanticContextType} from "@/core/definitions";
+import {
+  ErrorSource,
+  ErrorType,
+  IdentifierKind,
+  IdentifierType,
+  SemanticContextType
+} from "@/core/definitions";
 
-const errorKindDescription = {
-  [ErrorKind.SyntaxError]: "Syntax Error",
-  [ErrorKind.TypeError]: "Type Error",
-  [ErrorKind.SemanticError]: "Semantic Error",
-  [ErrorKind.SemanticWarning]: "Semantic Warning",
-  [ErrorKind.UndefinedIdentifier]: "Undefined Identifier",
-  [ErrorKind.RedeclaredIdentifier]: "Redeclared Identifier"
+const errorTypeDescription = {
+  // [ErrorKind.SyntaxError]: "Syntax Error",
+  // [ErrorKind.TypeError]: "Type Error",
+  // [ErrorKind.SemanticError]: "Semantic Error",
+  // [ErrorKind.SemanticWarning]: "Semantic Warning",
+  // [ErrorKind.UndefinedIdentifier]: "Undefined Identifier",
+  // [ErrorKind.RedeclaredIdentifier]: "Redeclared Identifier"
+
+  [ErrorType.SyntaxError]: "Syntax Error",
+
+  [ErrorType.UndefinedIdentifier]: "Undefined Identifier",
+  [ErrorType.IdentifierRedeclaration]: "Identifier Redeclaration",
+  [ErrorType.RecursiveFunction]: "Invalid Function",
+  [ErrorType.WhereFreeVariable]: "Invalid Where Condition",
+  [ErrorType.WhereFunctionCall]: "Invalid Where Condition",
+  [ErrorType.CompilerOptionDuplicated]: "Invalid Compiler Option",
+  [ErrorType.StartNodeDuplicated]: "Invalid Node Modifier",
+  [ErrorType.ReturnExprViolation]: "Invalid Statement",
+  [ErrorType.StatementAfterReturn]: "Invalid Statement",
+  [ErrorType.InvalidNamedExprScope]: "Invalid Expression",
+
+  [ErrorType.TypeMismatchFunction]: "Type Mismatch",
+  [ErrorType.TypeMismatchReturn]: "Type Mismatch",
+  [ErrorType.TypeMismatchCompilerOption]: "Type Mismatch",
+  [ErrorType.TypeMismatchVarDecl]: "Type Mismatch",
+  [ErrorType.TypeMismatchVarRef]: "Type Mismatch",
+  [ErrorType.TypeMismatchExpr]: "Type Mismatch",
+
+  [ErrorType.CodeInsideAbstractNode]: "Redundant Code",
+  [ErrorType.NoGoalDefined]: "Ill-Formed Graph",
+  [ErrorType.NoStartNodeDefined]: "Ill-Formed Graph",
+  [ErrorType.DuplicatedEdge]: "Redundant Edge",
+  [ErrorType.EmptyEdge]: "Empty Edge",
+
+  [ErrorType.RemoteError]: "Remote Execution Error"
 }
 
-export const formatErrorDescription = (kind) => {
-  return errorKindDescription[kind] ?? "Error"
+export const formatErrorDescription = (type) => {
+  return errorTypeDescription[type] ?? "Error"
 }
 
-export const formatErrorMessage = (kind, msg) => {
+const errorSourceToText = {
+  [ErrorSource.Semantic]: "Semantic Error",
+  [ErrorSource.Remote]: "Execution Error",
+  [ErrorSource.Lexer]: "Syntax Error",
+  [ErrorSource.Parser]: "Syntax Error"
+}
+
+const eMsgBased = ({msg}) => {
+  return msg
+}
+
+const eUndefinedIdentifier = ({desc, ident}) => {
+  return `use of undefined ${desc} '${ident}'`
+}
+
+const eIdentifierRedeclaration = ({ident}) => {
+  return `redeclaration of identifier '${ident}'`
+}
+
+const eTypeMismatchVarRef = ({ident, expected}) => {
+  return `type mismatch: ${ident} expected to have type ${formatType(expected)}`
+}
+
+const eRecursiveFunction = ({ident}) => {
+  return `recursion function call to '${ident}' is not allowed in Cyclone`
+}
+
+const eWhereFreeVariable = ({ident, freeVariable}) => {
+  return `variable '${freeVariable}' is not allowed in '${ident}'s where condition`
+}
+
+const eWhereFunctionCall = () => {
+  return `functions cannot be used inside 'where' clauses`
+}
+
+const eTypeMismatchFunction = ({ident, got, expected}) => {
+  return `type mismatch on function ${ident}, got: ${formatTypes(got)}, expected types are: ${formatSignatureInputs(expected)}`
+}
+
+const eTypeMismatchVarDecl = ({ident, expected, got}) => {
+  return `type mismatch when declaring variable '${ident}', expected ${formatType(expected)}, got ${formatType(got)}`
+}
+
+const eTypeMismatchExpr = ({expected, got, minLength}) => {
+  const hasMinLength = minLength != null
+  const minLengthMsg = hasMinLength ? ` at least ${minLength}` : ""
+  const expectedMsg = hasMinLength
+    ? `(...${formatType(expected[0])})`
+    : expected.length > 1 ? formatTypes(expected) : formatType(expected[0])
+
+  return `type mismatch: expecting${minLengthMsg} ${expectedMsg}, got ${got.length > 1 ? formatTypes(got) : formatType(got[0])}`
+}
+
+const eCompilerOptionDuplicated = ({ident}) => {
+  return `compiler option '${ident}' has already be defined`
+}
+
+const eTypeMismatchCompilerOption = ({ident, expected, desc}) => {
+  return `option ${ident} could only accept ${desc ? desc : `the following value: ${expected.join(", ")}`}`
+}
+
+const eInvalidNamedExprScope = ({ident, scopes}) => {
+  return `expression '${ident}' can only be used inside ${scopes.map(s => formatScopeBlockType(s)).join(" or ")} scope, and not in constant definitions`
+}
+
+const eStartNodeDuplicated = ({ident}) => {
+  return `start state already defined as ${ident}, only 1 start state could exist in current graph`
+}
+
+const eCodeInsideAbstractNode = () => {
+  return `code inside abstract node / state will be ignored by the compiler`
+}
+
+const eNoGoalDefined = () => {
+  return `no goal defined in current graph`
+}
+
+const eNoStartNodeDefined = () => {
+  return `no start node / state defined in current graph`
+}
+
+const eReturnExprViolation = () => {
+  return `'return' expression can only be used inside function body`
+}
+
+const eTypeMismatchReturn = ({expected, got}) => {
+  return `type mismatch on function return, expected to return ${formatType(expected)}, got ${formatType(got)}`
+}
+
+const eStatementAfterReturn = () => {
+  return `unreachable code: statement after 'return'`
+}
+
+const eDuplicatedEdge = () => {
+  return `duplicated non-conditional edge definition`
+}
+
+const eEmptyEdge = () => {
+  return `this edge has no actual connected state / node because every node is excluded`
+}
+
+const errorMessageFormatter = {
+  [ErrorType.RemoteError]: eMsgBased,
+  [ErrorType.SyntaxError]: eMsgBased,
+  [ErrorType.UndefinedIdentifier]: eUndefinedIdentifier,
+  [ErrorType.IdentifierRedeclaration]: eIdentifierRedeclaration,
+  [ErrorType.RecursiveFunction]: eRecursiveFunction,
+  [ErrorType.WhereFreeVariable]: eWhereFreeVariable,
+  [ErrorType.WhereFunctionCall]: eWhereFunctionCall,
+  [ErrorType.CompilerOptionDuplicated]: eCompilerOptionDuplicated,
+  [ErrorType.StartNodeDuplicated]: eStartNodeDuplicated,
+  [ErrorType.ReturnExprViolation]: eReturnExprViolation,
+  [ErrorType.StatementAfterReturn]: eStatementAfterReturn,
+  [ErrorType.InvalidNamedExprScope]: eInvalidNamedExprScope,
+  [ErrorType.TypeMismatchFunction]: eTypeMismatchFunction,
+  [ErrorType.TypeMismatchReturn]: eTypeMismatchReturn,
+  [ErrorType.TypeMismatchCompilerOption]: eTypeMismatchCompilerOption,
+  [ErrorType.TypeMismatchVarDecl]: eTypeMismatchVarDecl,
+  [ErrorType.TypeMismatchVarRef]: eTypeMismatchVarRef,
+  [ErrorType.TypeMismatchExpr]: eTypeMismatchExpr,
+  [ErrorType.CodeInsideAbstractNode]: eCodeInsideAbstractNode,
+  [ErrorType.NoGoalDefined]: eNoGoalDefined,
+  [ErrorType.NoStartNodeDefined]: eNoStartNodeDefined,
+  [ErrorType.DuplicatedEdge]: eDuplicatedEdge,
+  [ErrorType.EmptyEdge]: eEmptyEdge,
+}
+
+export const formatErrorMessage = (type, params, source) => {
   // switch (source) {
   //   case ErrorSource.Parser:
   //   case ErrorSource.Lexer: return `Syntax error: ${msg}`
@@ -22,7 +183,9 @@ export const formatErrorMessage = (kind, msg) => {
   //   default: return msg;
   // }
 
-  return `${errorKindDescription[kind] ?? "Error"}: ${msg}`
+  const pref = source ? `${errorSourceToText[source]}: ` : ""
+
+  return `${pref}${errorMessageFormatter[type](params)}`
 }
 
 const typeMsgRepr = {
@@ -114,7 +277,7 @@ const scopeBlockTypeRepr = {
   [SemanticContextType.GoalScope]: "goal",
   [SemanticContextType.RecordScope]: "record",
   [SemanticContextType.FnBodyScope]: "function",
-  [SemanticContextType.EnumDecl]: "enum {...}"
+  [SemanticContextType.EnumDecl]: "enum"
 }
 
 export const formatScopeBlockType = t => scopeBlockTypeRepr[t] ?? ""

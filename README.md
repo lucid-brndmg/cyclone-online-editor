@@ -52,6 +52,10 @@ Development Features:
 
 ![Visualization](screenshots/playground-visual.png)
 
+![Edge Detection 1](screenshots/edge-detection-1.png)
+
+![Edge Detection 2](screenshots/edge-detection-2.png)
+
 ## Getting Started
 Clone this repo to any location, run:
 ```shell
@@ -335,16 +339,27 @@ In the source code of the server there is a configuration file named `config.jso
     "level": "debug",
     // output a piece of information to console
     "console": true,
-    // log file's path
-    "path": "./",
     // config for rotate files
     // see https://github.com/winstonjs/winston-daily-rotate-file
     "file": {
-      "filename": "exec_server-%DATE%.log",
-      "datePattern": "YYYY-MM-DD-HH",
-      "zippedArchive": false,
-      "maxSize": "20m",
-      "maxFiles": "14d"
+      // configuration for server-end
+      "server": {
+        "filename": "exec_server-server-%DATE%.log",
+        "dirname": "./log",
+        "datePattern": "YYYY-MM-DD-HH",
+        "zippedArchive": false,
+        "maxSize": "20m",
+        "maxFiles": "14d"
+      },
+      // configuration for worker-end
+      "worker": {
+        "filename": "exec_server-worker-%DATE%.log",
+        "dirname": "./log",
+        "datePattern": "YYYY-MM-DD-HH",
+        "zippedArchive": false,
+        "maxSize": "20m",
+        "maxFiles": "14d"
+      }
     }
   }
 }
@@ -485,7 +500,7 @@ The website config is the `resource/config.json` file. In this file you could ch
   },
   "home": {
     // The code example that on the home page
-    "exampleCode": " /* A Simple Graph\n  * Demonstrate how to use path conditions.\n  */\n\ngraph G{\n\n    /* the set of nodes */\n    abstract start node S1{}\n    abstract node S2{}\n    \n    \n    /* the set of edges */\n    edge { S1 -> S1 }\n    edge { S1 -> S2 }\n    edge { S2 -> S1 }\n    edge { S2 -> S2 }\n    \n    goal{\n\n        /*\n         * Find a path (starts from node S1) that \n         *  has a length of 5, \n         *  must not include self-loops,\n         *  and eventually reach S2.\n         */\n        check for 5 condition (!(S1->S1) && !(S2->S2)) reach (S2)\n    }\n\n}"
+    "exampleCode": "graph G { /* ... code to show ... */ }"
   }
 }
 ```

@@ -29,7 +29,7 @@ import {ExecutableCode} from "@/component/tutorial/code";
 import {isCycloneExecutableCode} from "@/core/utils/language";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {CycloneLanguageId} from "@/core/monaco/language";
-import {tutorialTable} from "@/core/tutorial";
+import {tutorialTable} from "@/core/resources/tutorial";
 import {useEditorStore} from "@/state/editorStore";
 
 const manifestSelectionData = tutorialManifest.map(t => ({label: t.title, value: t.id}))
@@ -157,7 +157,7 @@ export const TutorialPanel = ({html, id}) => {
         if (isCycloneExecutableCode(code)) {
           return (
             <ExecutableCode execCode={code} onTry={() => setCode(code)}>
-              <code className={domNode.attribs.class} >
+              <code style={{whiteSpace: "pre-wrap"}} className={domNode.attribs.class} >
                 {domToReact(domNode.children, options)}
               </code>
             </ExecutableCode>
@@ -176,7 +176,7 @@ export const TutorialPanel = ({html, id}) => {
         px={"md"}
         w={"100%"}
         direction={{ base: 'column', lg: 'row' }}
-        gap={{ base: 'sm', md: 'lg' }}
+        gap={4}
         justify={{ md: 'center', lg: "space-between" }}
       >
         <Paper miw={"280px"} shadow="none" withBorder={false} w={"100%"} radius={"md"}>

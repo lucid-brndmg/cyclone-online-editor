@@ -6,7 +6,7 @@ import {checkProgram, execCycloneProgram} from "./cyclone.js"
 
 // THE ONLY CORS LIB THAT WORKS,
 // DO NOT USE @koa/cors
-import cors from './cors.js';
+import cors from './utils/cors.js';
 import {RedisKey, ResponseCode} from "./definitions.js";
 import logger from "./logger.js";
 import crypto from "node:crypto";

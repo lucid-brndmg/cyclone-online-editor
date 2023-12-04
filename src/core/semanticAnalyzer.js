@@ -1,10 +1,8 @@
 import {
   ActionKind,
-  ErrorKind,
-  ErrorSource,
+  ErrorSource, ErrorType,
   IdentifierKind,
   IdentifierType,
-  OutlineKind,
   SemanticContextType
 } from "@/core/definitions";
 import {CategorizedStackTable, PositionTable, StackedTable} from "@/lib/storage";
@@ -24,7 +22,10 @@ import {declareMetadata, recordBlockerFinder, scopeMetadata} from "@/core/utils/
 import {popMulti, popMultiStore} from "@/lib/list";
 import {checkSignature} from "@/core/utils/types";
 
-import {formatSignatureInputs, formatType, formatTypes} from "@/core/utils/format";
+/*
+* TODO:
+* - check LET
+* */
 
 export default class SemanticAnalyzer {
   context
@@ -41,6 +42,7 @@ export default class SemanticAnalyzer {
       typeStack: [],
       definedOptions: new Set(),
       transitionSet: new Set(),
+      stateSet: new Set(),
       enumFields: new Set(),
       startNodeIdentifier: null,
       goalDefined: false,
@@ -51,11 +53,16 @@ export default class SemanticAnalyzer {
 
   ready(endPos) {
     this.pushBlock(SemanticContextType.ProgramScope, posPair(0, 0, 0, 0), endPos)
+    this.emit("ready")
     // console.log(this.context)
   }
 
   emit(event, payload) {
     if (this.events.has(event)) {
+      const es = this.events.get(event)
+      if (!es.length) {
+        return
+      }
       for (let h of this.events.get(event)) {
         h(this.context, payload)
       }
@@ -69,10 +76,6 @@ export default class SemanticAnalyzer {
       this.events.set(event, [handler])
     }
   }
-
-  // getEditorSemanticContext() {
-  //   return this.context.editorCtx
-  // }
 
   pushBlock(type, position, metadata = null) {
     let table = null
@@ -158,9 +161,32 @@ export default class SemanticAnalyzer {
     return null
   }
 
-  searchNearestScope(f) {
-    for (let scope of this.context.scopedBlocks) {
-      if (f(scope)) {
+  findNearestBlock(type) {
+    for (let i = this.context.blockContextStack.length - 1; i >= 0; i--) {
+      const block = this.context.blockContextStack[i]
+      if (block.type === type) {
+        return block
+      }
+    }
+
+    return null
+  }
+
+  findNearestBlockByTypes(types) {
+    for (let i = this.context.blockContextStack.length - 1; i >= 0; i--) {
+      const block = this.context.blockContextStack[i]
+      if (types.includes(block.type)) {
+        return block
+      }
+    }
+
+    return null
+  }
+
+  findNearestScope(type) {
+    for (let i = this.context.scopedBlocks.length - 1; i >= 0; i--) {
+      const scope = this.context.scopedBlocks[i]
+      if (scope.type === type) {
         return scope
       }
     }
@@ -168,18 +194,15 @@ export default class SemanticAnalyzer {
     return null
   }
 
-  // registerEnum(identText) {
-  //   this.context.enumFields.add(identText)
-  // }
-
   referenceEnum(identText, position) {
     this.context.typeStack.push(IdentifierType.Enum)
     if (!this.context.enumFields.has(identText)) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.UndefinedIdentifier,
         ...position,
-        msg: `undefined enum literal '#${identText}'`
+
+        type: ErrorType.UndefinedIdentifier,
+        params: {desc: "enum literal", ident: `#${identText}`}
       }])
     }
     // return null
@@ -210,9 +233,10 @@ export default class SemanticAnalyzer {
     if (hasCount) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.RedeclaredIdentifier,
         ...identPos,
-        msg: `redeclaration of identifier: ${identText}`
+
+        type: ErrorType.IdentifierRedeclaration,
+        params: {ident: identText}
       }])
     }
 
@@ -243,6 +267,7 @@ export default class SemanticAnalyzer {
       // case SemanticContextType.LetDecl:
       case SemanticContextType.TransDecl:
       case SemanticContextType.StateDecl:
+      case SemanticContextType.InvariantDecl:
       case SemanticContextType.LocalVariableDecl:
       case SemanticContextType.GlobalConstantDecl:
       case SemanticContextType.GlobalVariableDecl:
@@ -299,7 +324,6 @@ export default class SemanticAnalyzer {
           } else {
             console.log("warn: no previous scope exists before current scope")
           }
-          // TODO: push to record scope here
           // this.context.recordCounts.incr(recordIdent, identText)
           this.context.recordFieldStack.push(recordIdent, identText, info)
           // maybe for scoped too ?
@@ -318,7 +342,10 @@ export default class SemanticAnalyzer {
   referenceIdentifier(blockType, identText, identPos) {
     // check existence
 
-    let errMsg = `use of undefined identifier: ${identText}`
+    let errParams = {
+      desc: "identifier",
+      ident: identText
+    }
     let kindLimitations = null
 
     const ident = this.context.identifierStack.peek(identText)
@@ -332,45 +359,30 @@ export default class SemanticAnalyzer {
       case SemanticContextType.Stop:
       case SemanticContextType.PathPrimary: {
         kindLimitations = [IdentifierKind.State]
-        errMsg = `use of undefined state: ${identText}`
-
-        if (blockType === SemanticContextType.TransScope) {
-          const transDecl = this.peekBlock(1).metadata
-          if (transDecl.fromState != null) {
-            if (transDecl.exclusionFlag) {
-              transDecl.excludedStates.add(identText)
-            } else {
-              transDecl.toStates.add(identText)
-            }
-          } else {
-            transDecl.fromState = identText
-          }
-        }
-
+        errParams.desc = "state"
         break
       }
 
       case SemanticContextType.StateInc: {
         kindLimitations = [IdentifierKind.State, IdentifierKind.Let]
-        errMsg = `use of undefined state or path: ${identText}`
+        errParams.desc = "state or path"
         break
       }
 
       case SemanticContextType.With: {
         kindLimitations = [IdentifierKind.Invariant]
-        errMsg = `use of undefined invariant: ${identText}`
+        errParams.desc = "invariant"
         break
       }
 
       case SemanticContextType.GoalScope: {
-        // must be BOOL??
-        // | (identifier pathCondAssignExpr SEMI)
         if (ident && ident.type !== IdentifierType.Bool) {
           es.push({
             source: ErrorSource.Semantic,
-            kind: ErrorKind.TypeError,
             ...identPos,
-            msg: `type mismatch: ${identText} expected to have type ${formatType(IdentifierType.Bool)}`
+
+            type: ErrorType.TypeMismatchVarRef,
+            params: {ident: identText, expected: IdentifierType.Bool}
           })
         }
         break
@@ -378,14 +390,15 @@ export default class SemanticAnalyzer {
 
       case SemanticContextType.FnCall: {
         if (ident) {
-          const functionDecl = this.searchNearestBlock(b => b.type === SemanticContextType.FnDecl)
+          const functionDecl = this.findNearestBlock(SemanticContextType.FnDecl)
           const fnName = functionDecl?.metadata.name
           if (fnName === identText && ident.kind === IdentifierKind.FnName) {
             es.push({
               source: ErrorSource.Semantic,
-              kind: ErrorKind.SemanticError,
               ...identPos,
-              msg: `recursion call to function '${identText}' is not allowed`
+
+              type: ErrorType.RecursiveFunction,
+              params: {ident: identText}
             })
           }
         }
@@ -394,12 +407,34 @@ export default class SemanticAnalyzer {
       }
     }
 
+    const whereBlock = this.findNearestBlock(SemanticContextType.WhereExpr)
+    if (whereBlock) {
+      const variableDeclBlock = this.findNearestBlockByTypes([
+        SemanticContextType.RecordVariableDecl,
+        SemanticContextType.LocalVariableDecl,
+        SemanticContextType.GlobalVariableDecl
+      ])
+      if (variableDeclBlock) {
+        const ident = variableDeclBlock.metadata.identifier
+        if (ident !== identText && this.context.identifierStack.peek(identText)?.kind !== IdentifierKind.GlobalConst) {
+          es.push({
+            source: ErrorSource.Semantic,
+            ...identPos,
+
+            type: ErrorType.WhereFreeVariable,
+            params: {ident, freeVariable: identText}
+          })
+        }
+      }
+    }
+
     if (!ident || (kindLimitations != null && !kindLimitations.includes(ident.kind))) {
       es.push({
         source: ErrorSource.Semantic,
-        kind: ErrorKind.UndefinedIdentifier,
         ...identPos,
-        msg: errMsg
+
+        type: ErrorType.UndefinedIdentifier,
+        params: errParams
       })
     }
 
@@ -424,18 +459,16 @@ export default class SemanticAnalyzer {
       console.log("warn: scope not found when reference record field", parentIdentText, identText, identPos)
     }
 
-    let errMsgParent = `not a valid record: ${parentIdentText}`
-    let errMsgField = `use of undefined record field: ${parentIdentText}.${identText}`
-
     const ident = this.context.identifierStack.peek(parentIdentText)
 
     const hasRecord = ident && ident.kind === IdentifierKind.Record // this.context.identifierCounts.hasCounts([IdentifierKind.Record], parentIdentText)
     if (!hasRecord) {
       es.push({
         source: ErrorSource.Semantic,
-        kind: ErrorKind.UndefinedIdentifier,
         ...parentPos,
-        msg: errMsgParent
+
+        type: ErrorType.UndefinedIdentifier,
+        params: {desc: "record", ident: parentIdentText}
       })
     }
 
@@ -443,9 +476,10 @@ export default class SemanticAnalyzer {
     if (!hasRecordField) {
       es.push({
         source: ErrorSource.Semantic,
-        kind: ErrorKind.UndefinedIdentifier,
         ...identPos,
-        msg: errMsgField
+
+        type: ErrorType.UndefinedIdentifier,
+        params: {desc: "record field", ident: `${parentIdentText}.${identText}`}
       })
       this.context.typeStack.push(IdentifierType.Hole)
     } else {
@@ -520,7 +554,7 @@ export default class SemanticAnalyzer {
       }
 
       case SemanticContextType.FnParamsDecl: {
-        const fnBlock = this.searchNearestBlock(block => block.type === SemanticContextType.FnDecl)
+        const fnBlock = this.findNearestBlock(SemanticContextType.FnDecl)
         if (fnBlock) {
           fnBlock.metadata.signatures[0].input.push(type)
           const currentIdentText = block.metadata.currentIdentifier
@@ -541,6 +575,18 @@ export default class SemanticAnalyzer {
         break
       }
     }
+  }
+
+  handleFunCall(actionKind, block, position) {
+    if (this.findNearestBlock(SemanticContextType.WhereExpr)) {
+      this.emit("errors", [{
+        source: ErrorSource.Semantic,
+        ...position,
+
+        type: ErrorType.WhereFunctionCall
+      }])
+    }
+    this.deduceActionCall(actionKind, block.metadata.fnName, block.metadata.gotParams, position)
   }
 
   deduceActionCall(actionKind, action, inputActualLength, position) {
@@ -582,9 +628,10 @@ export default class SemanticAnalyzer {
       const currentTypesOrdered = popMultiStore(this.context.typeStack, inputActualLength).reverse()
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.TypeError,
         ...position,
-        msg: `type mismatch on function ${action}, got: ${formatTypes(currentTypesOrdered)}, expected types are: ${formatSignatureInputs(fn.signatures)}`
+
+        type: ErrorType.TypeMismatchFunction,
+        params: {ident: action, got: currentTypesOrdered, expected: fn.signatures}
       }])
       output = IdentifierType.Hole
     }
@@ -616,9 +663,10 @@ export default class SemanticAnalyzer {
     if (type !== identInfo.type && type !== IdentifierType.Hole && !isException) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.TypeError,
         ...pos,
-        msg: `type mismatch when declaring variables, expected ${formatType(identInfo.type)}, got ${formatType(type)}`
+
+        type: ErrorType.TypeMismatchVarDecl,
+        params: {ident, expected: identInfo.type, got: type}
       }])
 
       // NO PUSH TO TYPE STACK AGAIN
@@ -628,22 +676,23 @@ export default class SemanticAnalyzer {
     // this.resetTypeStack()
   }
 
-  deduceToType(type, position, pushType = null, pushSelf = false, allowNull = false) {
+  deduceToType(type, position, pushType = null, allowNull = false) {
     const actualType = this.context.typeStack.pop()
-    const isCorrect = type == null || actualType === type || actualType === IdentifierType.Hole || (allowNull && actualType == null)
+    const isCorrect = actualType === type
+      || actualType === IdentifierType.Hole
+      || (allowNull && actualType == null)
 
     if (pushType != null) {
       this.context.typeStack.push(pushType)
-    } else if (pushSelf) {
-      this.context.typeStack.push(actualType)
     }
 
     if (!isCorrect) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.TypeError,
         ...position,
-        msg: `type mismatch: expecting ${formatType(type)}, got ${formatType(actualType)}`
+
+        type: ErrorType.TypeMismatchExpr,
+        params: {expected: [type], got: [actualType]}
       }])
     }
   }
@@ -659,9 +708,10 @@ export default class SemanticAnalyzer {
     if (!isCorrect) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.TypeError,
         ...position,
-        msg: `type mismatch: expecting ${formatTypes(types)}, got ${formatType(actualType)}`
+
+        type: ErrorType.TypeMismatchExpr,
+        params: {expected: types, got: [actualType]}
       }])
     }
   }
@@ -669,7 +719,13 @@ export default class SemanticAnalyzer {
   deduceAllToType(type, position, pushType = null, atLeast = 1) {
     const actualTypes = this.context.typeStack
     const isCorrect = (atLeast === 0 && actualTypes.length === 0)
-      || (actualTypes.length >= atLeast && actualTypes.every(actualType => actualType === type || actualType === IdentifierType.Hole))
+      || (
+        actualTypes.length >= atLeast
+        && actualTypes.every(actualType =>
+          actualType === type
+          || actualType === IdentifierType.Hole
+        )
+      )
 
     if (pushType != null) {
       this.context.typeStack = [pushType]
@@ -678,27 +734,22 @@ export default class SemanticAnalyzer {
     if (!isCorrect) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.TypeError,
         ...position,
-        msg: `type mismatch: expecting ${atLeast ? `at least ${atLeast} ` : ""} (...${formatType(type)}), got ${formatTypes(actualTypes)}`
+
+        type: ErrorType.TypeMismatchExpr,
+        params: {expected: [type], got: actualTypes, minLength: atLeast}
       }])
     }
   }
 
-  checkNamedExpr(name, position, msg, allowedScopes = []) {
+  checkNamedExpr(position, allowedScopes = []) {
     const scope = this.latestNthScope()
     if (!scope) {
       console.log("warn: use of initial without scope")
+      return false
     }
 
-    if (!allowedScopes.includes(scope.type)) {
-      this.emit("errors", [{
-        source: ErrorSource.Semantic,
-        kind: ErrorKind.SemanticError,
-        ...position,
-        msg
-      }])
-    }
+    return allowedScopes.includes(scope.type)
   }
 
   checkOption(optName, lit, position) {
@@ -710,9 +761,10 @@ export default class SemanticAnalyzer {
     if (this.context.definedOptions.has(optName)) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.SemanticError,
         ...position,
-        msg: `option '${optName}' has already be defined`
+
+        type: ErrorType.CompilerOptionDuplicated,
+        params: {ident: optName}
       }])
       return
     }
@@ -723,18 +775,20 @@ export default class SemanticAnalyzer {
     if (values && !values.includes(lit)) {
       es.push({
         source: ErrorSource.Semantic,
-        kind: ErrorKind.TypeError,
         ...position,
-        msg: `option '${optName}' could only accept these values: ${values.join(",")}`
+
+        type: ErrorType.TypeMismatchCompilerOption,
+        params: {ident: optName, expected: values}
       })
     }
 
     if (regex && !regex.test(lit)) {
       es.push({
         source: ErrorSource.Semantic,
-        kind: ErrorKind.TypeError,
         ...position,
-        msg: `option '${optName}' could only accept: ${description}`
+
+        type: ErrorType.TypeMismatchCompilerOption,
+        params: {ident: optName, desc: description}
       })
     }
 
@@ -742,6 +796,45 @@ export default class SemanticAnalyzer {
 
     if (es.length) {
       this.emit("errors", es)
+    }
+  }
+
+  handleInitialExpr(position) {
+    const scopes = [SemanticContextType.StateScope, SemanticContextType.GoalScope]
+
+    const valid = this.checkNamedExpr(
+      position,
+      // `'initial' expression can only be used in global / state / node scope, and not in constant definition`,
+      scopes
+    )
+
+    if (!valid) {
+      this.emit("errors", [{
+        type: ErrorType.InvalidNamedExprScope,
+        params: {
+          ident: "initial",
+          scopes
+        }
+      }])
+    }
+  }
+
+  handleFreshExpr(position) {
+    const scopes = [SemanticContextType.StateScope, SemanticContextType.GoalScope]
+    const valid = this.checkNamedExpr(
+      position,
+      // `'fresh' expression can only be used in global / state / node scope, and not in constant definition`,
+      scopes
+    )
+
+    if (!valid) {
+      this.emit("errors", [{
+        type: ErrorType.InvalidNamedExprScope,
+        params: {
+          ident: "fresh",
+          scopes
+        }
+      }])
     }
   }
 
@@ -753,9 +846,10 @@ export default class SemanticAnalyzer {
       if (startIdent != null) {
         es.push({
           source: ErrorSource.Semantic,
-          kind: ErrorKind.SemanticError,
           ...position,
-          msg: `start node already defined as '${startIdent}', only 1 start node could exist in current machine`
+
+          type: ErrorType.StartNodeDuplicated,
+          params: {ident: startIdent}
         })
       } else {
         this.context.startNodeIdentifier = identifier
@@ -765,21 +859,26 @@ export default class SemanticAnalyzer {
     if (attrs.isAbstract && block.metadata.hasChildren === true) {
       es.push({
         source: ErrorSource.Semantic,
-        kind: ErrorKind.SemanticWarning,
         ...position,
-        msg: "code inside abstract node / state will be ignored"
+
+        type: ErrorType.CodeInsideAbstractNode,
       })
     }
 
     if (es.length) {
       this.emit("errors", es)
     }
-
-    this.emit("state", {identifier, attributes: attrs})
+    this.context.stateSet.add(identifier)
+    this.emit("state", {identifier, attrs})
   }
 
-  handleGoal() {
+  handleStateScope(hasStatement) {
+    this.peekBlock().metadata.hasChildren = hasStatement
+  }
+
+  handleGoal(block) {
     this.context.goalDefined = true
+    this.emit("goal", block)
   }
 
   handleMachineDecl(pos) {
@@ -787,18 +886,18 @@ export default class SemanticAnalyzer {
     if (!this.context.goalDefined) {
       es.push({
         source: ErrorSource.Semantic,
-        kind: ErrorKind.SemanticWarning,
         ...pos,
-        msg: "no goal defined in machine"
+
+        type: ErrorType.NoGoalDefined,
       })
     }
 
     if (this.context.startNodeIdentifier == null) {
       es.push({
         source: ErrorSource.Semantic,
-        kind: ErrorKind.SemanticWarning,
         ...pos,
-        msg: "no start node defined in machine"
+
+        type: ErrorType.NoStartNodeDefined
       })
     }
 
@@ -808,14 +907,14 @@ export default class SemanticAnalyzer {
   }
 
   handleReturn(position) {
-    const scope = this.searchNearestScope(scope => scope.type === SemanticContextType.FnBodyScope)
+    const scope = this.findNearestScope(SemanticContextType.FnBodyScope)
 
     if (!scope) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.SemanticError,
         ...position,
-        msg: "'return' expression can only be used in function"
+
+        type: ErrorType.ReturnExprViolation
       }])
 
       return
@@ -827,7 +926,7 @@ export default class SemanticAnalyzer {
 
     scope.metadata.isReturned = true
 
-    const decl = this.searchNearestBlock(block => block.type === SemanticContextType.FnDecl)
+    const decl = this.findNearestBlock(SemanticContextType.FnDecl)
     if (!decl) {
       console.log("warn: unknown function declaration", position)
       return
@@ -838,9 +937,10 @@ export default class SemanticAnalyzer {
     if (type !== expectedType) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.TypeError,
         ...position,
-        msg: `type mismatch: function expected to return ${formatType(expectedType)}, got ${formatType(type)}`
+
+        type: ErrorType.TypeMismatchReturn,
+        params: {expected: expectedType, got: type}
       }])
     }
   }
@@ -850,49 +950,144 @@ export default class SemanticAnalyzer {
     if (scope && scope.type === SemanticContextType.FnBodyScope && scope.metadata.isReturned) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        kind: ErrorKind.SemanticError,
         ...position,
-        msg: "unreachable code: statement after 'return'"
+
+        type: ErrorType.StatementAfterReturn
       }])
     }
   }
 
-  handleTransExclusion(isEnter) {
-    const block = this.peekBlock(1)
-    block.metadata.exclusionFlag = isEnter
+  handleTransExclusion(idents) {
+    const transDecl = this.peekBlock(1).metadata
+    for (let id of idents) {
+      transDecl.excludedStates.add(id)
+    }
+
+    // block.metadata.exclusionFlag = isEnter
   }
 
   handleTransOp(op) {
     this.peekBlock(1).metadata.operators.add(op)
   }
 
+  handleTransToStates(idents) {
+    for (let id of idents) {
+      this.peekBlock(1).metadata.toStates.add(id)
+    }
+  }
+
   handleTransLabel(label) {
     this.peekBlock(1).metadata.label = label.slice(1, label.length - 1).trim()
   }
 
-  handleTransWhereExpr(expr) {
-    this.peekBlock(1).metadata.whereExpr = expr
-      .slice("where ".length)
-      .replace(/(?:\r\n|\r|\n)/g, " ")
-      .replace(/\s\s+/g, " ")
+  handleWhereExpr(expr, posPair) {
+    const block = this.peekBlock(1)
+
+    if (block.type === SemanticContextType.TransDecl) {
+      block.metadata.whereExpr = expr
+        .slice("where ".length)
+        .replace(/(?:\r\n|\r|\n)/g, " ")
+        .replace(/\s\s+/g, " ")
+    }
+
+    this.deduceToType(IdentifierType.Bool, posPair)
   }
 
   handleTrans(block, position) {
     const md = block.metadata
-    this.emit("edge", block)
+    const {fromState, toStates, operators, excludedStates} = md
+    const es = []
 
     if (!md.whereExpr) {
-      const label = `${md.fromState ?? ""}|${[...md.toStates].sort().join(",")}|${[...md.operators].sort().join(",")}|${[...md.excludedStates].sort().join(",")}`
+      const label = `${fromState ?? ""}|${[...toStates].sort().join(",")}|${[...operators].sort().join(",")}|${[...excludedStates].sort().join(",")}`
       if (this.context.transitionSet.has(label)) {
-        this.emit("errors", [{
+        es.push({
           source: ErrorSource.Semantic,
-          kind: ErrorKind.SemanticWarning,
           ...position,
-          msg: "duplicated non-conditional edge definition"
-        }])
+          type: ErrorType.DuplicatedEdge
+        })
       } else {
         this.context.transitionSet.add(label)
       }
+    }
+
+    const targetStates = new Set(toStates)
+    if (!toStates.size) {
+      const isExcludeSelf = operators.has("+")
+      for (let state of this.context.stateSet) {
+        if (!(isExcludeSelf && state === fromState) && !excludedStates.has(state)) {
+          targetStates.add(state)
+        }
+      }
+    }
+
+    if (targetStates.size === 0) {
+      es.push({
+        source: ErrorSource.Semantic,
+        ...position,
+        type: ErrorType.EmptyEdge
+      })
+    }
+
+    if (es.length) {
+      this.emit("errors", es)
+    }
+
+    this.emit("trans", {metadata: md, targetStates})
+  }
+
+  handleTransScope(ident) {
+    if (ident) {
+      this.peekBlock(1).metadata.fromState = ident
+    } else {
+      console.trace("warn: start state not found for trans")
+    }
+  }
+
+  handleInExpr(identifiers, expr, position) {
+    if (identifiers?.length) {
+      const block = this.peekBlock(1)
+      switch (block.type) {
+        case SemanticContextType.AssertExpr: {
+          this.emit("statesAssertion", {expr, position, identifiers})
+          break
+        }
+        case SemanticContextType.InvariantDecl: {
+          const name = block.metadata.identifier
+          this.emit("statesInvariant", {name, identifiers})
+          break
+        }
+      }
+    }
+  }
+
+  handleStopExpr(identifiers) {
+    const def = this.latestNthScope()
+    if (identifiers?.length) {
+      for (let id of identifiers) {
+        def.metadata.states.add(id)
+      }
+    }
+  }
+
+  handleWithExpr(identifiers) {
+    const def = this.latestNthScope()
+    if (identifiers?.length) {
+      for (let id of identifiers) {
+        def.metadata.invariants.add(id)
+      }
+    }
+  }
+
+  handleCheckExpr(expr) {
+    // this.latestNthScope().metadata.keyword = keyword
+    this.latestNthScope().metadata.expr = expr
+  }
+
+  handleExpression() {
+    const block = this.peekBlock()
+    if (block.type === SemanticContextType.FnCall) {
+      block.metadata.gotParams += 1
     }
   }
 }

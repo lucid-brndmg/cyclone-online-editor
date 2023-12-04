@@ -92,7 +92,7 @@ const HeroSection = () => {
         <ScrollArea className={classes.display}>
           <TypographyStylesProvider fz={"sm"} p={0}>
             <ExecutableCode execCode={Config.home.exampleCode} onTry={onTry}>
-              <pre dangerouslySetInnerHTML={{__html: exampleCode}} />
+              <pre style={{whiteSpace: "pre-wrap"}} dangerouslySetInnerHTML={{__html: exampleCode}} />
             </ExecutableCode>
           </TypographyStylesProvider>
         </ScrollArea>

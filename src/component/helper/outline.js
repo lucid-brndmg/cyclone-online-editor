@@ -35,17 +35,17 @@ import {
 import {memo, useCallback, useEffect, useMemo, useState} from "react";
 import {useEditorStore} from "@/state/editorStore";
 import {useEditorHelperStore} from "@/state/editorHelperStore";
-import {filterText, scopeLayersToOutline} from "@/core/utils/structure";
-import {ErrorKind, IdentifierKind, IdentifierType, OutlineKind, SemanticContextType} from "@/core/definitions";
+import {filterText, scopeLayersToOutline} from "@/core/utils/outline";
+import {IdentifierKind, IdentifierType, OutlineKind, SemanticContextType} from "@/core/definitions";
 import {
-  formatErrorDescription,
-  formatErrorMessage,
+  formatErrorDescription, formatErrorMessage,
   formatKindDescription,
   formatScopeBlockType,
   formatType
 } from "@/core/utils/format";
 import {locateToCode} from "@/core/utils/monaco";
 import {useIdle} from "@mantine/hooks";
+import {isWarning} from "@/core/specification";
 
 const outlineBlockTypeIcons = {
   [SemanticContextType.MachineScope]: IconVector,
@@ -199,7 +199,7 @@ const StructureOutlineTree = () => {
 
 const getErrorStyle = e => {
   let icon
-  if (e.kind === ErrorKind.SemanticWarning) {
+  if (isWarning(e.type)) {
     icon = <Box c={"orange"}><IconAlertTriangleFilled size={24} /></Box>
   } else {
     icon = <Box c={"red"}><IconAlertCircleFilled size={24} /></Box>
@@ -210,12 +210,12 @@ const getErrorStyle = e => {
     text: <Box>
       <Group justify={"space-between"}>
         <Text size={"sm"} fw={500}>
-          {formatErrorDescription(e.kind)}
+          {formatErrorDescription(e.type)}
         </Text>
         <Text size={"sm"} c={"dimmed"} px={"sm"}>{e.startPosition.line}:{e.startPosition.column + 1}</Text>
       </Group>
       <Text size={"sm"}>
-        {e.msg}
+        {formatErrorMessage(e.type, e.params)}
       </Text>
     </Box>
   }

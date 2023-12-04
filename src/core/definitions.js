@@ -5,22 +5,35 @@ export const ErrorSource = {
   Remote: 3
 }
 
-export const ErrorKind = {
-  // UndefinedVariable: 0, // undefined = ??
-  // UndefinedEnumField: 1, // #undefined
-  // UndefinedState: 2,
-  //
-  // UndefinedIdentifier: 98, // other undefined values
-  //
-  // TypeError: 99 // TBD
+export const ErrorType = {
+  SyntaxError: 1001,
 
-  SyntaxError: 1,
-  UndefinedIdentifier: 2,
-  RedeclaredIdentifier: 3,
-  TypeError: 4,
-  SemanticWarning: 5,
-  SemanticError: 6,
-  Remote: 7
+  UndefinedIdentifier: 2001,
+  IdentifierRedeclaration: 2002,
+  RecursiveFunction: 2003,
+  WhereFreeVariable: 2004,
+  WhereFunctionCall: 2005,
+  CompilerOptionDuplicated: 2006,
+  StartNodeDuplicated: 2007,
+  ReturnExprViolation: 2008,
+  StatementAfterReturn: 2009,
+  InvalidNamedExprScope: 2010,
+
+  TypeMismatchFunction: 3001,
+  TypeMismatchReturn: 3002,
+  TypeMismatchCompilerOption: 3003,
+  TypeMismatchVarDecl: 3004,
+  TypeMismatchVarRef: 3005,
+  TypeMismatchExpr: 3006,
+
+  CodeInsideAbstractNode: 4001,
+  NoGoalDefined: 4002,
+  NoStartNodeDefined: 4003,
+  DuplicatedEdge: 4004,
+  EmptyEdge: 4005,
+
+  RemoteError: 5001,
+
 }
 
 // enter: push block type
@@ -67,10 +80,12 @@ export const SemanticContextType = {
   LocalVariableDecl: 141, // decl
   RecordVariableDecl: 142, // decl
 
+  WhereExpr: 150,
+
   // VariableInit: 150, // ref
   // VariableWhere: 151,
 
-  Expression: 150, // REF
+  // Expression: 150, // REF
 
   InExpr: 160, // ref
 
@@ -81,11 +96,13 @@ export const SemanticContextType = {
   FnParamsDecl: 173, // decl
   FnCall: 174, // ref
 
-  Primary: 180, // ref
+  // Primary: 180, // ref
 
   AnnotationDecl: 190, // decl
 
   DotExpr: 200,
+
+  AssertExpr: 210
 
   // PathCondition: 210,
 
@@ -137,8 +154,8 @@ export const IdentifierType = {
 
 export const ActionKind = {
   InfixOperator: 0, // a x b
-  PrefixOperator: 1, // a x
-  SuffixOperator: 2, // x a
+  PrefixOperator: 1, // x a
+  SuffixOperator: 2, // a x
   Function: 3, // x(a)
 }
 

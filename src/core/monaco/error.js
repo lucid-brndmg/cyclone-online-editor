@@ -1,7 +1,7 @@
-import {ErrorKind} from "@/core/definitions";
+import {isWarning} from "@/core/specification";
 
-export const getErrorLevel = (monaco, kind) => {
-  if (kind === ErrorKind.SemanticWarning) {
+export const getErrorLevel = (monaco, type) => {
+  if (isWarning(type)) {
     return monaco.MarkerSeverity.Warning
   }
 

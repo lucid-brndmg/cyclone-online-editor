@@ -57,7 +57,13 @@ export const transDeclMetadata = () => ({
   toStates: new Set(),
   operators: new Set(),
   excludedStates: new Set(),
-  exclusionFlag: false
+  // exclusionFlag: false
+})
+
+export const goalScopeMetadata = () => ({
+  invariants: new Set(),
+  states: new Set(),
+  expr: ""
 })
 
 export const recordBlockerFinder = block => {

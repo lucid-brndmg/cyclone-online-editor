@@ -1,4 +1,4 @@
-import examples from "../../resource/code_example_manifest.json";
+import examples from "../../../resource/code_example_manifest.json";
 
 export const codeExampleTable = (() => {
   const result = {}

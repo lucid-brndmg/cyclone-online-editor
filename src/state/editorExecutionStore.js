@@ -14,8 +14,8 @@ export const useEditorExecutionStore = create((set, get) => ({
   executionResult: null,
   setExecutionResult: executionResult => set(() => ({executionResult})),
 
-  stateTransCopy: null,
-  setStateTransCopy: stateTransCopy => set({stateTransCopy}),
+  visualDataCopy: null,
+  setVisualDataCopy: visualDataCopy => set({visualDataCopy}),
 
   isLoading: false,
   setIsLoading: isLoading => set({isLoading}),

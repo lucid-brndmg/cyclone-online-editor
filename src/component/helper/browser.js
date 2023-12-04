@@ -6,7 +6,7 @@ import {IconBulb, IconDownload, IconFile, IconTrash} from "@tabler/icons-react";
 import {useEditorPersistentStore, useEditorSaveStatusStore} from "@/state/editorPersistentStore";
 import {useEffect, useMemo, useState} from "react";
 import {timeDifference} from "@/lib/time";
-import {codeExampleTable} from "@/core/codeExample";
+import {codeExampleTable} from "@/core/resources/codeExample";
 import {downloadBlobFile} from "@/lib/dom";
 import {modals} from "@mantine/modals";
 import {dynamicCodeExample} from "@/core/utils/resource";

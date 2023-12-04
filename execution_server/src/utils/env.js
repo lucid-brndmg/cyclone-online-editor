@@ -1,0 +1,1 @@
+export const isWorker = process.argv.some(arg => arg.endsWith("worker.js"))

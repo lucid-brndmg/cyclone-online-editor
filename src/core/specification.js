@@ -1,4 +1,4 @@
-import {ActionKind, IdentifierKind, IdentifierType, SemanticContextType} from "@/core/definitions";
+import {ActionKind, ErrorType, IdentifierKind, IdentifierType, SemanticContextType} from "@/core/definitions";
 import spec from "../../resource/cyclone_spec.json"
 
 export const scopedContextType = new Set([
@@ -233,3 +233,13 @@ export const cycloneFullKeywords = [
 export const cycloneFullKeywordsSet = new Set(cycloneFullKeywords)
 
 export const cycloneOperators = spec.operators
+
+const errorTypeWarnings = new Set([
+  ErrorType.NoStartNodeDefined,
+  ErrorType.NoGoalDefined,
+  ErrorType.DuplicatedEdge,
+  ErrorType.CodeInsideAbstractNode,
+  ErrorType.EmptyEdge,
+])
+
+export const isWarning = errorType => errorTypeWarnings.has(errorType)

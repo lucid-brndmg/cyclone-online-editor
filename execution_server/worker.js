@@ -5,7 +5,7 @@ import {execCycloneProgram} from "./src/cyclone.js";
 import redis from "./src/redis.js";
 import {RedisKey} from "./src/definitions.js";
 import queue from "./src/queue.js";
-import {prepareEnv} from "./src/env.js";
+import {prepareDependencies} from "./src/dependencies.js";
 
 let garbageFiles = []
 const deleteAfterExec = config.cyclone.deleteAfterExec
@@ -44,6 +44,6 @@ if (!config.queue.enabled) {
   process.exit()
 }
 
-prepareEnv()
+prepareDependencies()
 queue.process(config.queue.concurrency, processor)
 logger.info("worker listening ...", {concurrency: config.queue.concurrency})

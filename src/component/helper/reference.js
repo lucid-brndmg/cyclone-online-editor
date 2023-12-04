@@ -6,16 +6,17 @@ import {
   Divider, LoadingOverlay,
   NavLink,
   Stack,
-  Text,
+  Text, TextInput,
   TypographyStylesProvider
 } from "@mantine/core";
 import {IconChevronRight, IconCircleFilled} from "@tabler/icons-react";
-import {useEffect, useMemo, useRef, useState} from "react";
-// import "highlight.js/styles/atom-one-dark.min.css";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import hljs from "highlight.js";
 import hljsCyclone from "../../generated/hljs/cyclone"
-import {getDocumentById, getGroupDocument} from "@/core/referenceDocs";
+import {getDocumentById, getGroupDocument} from "@/core/resources/referenceDocs";
 import {CycloneLanguageId} from "@/core/monaco/language";
+import {useDebouncedValue} from "@mantine/hooks";
+import {Input} from "postcss";
 
 const DocItem = ({group, doc}) => {
   const [docContent, setDocContent] = useState(null)
@@ -44,6 +45,8 @@ const DocItem = ({group, doc}) => {
 const GroupItem = ({group}) => {
   const [groupDoc, setGroupDoc] = useState(null)
   const [openedDocs, setOpenedDocs] = useState(new Set())
+  // const [search, setSearch] = useState("")
+  // const [debouncedSearch] = useDebouncedValue(search, 200)
 
   useEffect(() => {
     if (group.html) {
@@ -56,6 +59,10 @@ const GroupItem = ({group}) => {
       hljs.highlightAll()
     }
   }, [groupDoc]);
+
+  // const filterSearchDoc = useCallback(doc => {
+  //   return doc.title.toLowerCase().includes(debouncedSearch.toLowerCase().trim())
+  // }, [debouncedSearch])
 
   const onOpen = (open, id) => {
     if (open) {
@@ -100,27 +107,43 @@ const ReferenceDocs = () => {
   const expandedSet = useMemo(() => {
     return new Set(expandedGroup)
   }, [expandedGroup])
+  const [search, setSearch] = useState("")
+  const [debouncedSearch] = useDebouncedValue(search, 200)
+
+  const filterSearchGroup = useCallback(group => {
+    const low = debouncedSearch.toLowerCase().trim()
+    return group.title.toLowerCase().includes(low)
+      || group.documents.some(doc => doc.title.toLowerCase().includes(low))
+  }, [debouncedSearch])
 
   return (
-    <Accordion chevronPosition="left" multiple={true} value={expandedGroup} onChange={setExpandedGroup} >
-      {referenceManifest.map((group, i) => {
-        return (
-          <Accordion.Item value={group.id} key={i}>
-            <Accordion.Control ><Text fw={500}>{group.title}</Text></Accordion.Control>
-            <Accordion.Panel pos={"relative"}>
-              {
-                expandedSet.has(group.id)
-                  ? <GroupItem
-                    group={group}
-                    key={i}
-                  />
-                  : null
-              }
-            </Accordion.Panel>
-          </Accordion.Item>
-        )
-      })}
-    </Accordion>
+    <>
+      <TextInput
+        value={search}
+        onChange={e => setSearch(e.currentTarget.value)}
+        label={"Quick Search"}
+      />
+      <Accordion chevronPosition="left" multiple={true} value={expandedGroup} onChange={setExpandedGroup} >
+        {(debouncedSearch ? referenceManifest.filter(filterSearchGroup) : referenceManifest).map((group, i) => {
+          return (
+            <Accordion.Item value={group.id} key={i}>
+              <Accordion.Control ><Text fw={500}>{group.title}</Text></Accordion.Control>
+              <Accordion.Panel pos={"relative"}>
+                {
+                  expandedSet.has(group.id)
+                    ? <GroupItem
+                      group={group}
+                      key={i}
+                      // search={debouncedSearch}
+                    />
+                    : null
+                }
+              </Accordion.Panel>
+            </Accordion.Item>
+          )
+        })}
+      </Accordion>
+    </>
   )
 }
 

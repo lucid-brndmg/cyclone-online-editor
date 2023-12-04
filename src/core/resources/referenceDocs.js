@@ -1,4 +1,4 @@
-import referenceManifest from "../../resource/reference_manifest.json"
+import referenceManifest from "../../../resource/reference_manifest.json"
 import {dynamicReferenceDoc} from "@/core/utils/resource";
 
 const keywordDocuments = (() => {

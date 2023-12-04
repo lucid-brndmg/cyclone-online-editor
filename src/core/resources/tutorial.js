@@ -1,4 +1,4 @@
-import tutorialManifest from "../../resource/tutorial_manifest.json";
+import tutorialManifest from "../../../resource/tutorial_manifest.json";
 
 export const tutorialTable = (() => {
   const result = {}

@@ -6,6 +6,10 @@ export default class EditorSemanticContext {
   scopeLayers = []
   stateTable = new Map()
   transitions = []
+  assertions = []
+  invariants = []
+  namedTransitions = new Map()
+  goal
 
   // identifierCoordsTable = new FixedCoordinateTable()
 
@@ -30,33 +34,43 @@ export default class EditorSemanticContext {
     return this.scopeLayers
   }
 
-  defineState(identifier, attrs) {
-    this.stateTable.set(identifier, {
-      identifier,
-      attrs,
-    })
-  }
-
-  getDefinedStates() {
-    return this.stateTable
-  }
+  // defineState(identifier, attrs) {
+  //   this.stateTable.set(identifier, {
+  //     identifier,
+  //     attrs,
+  //   })
+  // }
 
   // operator: -> | <-> | * | +
-  defineTransition(identifier, label, whereExpr, fromState, toStates, operators, excludedStates) {
+  defineTransition(identifier, label, whereExpr, fromState, operators, targetStates) {
     this.transitions.push({
       identifier,
       label,
       whereExpr,
-      fromState,
-      toStates,
-      operators,
-      excludedStates
+      isBiWay: operators.has("<->"),
+      targetStates,
+      fromState
     })
-  }
-  getDefinedTransitions() {
-    return this.transitions
+    if (identifier) {
+      this.namedTransitions.set(identifier, targetStates)
+    }
   }
 
+  findTransition(name) {
+    return this.namedTransitions.get(name)
+  }
+
+  getVisualData() {
+    return {
+      trans: this.transitions,
+      states: this.stateTable,
+      assertions: this.assertions,
+      invariants: this.invariants,
+      goal: this.goal
+    }
+  }
+
+  // execute this BEFORE ready
   attach(analyzer) {
     analyzer.on("enterScope", (context, block) => {
       this.pushScopeLayerScope(context.scopedBlocks.length, block.type, block.position)
@@ -74,21 +88,45 @@ export default class EditorSemanticContext {
       this.pushScopeLayerIdent(text, type, position, kind, blockType, context.scopedBlocks.length)
     })
 
-    analyzer.on("state", (context, {identifier, attributes}) => {
-      this.defineState(identifier, attributes)
-    })
+    // analyzer.on("state", (context, {identifier, attributes}) => {
+    //   this.defineState(identifier, attributes)
+    // })
 
-    analyzer.on("edge", (context, block) => {
-      const md = block.metadata
+    analyzer.on("trans", (context, {metadata, targetStates}) => {
+      // const md = block.metadata
       this.defineTransition(
-        md.identifier,
-        md.label,
-        md.whereExpr,
-        md.fromState,
-        md.toStates,
-        md.operators,
-        md.excludedStates
+        metadata.identifier,
+        metadata.label,
+        metadata.whereExpr,
+        metadata.fromState,
+        metadata.operators,
+        targetStates
       )
     })
+
+    analyzer.on("statesAssertion", (ctx, assertion) => {
+      this.assertions.push(assertion)
+    })
+
+    analyzer.on("statesInvariant", (ctx, invariant) => {
+      this.invariants.push(invariant)
+    })
+
+    analyzer.on("goal", (ctx, block) => {
+      const md = block.metadata
+      if (md.invariants.size || md.states.size) {
+        this.goal = {
+          invariants: md.invariants,
+          states: md.states,
+          expr: md.expr
+        }
+      }
+    })
+
+    analyzer.on("state", (ctx, {identifier, attrs}) => {
+      this.stateTable.set(identifier, {identifier, attrs})
+    })
+
+    // Don't need to listen to "state" cuz stateTable is already defined
   }
 }

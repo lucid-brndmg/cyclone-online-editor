@@ -30,11 +30,20 @@
     "console": true,
     "path": "./",
     "file": {
-      "filename": "exec_server-%DATE%.log",
-      "datePattern": "YYYY-MM-DD-HH",
-      "zippedArchive": false,
-      "maxSize": "20m",
-      "maxFiles": "14d"
+      "server": {
+        "filename": "exec_server-server-%DATE%.log",
+        "datePattern": "YYYY-MM-DD-HH",
+        "zippedArchive": false,
+        "maxSize": "20m",
+        "maxFiles": "14d"
+      },
+      "worker": {
+        "filename": "exec_server-worker-%DATE%.log",
+        "datePattern": "YYYY-MM-DD-HH",
+        "zippedArchive": false,
+        "maxSize": "20m",
+        "maxFiles": "14d"
+      }
     }
   }
 }

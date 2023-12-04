@@ -108,10 +108,13 @@ goal:
     | (identifier pathCondAssignExpr SEMI)
     | (assertExpr)
   )*
-  (CHECK | ENUMERATE) forExpr (viaExpr)? (withExpr)? (stopExpr)?
+  checkExpr
   RBRACE
   ;
 
+checkExpr:
+  (CHECK | ENUMERATE) forExpr (viaExpr)? (withExpr)? (stopExpr)?
+  ;
 forExpr:
   (FOR | EACH | UPTO) intLiteral (COMMA intLiteral)*
   ;

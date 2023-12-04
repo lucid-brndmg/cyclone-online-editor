@@ -14,7 +14,7 @@ const PlaygroundMainContent = () => {
         px={"md"}
         w={"100%"}
         direction={{ base: 'column', lg: 'row' }}
-        gap={{ base: 'sm', md: 'lg' }}
+        gap={4}
         justify={{ md: 'center', lg: "space-between" }}
         // align={{base: "center", md: "flex-start"}}
       >

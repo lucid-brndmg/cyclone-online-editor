@@ -27,7 +27,7 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 
 export const CodeExecutionButton = ({...props}) => {
   const {code, setCode, editorCtx} = useEditorStore()
-  const {setIsLoading, setIsError, setStateTransCopy, setExecutionResult, isLoading, executionResult, setParsedPaths, setErrorMessage, setIsPolling, isPolling} = useEditorExecutionStore()
+  const {setIsLoading, setIsError, setVisualDataCopy, setExecutionResult, isLoading, executionResult, setParsedPaths, setErrorMessage, setIsPolling, isPolling} = useEditorExecutionStore()
   const isPollingRef = useRef(isPolling)
   const invalidCode = useMemo(() => code.trim().length === 0, [code])
   const {executionServer, execPollWait} = useEditorSettingsStore()
@@ -92,10 +92,7 @@ export const CodeExecutionButton = ({...props}) => {
     setExecutionResult(null)
     setIsError(false)
     setErrorMessage("")
-    setStateTransCopy({
-      states: editorCtx.getDefinedStates(),
-      trans: editorCtx.getDefinedTransitions()
-    })
+    setVisualDataCopy(editorCtx.getVisualData())
 
     try {
       const resp = await fetch(`${executionServer.trim() || Config.executionServer.url}/exec`, {

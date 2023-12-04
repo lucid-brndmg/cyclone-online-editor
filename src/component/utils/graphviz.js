@@ -1,6 +1,6 @@
 import {createRef, forwardRef, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
-import {Box, Button, Code, CopyButton, Group, SegmentedControl} from "@mantine/core";
+import {Box, Button, Code, CopyButton, Group, ScrollArea, SegmentedControl} from "@mantine/core";
 import classes from "@/styles/modules/GraphvizPreview.module.css";
 import {IconCopy, IconDownload, IconZoomIn} from "@tabler/icons-react";
 import {disableSelect, downloadBlobFile, downloadTextFile, serializeSvg} from "@/lib/dom";
@@ -118,7 +118,7 @@ export const GraphvizSinglePreview = ({code, leftSection}) => {
 
           </>
           : <>
-            <Code block={true}>{code}</Code>
+            <Code style={{whiteSpace: "pre-wrap"}} block={true}>{code}</Code>
             <Group grow>
               <Button variant={"default"} leftSection={<IconDownload size={16} />} onClick={() => downloadTextFile(code, "graph.dot")}>Download</Button>
               <CopyButton value={code}>
@@ -227,7 +227,7 @@ export const GraphvizMultiPreview = ({
             return (
               <Box key={i}>
                 {title}
-                <CopyableCodeBlock code={code} filename={`${filename || "graph"}.dot`} />
+                <CopyableCodeBlock wrap={true} code={code} filename={`${filename || "graph"}.dot`} />
               </Box>
             )
           })}

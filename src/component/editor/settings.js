@@ -234,10 +234,10 @@ export const SettingsPopover = ({children}) => {
               />
               <Switch
                 label={"Display full state / node information"}
-                checked={graphviz.preview.showStateProps}
+                checked={graphviz.preview.showNodeProps}
                 onChange={e => setGraphviz({
                   ...graphviz,
-                  preview: {...graphviz.preview, showStateProps: e.currentTarget.checked}
+                  preview: {...graphviz.preview, showNodeProps: e.currentTarget.checked}
                 })}
               />
               {/* <Switch */}

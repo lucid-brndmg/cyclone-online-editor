@@ -4,7 +4,7 @@ import {exit} from "node:process";
 import path from "node:path";
 import fs from "node:fs";
 
-export const prepareEnv = () => {
+export const prepareDependencies = () => {
   // if (conf.queue.enabled && !conf.redis) {
   //   logger.error("No redis config prepared for queue.")
   //   exit()
@@ -34,5 +34,5 @@ export const prepareEnv = () => {
     process.env["PATH"] += `${env ? ";" : ""}${path.resolve(conf.cyclone.path)}`
   }
 
-  logger.info("env ready")
+  logger.info("ready")
 }

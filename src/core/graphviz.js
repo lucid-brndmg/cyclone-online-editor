@@ -1,4 +1,5 @@
 import {map2elems} from "@/lib/list";
+import {dropRegex, dropRegexes, simplify} from "@/lib/string";
 
 export const DisplayDirection = {
   Auto: "auto",
@@ -50,15 +51,16 @@ const genGraphvizStatesDef = (states, options, resultPaths = null) => {
     const color = resultPaths?.states.has(identifier)
       ? ", color=darkorange, fontcolor=darkorange"
       : ""
-    codePieces.push(`// ${props} ${identifier}\n${identifier}[label="${identifier}${options.showStateProps ? `\\n[${props}]` : ""}"${color}];`)
+    codePieces.push(`// ${props} ${identifier}\n${identifier}[label="${identifier}${options.showNodeProps ? `\\n[${props}]` : ""}"${color}];`)
   }
 
   return codePieces
 }
 
 const genAttrs = xs => xs.length ? `[${xs.join(", ")}]` : ""
-const genUndefinedState = (s, opts) => `// WARNING: undefined state: ${s} \n${s}[fontcolor=red, label="${s}${opts.showStateProps ? "\\n[undefined]" : ""}"];\n`
+const genUndefinedState = (s, opts) => `// WARNING: undefined state: ${s} \n${s}[fontcolor=red, label="${s}${opts.showNodeProps ? "\\n[undefined]" : ""}"];\n`
 
+const genUndefinedInvariant = (s, opts) => `${s}[fontcolor=blue, color=blue, style=dashed, label="invariant ${s}${opts.showNodeProps ? "\\n[every state]" : ""}"];\n`
 
 export const availableGraphvizEngines = [
   "circo",
@@ -72,17 +74,14 @@ export const availableGraphvizEngines = [
 ]
 
 export const graphvizForEditorOptions = {
-  showStateProps: true,
+  showNodeProps: true,
   showLabelLiteral: true,
   // showWhereExpr: true,
   paddingEdgeText: true
 }
 
-export const genGraphvizPreview = ({states, trans}, options, resultPaths = null) => {
-  const previewOptions = options.preview
-  const statesDef = genGraphvizStatesDef(states.values(), previewOptions, resultPaths)
+export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef, previewOptions) => {
   const transRelations = []
-  const definedStates = new Set(states.keys())
   const resultEdgesDef = new Set(
     resultPaths
       ? map2elems(resultPaths.edge, (s1, s2) => `${s1},${s2}`)
@@ -94,26 +93,12 @@ export const genGraphvizPreview = ({states, trans}, options, resultPaths = null)
     label,
     whereExpr,
     fromState,
-    toStates,
-    operators,
-    excludedStates
+    targetStates,
+    isBiWay
   } of trans) {
     if (!definedStates.has(fromState)) {
       statesDef.push(genUndefinedState(fromState, previewOptions))
       definedStates.add(fromState)
-    }
-    const targetStates = new Set(toStates)
-    if (!toStates.size) {
-      const isExcludeSelf = operators.has("+")
-      // const isIncludeAll = operators.has("*")
-
-      for (let state of states.keys()) {
-        if (!(isExcludeSelf && state === fromState) && !excludedStates.has(state)) {
-          targetStates.add(state)
-        }
-      }
-
-      // const exclusions = new Set(excludedStates)
     }
     const transPieces = []
     for (let sTo of targetStates) {
@@ -123,17 +108,12 @@ export const genGraphvizPreview = ({states, trans}, options, resultPaths = null)
         definedStates.add(sTo)
       }
 
-      const isBiWay = operators.has("<->")
-
       if (isBiWay) {
         attrs.push(`dir=both`)
       }
       if (resultEdgesDef.has(`${fromState},${sTo}`) || (isBiWay && resultEdgesDef.has(`${sTo},${fromState}`))) {
         attrs.push(`color=darkorange`, `fontcolor=darkorange`)
       }
-      // if (whereExpr) {
-      //   attrs.push(`style=dashed`)
-      // }
 
       let descriptions = []
       if (identifier) {
@@ -173,10 +153,118 @@ export const genGraphvizPreview = ({states, trans}, options, resultPaths = null)
       transRelations.push(transPieces)
     }
   }
+
+  return transRelations
+}
+
+const genGraphvizInvariantsDef = (invariants, statesDef, definedStates, previewOptions) => {
+  const def = []
+  const definedInvariants = new Set()
+  for (let inv of invariants) {
+    const {name, identifiers} = inv
+    statesDef.push(`${name}[label=" invariant ${name} ", style=dashed, fontcolor=blue, color=blue];`)
+    definedInvariants.add(name)
+    for (let ident of identifiers) {
+      if (!definedStates.has(ident)) {
+        statesDef.push(genUndefinedState(ident, previewOptions))
+        definedStates.add(ident)
+      }
+      def.push(`${name} -> ${ident}[color=blue];`)
+    }
+  }
+
+  return [def, definedInvariants]
+}
+
+const genGraphvizAssertionsDef = (assertions, statesDef, definedStates, previewOptions) => {
+  const def = []
+  let assertionIdAcc = 0
+  for (let a of assertions) {
+    const {expr, identifiers} = a
+    const assertionId = `<assertion${assertionIdAcc ++}>`
+    // const exprMatch = [...expr.matchAll(/in\s*\(/g)]
+    // const last = exprMatch[exprMatch.length - 1]
+    // const cleanExpr = last ? expr.slice(0, last.index).trim() : expr
+    const cleanExpr = dropRegex(expr, /in\s*\(/g).trim()
+    statesDef.push(`${assertionId}[label=" assert\\n${cleanExpr.slice("assert ".length)} ", fontcolor=green, color=green];`)
+    for (let ident of identifiers) {
+      if (!definedStates.has(ident)) {
+        statesDef.push(genUndefinedState(ident, previewOptions))
+        definedStates.add(ident)
+      }
+      def.push(`${assertionId} -> ${ident}[color=green];`)
+    }
+  }
+
+  return def
+}
+
+const genGraphvizGoalDef = ({invariants, states, expr}, statesDef, invariantsDef, definedStates, definedInvariants, opts) => {
+  const def = []
+  const id = `<goal>`
+  const cleanRes = []
+  if (states.size) {
+    cleanRes.push(/(reach|stop)\s*\(/g)
+  }
+  if (invariants.size) {
+    cleanRes.push(/with\s*\(/g)
+  }
+  const cleanExpr = dropRegexes(expr, cleanRes).trim()
+  statesDef.push(`${id}[label=" ${cleanExpr} ", color=darkorange, fontcolor=darkorange];`)
+  for (let inv of invariants) {
+    if (!definedInvariants.has(inv)) {
+      invariantsDef.push(genUndefinedInvariant(inv, opts))
+      definedInvariants.add(inv)
+    }
+    def.push(`${id} -> ${inv}[color=darkorange];`)
+  }
+  for (let state of states) {
+    if (!definedStates.has(state)) {
+      statesDef.push(genUndefinedState(state, opts))
+      definedStates.add(state)
+    }
+
+    def.push(`${id} -> ${state}[color=darkorange];`)
+  }
+
+  return def
+}
+
+export const genGraphvizPreview = (
+  {
+    states,
+    trans,
+    assertions,
+    invariants,
+    goal
+  },
+  options,
+  resultPaths = null
+) => {
+  const previewOptions = options.preview
+  const statesDef = genGraphvizStatesDef(states.values(), previewOptions, resultPaths)
+  const definedStates = new Set(states.keys())
+  const transRelations = genGraphvizTransDef(definedStates, resultPaths, trans, statesDef, previewOptions)
+  const [invariantsDef, definedInvariants] = genGraphvizInvariantsDef(invariants, statesDef, definedStates, previewOptions)
+  const assertionsDef = genGraphvizAssertionsDef(assertions, statesDef, definedStates, previewOptions)
+  const goalDef = goal ? genGraphvizGoalDef(goal, statesDef, invariantsDef, definedStates, definedInvariants, previewOptions).join("\n") : null
+
   const dir = options.direction === DisplayDirection.Auto
     ? (transRelations.length ? "TB" : "LR")
     : options.direction
-  return `digraph {\n\nrankdir=${dir};\n${statesDef.join("\n")}\n\n${transRelations.map(t => t.join("\n")).join("\n")}\n\n}`
+
+  const segments = [
+    `rankdir=${dir};`,
+    statesDef.join("\n"),
+    transRelations.map(t => t.join("\n")).join("\n"),
+    invariantsDef.join("\n"),
+    assertionsDef.join("\n"),
+  ]
+  if (goalDef) {
+    segments.push(goalDef)
+  }
+
+  return `digraph {\n\n${segments.join("\n\n")}\n\n}`
 }
 
 export const genGraphvizExecutionResultPaths = ({states, edges}, options) => {

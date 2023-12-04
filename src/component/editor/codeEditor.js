@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {Editor, loader} from "@monaco-editor/react";
-import {ErrorStorage} from "@/core/error";
+import {ErrorStorage} from "@/core/utils/errorStorage";
 import {SemanticListener} from "@/core/antlr/listener";
 import Config from "../../../resource/config.json";
 import SemanticAnalyzer from "@/core/semanticAnalyzer";
@@ -18,7 +18,7 @@ import {IdentifierKind, IdentifierType} from "@/core/definitions";
 import {parseCycloneSyntax} from "@/core/antlr/parse";
 import {CycloneLanguageId, CycloneMonacoConfig, CycloneMonacoTokens} from "@/core/monaco/language";
 import {getDefaultCompletionItems} from "@/core/monaco/completion";
-import {getKeywordHoverDocument} from "@/core/referenceDocs";
+import {getKeywordHoverDocument} from "@/core/resources/referenceDocs";
 import {getErrorLevel} from "@/core/monaco/error";
 import {pos} from "@/lib/position";
 import {LoadingOverlay} from "@mantine/core";
@@ -235,13 +235,18 @@ export const CycloneCodeEditor = ({
           } else {
             const ident = found.value.identifiers.get(text)
             if (ident) {
+              const contents = [{value: cycloneCodeMD(formatIdentifier(ident))}]
+              if (ident.kind === IdentifierKind.Trans) {
+                const targetStates = editorSemanticContextRef.current.findTransition(ident.text)
+                if (targetStates?.size) {
+                  contents.push({value: `connected to ${targetStates.size} states: ${[...targetStates].join(", ")}`})
+                }
+              }
+              contents.push(
+                { value: formatKindDescription(ident.kind) },
+              )
               return {
-                contents: [
-                  {
-                    value: cycloneCodeMD(formatIdentifier(ident)),
-                  },
-                  { value: formatKindDescription(ident.kind) },
-                ],
+                contents,
               }
             }
           }
@@ -290,7 +295,7 @@ export const CycloneCodeEditor = ({
     const monaco = monacoCtx.monaco
 
     // TODO: filter kinds?
-    const errorsConverted = errors.map(({kind, msg, startPosition, stopPosition}) => {
+    const errorsConverted = errors.map(({type, params, startPosition, stopPosition, source}) => {
       const startLine = startPosition.line
       const stopLine = stopPosition?.line ?? startPosition.line
       const startColumn = startPosition.column
@@ -301,8 +306,8 @@ export const CycloneCodeEditor = ({
       // const stopColumn = (stopPosition ? stopPosition.column : startColumn) + 1
 
       return {
-        message: formatErrorMessage(kind, msg),
-        severity: getErrorLevel(monaco, kind), // monaco.MarkerSeverity.Error,
+        message: formatErrorMessage(type, params, source),
+        severity: getErrorLevel(monaco, type), // monaco.MarkerSeverity.Error,
         startLineNumber: startLine,
         endLineNumber: stopLine,
         startColumn: startColumn + 1,

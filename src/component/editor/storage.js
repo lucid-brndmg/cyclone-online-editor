@@ -3,7 +3,7 @@ import {isManifest, useEditorPersistentStore, useEditorSaveStatusStore} from "@/
 import {useEditorStore} from "@/state/editorStore";
 import {useEffect, useMemo, useState} from "react";
 import {IconDeviceFloppy, IconFile, IconFilePlus} from "@tabler/icons-react";
-import {codeExampleTable} from "@/core/codeExample";
+import {codeExampleTable} from "@/core/resources/codeExample";
 import {SaveFileModal} from "@/component/modal/saveFileModal";
 import {locateToCode} from "@/core/utils/monaco";
 
