@@ -35,9 +35,15 @@ export const useEditorSettingsStore = create((set, get) => ({
 
   monacoOptions: {
     minimap: {enabled: false},
-    fontSize: 14
+    fontSize: 14,
   },
   setMonacoOptions: monacoOptions => set({monacoOptions}),
+
+  editorCodeOptions: {
+    lensStateEnabled: true,
+    lensTransEnabled: true
+  },
+  setEditorCodeOptions: editorCodeOptions => set({editorCodeOptions}),
 
   monacoTheme: "",
   setMonacoTheme: monacoTheme => set({monacoTheme}),
@@ -65,6 +71,7 @@ export const useEditorSettingsStore = create((set, get) => ({
       width,
       resultHeight,
       monacoOptions,
+      editorCodeOptions,
       monacoTheme,
       graphviz,
       executionServer,
@@ -81,6 +88,7 @@ export const useEditorSettingsStore = create((set, get) => ({
       width,
       resultHeight,
       monacoOptions,
+      editorCodeOptions,
       monacoTheme,
       graphviz,
       executionServer,
@@ -91,7 +99,7 @@ export const useEditorSettingsStore = create((set, get) => ({
     await localforage.setItem("editor_settings", save)
   },
 
-  setSettings: ({height, width, monacoOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait}) => {
-    set({height, width, monacoOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait})
+  setSettings: ({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait}) => {
+    set({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait})
   }
 }))

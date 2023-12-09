@@ -41,11 +41,13 @@ export const CycloneCodeEditor = ({
   onCode,
   errors,
   onErrors,
-  options,
+  monacoOptions,
+  codeOptions,
   debouncedCode,
   onCursorPosition = null,
   onMonacoReady = null,
   onEditorContext = null,
+  externalCommands = {},
   ...props
 }) => {
   const [monacoCtx, setMonacoCtx] = useState(null)
@@ -58,6 +60,11 @@ export const CycloneCodeEditor = ({
   // const semanticAnalyzerRef = useRef(new SemanticAnalyzer())
   const editorSemanticContextRef = useRef(null)
   const disposersRef = useRef([])
+  const codeOptionsRef = useRef(codeOptions)
+
+  useEffect(() => {
+    codeOptionsRef.current = codeOptions
+  }, [codeOptions]);
 
   const onCodeError = e => {
     errorsRef.current.setError(e)
@@ -239,7 +246,7 @@ export const CycloneCodeEditor = ({
               if (ident.kind === IdentifierKind.Trans) {
                 const targetStates = editorSemanticContextRef.current.findTransition(ident.text)
                 if (targetStates?.size) {
-                  contents.push({value: `connected to ${targetStates.size} states: ${[...targetStates].join(", ")}`})
+                  contents.push({value: `targeted to ${targetStates.size} states: ${[...targetStates].join(", ")}`})
                 }
               }
               contents.push(
@@ -254,11 +261,75 @@ export const CycloneCodeEditor = ({
       }
     })
 
+    const {dispose: disposeOnTransLensCommand} = monaco.editor.registerCommand("onTransLens", externalCommands["onTransLens"])
+    const {dispose: disposeOnStateLensCommand} = monaco.editor.registerCommand("onStateLens", externalCommands["onStateLens"])
+
+    const {dispose: disposeLensProvider} = monaco.languages.registerCodeLensProvider(CycloneLanguageId, {
+      provideCodeLenses: function (model, token) {
+        if (!editorSemanticContextRef.current) {
+          return
+        }
+        const {states, trans} = editorSemanticContextRef.current.getVisualData()
+        const lensesTrans = codeOptionsRef.current.lensTransEnabled ? trans
+          .map(({targetStates, position}, i) => {
+            const size = targetStates.size
+            const allStates = [...targetStates]
+            return {
+              range: {
+                startLineNumber: position.startPosition.line,
+                startColumn: position.startPosition.column + 1,
+                endLineNumber: position.stopPosition.line,
+                endColumn: position.stopPosition.column + 1
+              },
+              id: `trans_${i}`,
+              command: {
+                id: "onTransLens",
+                title: `${size} states targeted: ${allStates.slice(0, 5).join(", ")}${size > 5 ? " ..." : ""}`,
+                tooltip: allStates.join(", "),
+                arguments: [allStates]
+              }
+            }
+          }) : []
+        const lensesStates = codeOptionsRef.current.lensStateEnabled ? [...states.values()].map(({trans, namedTrans, position}, i) => {
+          const allNamed = [...namedTrans]
+          const hasAnon = allNamed.length < trans
+          const ellipses = hasAnon || allNamed.length > 5
+          return {
+            range: {
+              startLineNumber: position.startPosition.line,
+              startColumn: position.startPosition.column + 1,
+              endLineNumber: position.stopPosition.line,
+              endColumn: position.stopPosition.column + 1
+            },
+            id: `state_${i}`,
+            command: {
+              id: "onStateLens",
+              title: `${trans} edges involved: ${allNamed.slice(0, 5).join(", ")}${ellipses ? " ..." : ""}${hasAnon ? ` <${trans - allNamed.length} unnamed>` : ""}`,
+              tooltip: allNamed.join(", "),
+              arguments: [trans, allNamed]
+            }
+          }
+        }) : []
+
+        return {
+          lenses: lensesTrans.concat(lensesStates),
+          dispose: () => {},
+        };
+      },
+      resolveCodeLens: function (model, codeLens, token) {
+        return codeLens;
+      },
+    })
+
+
     disposersRef.current.push(
       disposeCompletionProvider,
       disposeLanguageConf,
       disposeTokenProvider,
-      disposeHoverProvider
+      disposeHoverProvider,
+      disposeLensProvider,
+      disposeOnTransLensCommand,
+      disposeOnStateLensCommand
     )
 
     onMonacoReady && onMonacoReady(newMonacoCtx)
@@ -328,7 +399,7 @@ export const CycloneCodeEditor = ({
         onChange={(v) => {
           onCode(v)
         }}
-        options={options}
+        options={monacoOptions}
         onMount={prepareEditor}
         {...props}
       />

@@ -5,7 +5,7 @@ import {
   FileButton,
   Group,
   NativeSelect,
-  Popover, Slider,
+  Popover, SimpleGrid, Slider,
   Stack,
   Switch,
   Text,
@@ -15,7 +15,7 @@ import {
 import {IconDownload, IconMinus, IconPlus, IconUpload} from "@tabler/icons-react";
 import {MAX_POLL_WAIT, MIN_H, MIN_POLL_WAIT, MIN_W, useEditorSettingsStore} from "@/state/editorSettingsStore";
 import thirdPartyThemes from "../../../resource/theme_manifest.json"
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {useEditorStore} from "@/state/editorStore";
 import {dynamicTheme} from "@/core/utils/resource";
 import {downloadTextFile} from "@/lib/dom";
@@ -33,7 +33,20 @@ const themeSelectData = [
   }
 })
 export const SettingsPopover = ({children}) => {
-  const {height, width, monacoOptions, setMonacoOptions, setHeight, monacoTheme, setMonacoTheme, setWidth, setSettings, graphviz, setGraphviz, executionServer, setExecutionServer, execPollWait, setExecPollWait} = useEditorSettingsStore()
+  const {
+    height, width,
+    monacoOptions,
+    setMonacoOptions,
+    setHeight,
+    monacoTheme, setMonacoTheme,
+    setWidth,
+    setSettings,
+    graphviz, setGraphviz,
+    executionServer, setExecutionServer,
+    execPollWait, setExecPollWait,
+    editorCodeOptions, setEditorCodeOptions,
+
+  } = useEditorSettingsStore()
   const [isLoadingTheme, setIsLoadingTheme] = useState(false)
 
   const [uExecServer, setUExecServer] = useState(executionServer)
@@ -68,7 +81,6 @@ export const SettingsPopover = ({children}) => {
           setIsLoadingTheme(false)
         })
       } else {
-        // todo: vs-dark
         editor.setTheme(computedColorScheme === "light" ? "vs" : "vs-dark")
         // monacoCtx.editor.setTheme("vs-dark")
       }
@@ -105,13 +117,13 @@ export const SettingsPopover = ({children}) => {
   }
   // 280
   return (
-    <Popover width={600} trapFocus position="bottom" withArrow shadow="md">
+    <Popover width={500} trapFocus position="bottom" withArrow shadow="md">
       <Popover.Target>
         {children}
       </Popover.Target>
       <Popover.Dropdown>
         <Stack>
-          <Group style={{alignItems: "flex-start"}} justify={"space-between"}>
+          <SimpleGrid cols={2}>
             <Stack>
               <Text fw={700}>Code Editor</Text>
               <NativeSelect
@@ -129,6 +141,28 @@ export const SettingsPopover = ({children}) => {
                   ...monacoOptions,
                   minimap: {enabled: e.currentTarget.checked}
                 })}
+              />
+
+              <Switch
+                label={"Code Lens For States"}
+                checked={editorCodeOptions.lensStateEnabled}
+                onChange={e => {
+                  setEditorCodeOptions({
+                    ...editorCodeOptions,
+                    lensStateEnabled: e.currentTarget.checked
+                  })
+                }}
+              />
+
+              <Switch
+                label={"Code Lens For Edges"}
+                checked={editorCodeOptions.lensTransEnabled}
+                onChange={e => {
+                  setEditorCodeOptions({
+                    ...editorCodeOptions,
+                    lensTransEnabled: e.currentTarget.checked
+                  })
+                }}
               />
 
               <Group justify={"space-between"}>
@@ -166,7 +200,7 @@ export const SettingsPopover = ({children}) => {
                 <TextInput
                   label={"Execution Server"}
                   description={<>
-                    Define preferred execution server to execute Cyclone's code remotely. Server could be <a target={`_blank`} href={"https://github.com"}>deployed locally</a>
+                    Define preferred execution server to execute Cyclone's code remotely. Server could be <a target={`_blank`} href={"https://github.com/lucid-brndmg/cyclone-online-editor?tab=readme-ov-file#execution-server-1"}>deployed locally</a>
                   </>}
                   placeholder={"https://..."}
                   onChange={e => setUExecServer(e.currentTarget.value)}
@@ -191,7 +225,7 @@ export const SettingsPopover = ({children}) => {
 
             </Stack>
 
-            <Divider orientation={"vertical"} />
+            {/* <Divider orientation={"vertical"} /> */}
 
             <Stack>
               <Text fw={700}>Preview & Graphviz</Text>
@@ -217,6 +251,22 @@ export const SettingsPopover = ({children}) => {
               />
 
               <Switch
+                label={"Display detailed props for states"}
+                checked={graphviz.preview.showNodeProps}
+                onChange={e => setGraphviz({
+                  ...graphviz,
+                  preview: {...graphviz.preview, showNodeProps: e.currentTarget.checked}
+                })}
+              />
+              <Switch
+                label={"Display detailed expression for assertion, invariant or goal"}
+                checked={graphviz.preview.showDetailedExpressions}
+                onChange={e => setGraphviz({
+                  ...graphviz,
+                  preview: {...graphviz.preview, showDetailedExpressions: e.currentTarget.checked}
+                })}
+              />
+              <Switch
                 label={"Display simplified edge description"}
                 checked={!graphviz.preview.showLabelLiteral}
                 onChange={e => setGraphviz({
@@ -225,21 +275,32 @@ export const SettingsPopover = ({children}) => {
                 })}
               />
               <Switch
-                label={"Performance Mode"}
-                checked={graphviz.performanceMode}
+                label={"Display invariants"}
+                checked={graphviz.preview.showInvariant}
                 onChange={e => setGraphviz({
                   ...graphviz,
-                  performanceMode: e.currentTarget.checked
+                  preview: {...graphviz.preview, showInvariant: e.currentTarget.checked}
                 })}
               />
+
               <Switch
-                label={"Display full state / node information"}
-                checked={graphviz.preview.showNodeProps}
+                label={"Display assertions"}
+                checked={graphviz.preview.showAssertion}
                 onChange={e => setGraphviz({
                   ...graphviz,
-                  preview: {...graphviz.preview, showNodeProps: e.currentTarget.checked}
+                  preview: {...graphviz.preview, showAssertion: e.currentTarget.checked}
                 })}
               />
+
+              <Switch
+                label={"Display goal"}
+                checked={graphviz.preview.showGoal}
+                onChange={e => setGraphviz({
+                  ...graphviz,
+                  preview: {...graphviz.preview, showGoal: e.currentTarget.checked}
+                })}
+              />
+
               {/* <Switch */}
               {/*   label={"Display full 'where' expression"} */}
               {/*   checked={graphviz.preview.showWhereExpr} */}
@@ -257,8 +318,16 @@ export const SettingsPopover = ({children}) => {
                   preview: {...graphviz.preview, paddingEdgeText: e.currentTarget.checked}
                 })}
               />
+              <Switch
+                label={"Performance Mode"}
+                checked={graphviz.performanceMode}
+                onChange={e => setGraphviz({
+                  ...graphviz,
+                  performanceMode: e.currentTarget.checked
+                })}
+              />
             </Stack>
-          </Group>
+          </SimpleGrid>
 
           <Divider />
 

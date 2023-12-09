@@ -41,19 +41,34 @@ export default class EditorSemanticContext {
   //   })
   // }
 
+  registerTransInState(state, transIdent) {
+    if (this.stateTable.has(state)) {
+      const stateCtx = this.stateTable.get(state)
+      stateCtx.trans += 1
+      if (transIdent) {
+        stateCtx.namedTrans.add(transIdent)
+      }
+    }
+  }
+
   // operator: -> | <-> | * | +
-  defineTransition(identifier, label, whereExpr, fromState, operators, targetStates) {
+  defineTransition(identifier, label, whereExpr, fromState, operators, targetStates, position) {
     this.transitions.push({
       identifier,
       label,
       whereExpr,
       isBiWay: operators.has("<->"),
       targetStates,
-      fromState
+      fromState,
+      position
     })
     if (identifier) {
       this.namedTransitions.set(identifier, targetStates)
     }
+    for (let state of targetStates) {
+      this.registerTransInState(state, identifier)
+    }
+    this.registerTransInState(fromState, identifier)
   }
 
   findTransition(name) {
@@ -92,7 +107,7 @@ export default class EditorSemanticContext {
     //   this.defineState(identifier, attributes)
     // })
 
-    analyzer.on("trans", (context, {metadata, targetStates}) => {
+    analyzer.on("trans", (context, {metadata, targetStates, position}) => {
       // const md = block.metadata
       this.defineTransition(
         metadata.identifier,
@@ -100,7 +115,8 @@ export default class EditorSemanticContext {
         metadata.whereExpr,
         metadata.fromState,
         metadata.operators,
-        targetStates
+        targetStates,
+        position
       )
     })
 
@@ -118,13 +134,14 @@ export default class EditorSemanticContext {
         this.goal = {
           invariants: md.invariants,
           states: md.states,
-          expr: md.expr
+          expr: md.expr,
+          position: block.position
         }
       }
     })
 
-    analyzer.on("state", (ctx, {identifier, attrs}) => {
-      this.stateTable.set(identifier, {identifier, attrs})
+    analyzer.on("state", (ctx, {identifier, attrs, position}) => {
+      this.stateTable.set(identifier, {identifier, attrs, position, trans: 0, namedTrans: new Set()})
     })
 
     // Don't need to listen to "state" cuz stateTable is already defined

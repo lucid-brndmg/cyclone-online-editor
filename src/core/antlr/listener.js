@@ -63,11 +63,12 @@ export class SemanticListener extends CycloneParserListener {
       const kwd = child?.symbol?.text
       return kwd === "machine" || kwd === "graph"
     })
-
+    let symbolPos = null
     if (token) {
       const symbol = token.symbol
-      this.analyzer.handleMachineDecl(getSymbolPosition(symbol))
+      symbolPos = getSymbolPosition(symbol)
     }
+    this.analyzer.handleMachineDecl(symbolPos)
   }
 
   enterMachineScope(ctx) {
@@ -213,7 +214,7 @@ export class SemanticListener extends CycloneParserListener {
     const idents = getIdentifiersInList(ctx)
     const [line, column] = [ctx.parentCtx.start.start, ctx.parentCtx.stop.stop]
     const expr = ctx.parentCtx.start.getInputStream().getText(line, column)
-    this.analyzer.handleInExpr(idents?.map(it => it.start.text), expr, pos(line, column))
+    this.analyzer.handleInExpr(idents?.map(it => it.start.text), expr, pos(ctx.parentCtx.start.line, ctx.parentCtx.start.column))
   }
 
   exitInExpr(ctx) {

@@ -4,9 +4,19 @@ import {EditorHelperPanel} from "@/component/helper/editorHelper";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {FileStateWrapper} from "@/component/helper/browser";
 import Head from "next/head";
+import {useEditorHelperStore} from "@/state/editorHelperStore";
 
 const PlaygroundMainContent = () => {
   const {width} = useEditorSettingsStore()
+  const {setHelperTab} = useEditorHelperStore()
+  const commands = {
+    onTransLens: () => {
+      setHelperTab("visual")
+    },
+    onStateLens: () => {
+      setHelperTab("visual")
+    }
+  }
   return (
     <Stack align={"flex-start"}>
       <FileStateWrapper />
@@ -19,7 +29,7 @@ const PlaygroundMainContent = () => {
         // align={{base: "center", md: "flex-start"}}
       >
         <EditorHelperPanel miw={"280px"} />
-        <CycloneEditorMainSection style={{flexGrow: 1}} miw={`${width}vw`} />
+        <CycloneEditorMainSection style={{flexGrow: 1}} miw={`${width}vw`} commands={commands} />
       </Flex>
     </Stack>
   )

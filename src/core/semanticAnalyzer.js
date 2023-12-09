@@ -869,7 +869,7 @@ export default class SemanticAnalyzer {
       this.emit("errors", es)
     }
     this.context.stateSet.add(identifier)
-    this.emit("state", {identifier, attrs})
+    this.emit("state", {identifier, attrs, position})
   }
 
   handleStateScope(hasStatement) {
@@ -882,6 +882,10 @@ export default class SemanticAnalyzer {
   }
 
   handleMachineDecl(pos) {
+    if (!pos) {
+      return
+    }
+
     const es = []
     if (!this.context.goalDefined) {
       es.push({
@@ -904,6 +908,8 @@ export default class SemanticAnalyzer {
     if (es.length) {
       this.emit("errors", es)
     }
+
+    this.emit("finished", {})
   }
 
   handleReturn(position) {
@@ -1033,7 +1039,7 @@ export default class SemanticAnalyzer {
       this.emit("errors", es)
     }
 
-    this.emit("trans", {metadata: md, targetStates})
+    this.emit("trans", {metadata: md, targetStates, position})
   }
 
   handleTransScope(ident) {

@@ -50,15 +50,17 @@ export const Toolbar = ({
 
   return (
     <Group justify={"space-between"}>
-      <CodeExecutionButton
-        leftSection={<IconPlayerPlay />}
-        color={"green"}
-      />
-      {
-        light
-          ? null
-          : <FileStatusBar />
-      }
+      <Group>
+        <CodeExecutionButton
+          leftSection={<IconPlayerPlay />}
+          color={"green"}
+        />
+        {
+          light
+            ? null
+            : <FileStatusBar />
+        }
+      </Group>
 
       <Button.Group>
         {

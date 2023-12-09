@@ -72,10 +72,10 @@ const HeroSection = () => {
               <b>Graph-Based</b> – Describe states or nodes and edges that connect them. Solve the problem by finding paths
             </List.Item>
             <List.Item>
-              <b>Powered by Z3</b> – Language based on the powerful z3 engine to ensure the correctness of its result
+              <b>Simple & Straightforward</b> – Solve complicated questions by writing a few line of code with a very simple syntax.
             </List.Item>
             <List.Item>
-              <b>Simple & Straightforward</b> – Solve complicated questions by writing a few line of code. Visualization engine & semantic checker are also ready
+              <b>Edit Online</b> – Use the online editor to unlock the full experience of Cyclone. Code lens, reference docs and visualization engine are ready.
             </List.Item>
           </List>
 

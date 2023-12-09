@@ -9,11 +9,12 @@ import {StatusBar, Toolbar} from "@/component/editor/bars";
 
 export const CycloneEditorForm = ({
   light = false,
+  commands,
 }) => {
   const {code, setCode, errors, setErrors, setPosition, setEditorCtx, setMonacoCtx} = useEditorStore()
   const [debouncedCode] = useDebouncedValue(code, 200)
 
-  const {height, width, monacoOptions, setWidth, setHeight} = useEditorSettingsStore()
+  const {height, width, monacoOptions, setWidth, setHeight, editorCodeOptions} = useEditorSettingsStore()
 
   const onMouseDown = e => {
     const [initX, initY] = [e.clientX, e.clientY]
@@ -35,6 +36,12 @@ export const CycloneEditorForm = ({
     window.addEventListener("mouseup", onMouseUp)
     window.addEventListener('selectstart', disableSelect);
   }
+
+  // const commands = {
+  //   onTransLens: () => {
+  //     console.log("switch visual")
+  //   }
+  // }
 
   // <CodeConsoleResultSection mode={resultMode}/>
 
@@ -64,7 +71,8 @@ export const CycloneEditorForm = ({
         <Divider />
         <CycloneCodeEditor
           debouncedCode={debouncedCode}
-          options={monacoOptions}
+          monacoOptions={monacoOptions}
+          codeOptions={editorCodeOptions}
           code={code}
           onCode={setCode}
           errors={errors}
@@ -73,6 +81,7 @@ export const CycloneEditorForm = ({
           onMonacoReady={setMonacoCtx}
           onEditorContext={setEditorCtx}
           height={`${height}svh`}
+          externalCommands={commands}
         />
         <Divider />
         <StatusBar/>
@@ -154,10 +163,10 @@ export const CycloneExecutionResultForm = () => {
   )
 }
 
-export const CycloneEditorMainSection = ({light = false, ...props}) => {
+export const CycloneEditorMainSection = ({light = false, commands, ...props}) => {
   return (
     <Stack {...props}>
-      <CycloneEditorForm light={light} />
+      <CycloneEditorForm light={light} commands={commands} />
       <CycloneExecutionResultForm />
     </Stack>
   )

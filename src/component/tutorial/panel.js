@@ -170,6 +170,15 @@ export const TutorialPanel = ({html, id}) => {
   const parsed = parse(html, options)
   const editorHeight = resultHeight + height
 
+  const editorCommands = {
+    onTransLens: (ctx, states) => {
+      alert(`targeted to ${states.length} states: ${states.join(", ")}`)
+    },
+    onStateLens: (ctx, trans, namedTrans) => {
+      alert(`${trans} edges involved: ${namedTrans.join(", ")}${namedTrans.length < trans ? ` ... <${trans - namedTrans.length} unnamed>` : ""}`)
+    }
+  }
+
   return (
     <Stack>
       <Flex
@@ -201,7 +210,7 @@ export const TutorialPanel = ({html, id}) => {
             }
           </Stack>
         </Paper>
-        <CycloneEditorMainSection light={true} style={{flexGrow: 1}} miw={`${width}vw`} />
+        <CycloneEditorMainSection light={true} style={{flexGrow: 1}} miw={`${width}vw`} commands={editorCommands} />
       </Flex>
       <Space /> <Space />
     </Stack>

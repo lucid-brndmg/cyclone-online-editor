@@ -145,7 +145,7 @@ const eDuplicatedEdge = () => {
 }
 
 const eEmptyEdge = () => {
-  return `this edge has no actual connected state / node because every node is excluded`
+  return `this edge has no actual targeted state / node because every node is excluded`
 }
 
 const errorMessageFormatter = {
