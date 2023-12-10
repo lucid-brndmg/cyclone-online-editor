@@ -31,6 +31,7 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {CycloneLanguageId} from "@/core/monaco/language";
 import {tutorialTable} from "@/core/resources/tutorial";
 import {useEditorStore} from "@/state/editorStore";
+import {formatStateTransRelation} from "@/core/utils/format";
 
 const manifestSelectionData = tutorialManifest.map(t => ({label: t.title, value: t.id}))
 
@@ -174,8 +175,8 @@ export const TutorialPanel = ({html, id}) => {
     onTransLens: (ctx, states) => {
       alert(`targeted to ${states.length} states: ${states.join(", ")}`)
     },
-    onStateLens: (ctx, trans, namedTrans) => {
-      alert(`${trans} edges involved: ${namedTrans.join(", ")}${namedTrans.length < trans ? ` ... <${trans - namedTrans.length} unnamed>` : ""}`)
+    onStateLens: (ctx, stateCtx) => {
+      alert(formatStateTransRelation(stateCtx, false).text)
     }
   }
 

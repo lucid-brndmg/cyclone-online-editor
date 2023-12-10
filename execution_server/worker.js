@@ -1,4 +1,4 @@
-import logger from "./src/logger.js";
+import {serviceLogger} from "./src/logger.js";
 import config from "./config.json" assert { type: "json" };
 import fs from "node:fs";
 import {execCycloneProgram} from "./src/cyclone.js";
@@ -16,14 +16,14 @@ if (config.queue.autoClearFileIntervalMs > 0 && !deleteAfterExec) {
     garbageFiles = []
 
     await Promise.all(clearing.map(p => fs.promises.rm(p, {force: true})))
-    logger.info("auto cleared garbage files", {size: clearing.length})
+    serviceLogger.info("auto cleared garbage files", {size: clearing.length})
   }, config.queue.autoClearFileIntervalMs)
 }
 
 const processor = async job => {
   const {program, id} = job.data
   if (!program || !id) {
-    logger.warn("discarding corrupted job", {id})
+    serviceLogger.warn("discarding corrupted job", {id})
     return
   }
 
@@ -36,14 +36,14 @@ const processor = async job => {
     EX: config.queue.resultTTLSecs
   })
 
-  logger.info("job processed", {id})
+  serviceLogger.info("job processed", {id})
 }
 
 if (!config.queue.enabled) {
-  logger.error("not in queue mode")
+  serviceLogger.error("not in queue mode")
   process.exit()
 }
 
 prepareDependencies()
 queue.process(config.queue.concurrency, processor)
-logger.info("worker listening ...", {concurrency: config.queue.concurrency})
+serviceLogger.info("worker listening ...", {concurrency: config.queue.concurrency})

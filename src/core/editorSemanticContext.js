@@ -41,10 +41,11 @@ export default class EditorSemanticContext {
   //   })
   // }
 
-  registerTransInState(state, transIdent) {
+  registerTransInState(state, transIdent, expr) {
     if (this.stateTable.has(state)) {
       const stateCtx = this.stateTable.get(state)
       stateCtx.trans += 1
+      stateCtx.exprList.push(expr)
       if (transIdent) {
         stateCtx.namedTrans.add(transIdent)
       }
@@ -52,7 +53,7 @@ export default class EditorSemanticContext {
   }
 
   // operator: -> | <-> | * | +
-  defineTransition(identifier, label, whereExpr, fromState, operators, targetStates, position) {
+  defineTransition(identifier, label, whereExpr, fromState, operators, targetStates, position, expr) {
     this.transitions.push({
       identifier,
       label,
@@ -66,13 +67,17 @@ export default class EditorSemanticContext {
       this.namedTransitions.set(identifier, targetStates)
     }
     for (let state of targetStates) {
-      this.registerTransInState(state, identifier)
+      this.registerTransInState(state, identifier, expr)
     }
-    this.registerTransInState(fromState, identifier)
+    this.registerTransInState(fromState, identifier, expr)
   }
 
   findTransition(name) {
     return this.namedTransitions.get(name)
+  }
+
+  findState(name) {
+    return this.stateTable.get(name)
   }
 
   getVisualData() {
@@ -107,7 +112,7 @@ export default class EditorSemanticContext {
     //   this.defineState(identifier, attributes)
     // })
 
-    analyzer.on("trans", (context, {metadata, targetStates, position}) => {
+    analyzer.on("trans", (context, {metadata, targetStates, position, expr}) => {
       // const md = block.metadata
       this.defineTransition(
         metadata.identifier,
@@ -116,7 +121,8 @@ export default class EditorSemanticContext {
         metadata.fromState,
         metadata.operators,
         targetStates,
-        position
+        position,
+        expr
       )
     })
 
@@ -141,7 +147,7 @@ export default class EditorSemanticContext {
     })
 
     analyzer.on("state", (ctx, {identifier, attrs, position}) => {
-      this.stateTable.set(identifier, {identifier, attrs, position, trans: 0, namedTrans: new Set()})
+      this.stateTable.set(identifier, {identifier, attrs, position, trans: 0, namedTrans: new Set(), exprList: []})
     })
 
     // Don't need to listen to "state" cuz stateTable is already defined

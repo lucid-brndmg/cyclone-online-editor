@@ -1,6 +1,5 @@
 import path from "node:path"
 import fs from "node:fs"
-import crypto from "node:crypto";
 import antlr4, {ParseTreeWalker} from "antlr4";
 import config from "../config.json" assert { type: "json" };
 import {execFileAsync, execShellCommand, spawnAsync} from "./lib/system.js"
@@ -8,7 +7,8 @@ import CycloneLexer from "./generated/antlr/CycloneLexer.js";
 import CycloneParser from "./generated/antlr/CycloneParser.js";
 import CycloneParserListener from "./generated/antlr/CycloneParserListener.js";
 import {ResponseCode} from "./definitions.js";
-import logger from "./logger.js";
+import {executionLogger, serviceLogger} from "./logger.js";
+import {customSlice} from "./lib/string.js";
 
 // const regexOption = /option-\s*\w+\s*=.*[^;];/gm
 
@@ -55,6 +55,26 @@ export const checkProgram = program => {
   return {}
 }
 
+export const logResult = (input, result, args, execOpts) => {
+  const patterns = config.logger.execution.patterns
+
+  for (let i = 0; i < patterns.length; i ++) {
+    const {re, reFlag, level, sliceInput, sliceOutput} = patterns[i]
+    // v8 automatically caches regex
+    // see https://stackoverflow.com/questions/14352100/does-v8-cache-compiled-regular-expressions-automatically
+    const reInst = new RegExp(re, reFlag ?? undefined)
+
+    if (reInst.test(result)) {
+      executionLogger[level]({
+        output: customSlice(result, sliceOutput),
+        input: customSlice(input, sliceInput),
+        args, execOpts, patternIndex: i
+      })
+      break
+    }
+  }
+}
+
 export const execCycloneProgram = async (program, id) => {
   const tmpFilename = id + config.cyclone.extension
   const srcPath = config.cyclone.sourcePath
@@ -67,24 +87,27 @@ export const execCycloneProgram = async (program, id) => {
   // let result = await execShellCommand(command, {cwd: config.cyclonePath, timeout: config.cycloneMandatoryTimeoutMs})
 
   try {
-    let result = await execFileAsync("java", ["-jar", path.join(config.cyclone.path, config.cyclone.executable), tmpPath], {cwd: srcPath, timeout: config.cyclone.mandatoryTimeoutMs}) // cwd: config.cyclone.path,
+    const args = ["-jar", path.join(config.cyclone.path, config.cyclone.executable), tmpPath]
+    const opts = {cwd: srcPath, timeout: config.cyclone.mandatoryTimeoutMs}
+    let result = await execFileAsync("java", args, opts) // cwd: config.cyclone.path,
 
     if (!result) {
       // failed to execute, NOT failed to solve
       return {code: ResponseCode.UnsuccessfulExecution}
     }
 
+    logResult(program, result, args, opts)
+
     const spl = result.split(/[\r\n]+/)
     const traceLine = spl.find(line => line.startsWith(config.cyclone.traceKeyword))
     if (traceLine) {
       const tracePath = traceLine.slice(config.cyclone.traceKeyword.length).trim()
-      // const existsTrace = tracePath // && (await fs.promises.access(tracePath, fs.constants.F_OK))
       if (tracePath) {
         tmpFiles.push(tracePath)
         try {
           traceContent = await fs.promises.readFile(tracePath, "utf-8")
         } catch (error) {
-          logger.error("error reading trace", {error});
+          serviceLogger.error("error reading trace", {error});
         }
       }
     }
@@ -104,21 +127,6 @@ export const execCycloneProgram = async (program, id) => {
       }
     }
 
-    // return {
-    //   success: true, // successfully executed the shell command, NOT successfully COMPILED
-    //   // trace: traceContent
-    //   //   ?.replace(/[a-zA-Z]:[\\\/](?:[\w\s\.-]+[\\\/])*([\w\s\.-]+\.(cyclone|trace|jar|dot))/g, "<path>")
-    //   //   ?.replace(/(\/[\w-]+)*([\w-]+)\.(trace|cyclone|jar|dot)/g, "<path>"),
-    //   // result: result
-    //   //   .replace(/[a-zA-Z]:[\\\/](?:[\w\s\.-]+[\\\/])*([\w\s\.-]+\.(cyclone|trace|jar|dot))/g, "<path>")
-    //   //   .replace(/(\/[\w-]+)*([\w-]+)\.(trace|cyclone|jar|dot)/g, "<path>"),
-    //
-    //   // trace: traceContent?.replaceAll(tracePath)
-    //
-    //   result: sanitizedResult,
-    //   trace: sanitizedTrace
-    // }
-
     return {
       code: ResponseCode.Success,
       data: {
@@ -132,7 +140,7 @@ export const execCycloneProgram = async (program, id) => {
       return {code: ResponseCode.ExecutionTimeout, data: config.cyclone.mandatoryTimeoutMs}
     }
 
-    logger.error("cyclone execution error", {error: e})
+    serviceLogger.error("cyclone execution error", {error: e})
     return {code: ResponseCode.InternalError}
   }
 }

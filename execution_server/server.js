@@ -2,7 +2,6 @@ import path from "node:path";
 import fs from "node:fs";
 import {serve} from "./src/server.js"
 import {exit} from "node:process"
-import logger from "./src/logger.js";
 import {prepareDependencies} from "./src/dependencies.js";
 
 // const initEnv = () => {

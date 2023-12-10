@@ -281,3 +281,13 @@ const scopeBlockTypeRepr = {
 }
 
 export const formatScopeBlockType = t => scopeBlockTypeRepr[t] ?? ""
+
+export const formatStateTransRelation = ({trans, namedTrans}, max = 5) => {
+  const allNamed = [...namedTrans]
+  const hasAnon = allNamed.length < trans
+  const ellipses = (max && allNamed.length > max)
+  return {
+    text: `${trans} edges involved: ${(max ? allNamed.slice(0, max).join(", ") : allNamed.join(", "))}${ellipses ? " ..." : ""}${hasAnon ? ` (${trans - allNamed.length} unnamed)` : ""}`,
+    named: allNamed
+  }
+}

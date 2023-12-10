@@ -4,21 +4,36 @@ import DailyRotateFile from "winston-daily-rotate-file";
 import {isWorker} from "./utils/env.js";
 import path from "node:path";
 
-const selectedLoggerConfig = isWorker ? config.logger.file.worker : config.logger.file.server
-// const loggerConfig = {...selectedLoggerConfig, filename: path.join(config.logger.path, selectedLoggerConfig.filename)}
+export const serviceLogger = (() => {
+  const selectedLoggerConfig = isWorker ? config.logger.service.file.worker : config.logger.service.file.server
 
-const transports = [
-  new DailyRotateFile(selectedLoggerConfig)
-]
+  const transports = [
+    new DailyRotateFile(selectedLoggerConfig)
+  ]
 
-if (config.logger.console) {
-  transports.push(new winston.transports.Console())
-}
+  if (config.logger.service.console) {
+    transports.push(new winston.transports.Console())
+  }
 
-const logger = winston.createLogger({
-  transports,
-  format: winston.format.json(),
-  level: config.logger.level
-})
+  return winston.createLogger({
+    transports,
+    format: winston.format.json(),
+    level: config.logger.service.level
+  })
+})()
 
-export default logger
+export const executionLogger = (() => {
+  const transports = [
+    new DailyRotateFile(config.logger.execution.file)
+  ]
+
+  if (config.logger.execution.console) {
+    transports.push(new winston.transports.Console())
+  }
+
+  return winston.createLogger({
+    transports,
+    format: winston.format.json(),
+    level: config.logger.execution.level
+  })
+})()

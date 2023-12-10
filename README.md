@@ -27,6 +27,7 @@ Editor Features:
 - **Hover Information:** Display type info & reference docs when mouse hovered on keywords or identifiers.
 - **Code Completion & Snippets:** Provide auto-completions & snippets when typing. Scoped identifiers could be provided as well.
 - **Code Execution:** Execute cyclone source code online & get result and traces.
+- **Code Lens:** Show realtime state & edge relations, all operators for transitions supported (such as `+`, `<->`, `*`, etc...)
 
 Playground Features:
 - **File Browser:** Provides a file browser to load official examples instantly, also user may save (or load) their source code inside the browser.
@@ -334,32 +335,53 @@ In the source code of the server there is a configuration file named `config.jso
     // is this server been deployed using a reverse proxy like nginx (koa options)
     "isProxy": false
   },
+  // logger config
   "logger": {
-    // logger's logging level
-    "level": "debug",
-    // output a piece of information to console
-    "console": true,
-    // config for rotate files
-    // see https://github.com/winstonjs/winston-daily-rotate-file
-    "file": {
-      // configuration for server-end
-      "server": {
-        "filename": "exec_server-server-%DATE%.log",
-        "dirname": "./log",
-        "datePattern": "YYYY-MM-DD-HH",
-        "zippedArchive": false,
-        "maxSize": "20m",
-        "maxFiles": "14d"
-      },
-      // configuration for worker-end
-      "worker": {
-        "filename": "exec_server-worker-%DATE%.log",
-        "dirname": "./log",
-        "datePattern": "YYYY-MM-DD-HH",
-        "zippedArchive": false,
-        "maxSize": "20m",
-        "maxFiles": "14d"
+    // service logger
+    "service": {
+      "level": "debug",
+      // output a piece of information to console
+      "console": true,
+      // config for rotate files
+      // see https://github.com/winstonjs/winston-daily-rotate-file
+      "file": {
+        // configuration for server-end
+        "server": {
+          "dirname": "./",
+          "filename": "exec_server-server-%DATE%.log",
+          "datePattern": "YYYY-MM-DD-HH",
+          "zippedArchive": false,
+          "maxSize": "20m",
+          "maxFiles": "14d"
+        },
+        // configuration for worker-end
+        "worker": {/* ... */}
       }
+    },
+    // execution result logger
+    // this logger might output some large texts, be careful when config
+    "execution": {
+      "level": "debug",
+      // Patterns that execution result matches to trigger this logger
+      "patterns": [
+        {
+          // regex and flag, required by RegExp object
+          "re": "(\\s+\"org\\.nuim\\.cyclone)",
+          "reFlag": null,
+          "level": "error",
+          // slice length for input and output
+          // -1: no slice
+          // 0: slice all (logs empty string)
+          // other values: slice from index 0 until this value
+          "sliceInput": -1,
+          "sliceOutput": -1
+        }
+      ],
+      "console": true,
+      // config for rotate files
+      // be careful when config this
+      // make sure the file will stay at a normal size
+      "file": {/* ... */}
     }
   }
 }
@@ -396,6 +418,18 @@ There are 3 strategies for clearing these files:
 - Manually write a scheduled task with cron (or other methods) to routinely clear these files.
 
 The second method is recommended in production.
+
+#### Loggers
+
+Currently, this execution has 2 types of loggers:
+- Service Logger: The logger for server and worker
+- Execution Logger: A logger that targeted to the execution result, could help catching errors for the compiler. 
+
+The execution logger takes multiple regex patterns, and will log out the input (the program) and output (the result) when some pattern matches the current execution result. 
+
+For example, if one wants to catch all the `NullPointerException` in the compiler, set a pattern with the right regex and the logger will log out the details when execution result matches this error. Then the Cyclone team could take time to find out why the compiler would throw such exception under this input.
+
+**Please be careful when configuring the execution logger**, because the logger might output some very large text (we don't know what the user would input or what the compiler would output). Make sure to set the reasonable file size and collect & clear log files constantly.
 
 #### Build Your Own Server
 If you don't like the existing execution server, you could build your own. Just make sure that the server could execute Cyclone's source code and get the result & trace.

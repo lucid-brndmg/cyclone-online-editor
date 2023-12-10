@@ -1,5 +1,5 @@
 import conf from "../config.json" assert { type: "json" };
-import logger from "./logger.js";
+import {serviceLogger} from "./logger.js";
 import {exit} from "node:process";
 import path from "node:path";
 import fs from "node:fs";
@@ -12,21 +12,21 @@ export const prepareDependencies = () => {
   const exec = path.join(conf.cyclone.path, conf.cyclone.executable)
 
   if (!fs.existsSync(exec)) {
-    logger.error("Cyclone executable does not exist");
+    serviceLogger.error("Cyclone executable does not exist");
     exit()
   } else {
-    logger.info("Found cyclone executable", {path: exec});
+    serviceLogger.info("Found cyclone executable", {path: exec});
   }
 
   if (!fs.existsSync(conf.cyclone.sourcePath)) {
-    logger.info("sourcePath not exists. Creating", {path: conf.cyclone.sourcePath})
+    serviceLogger.info("sourcePath not exists. Creating", {path: conf.cyclone.sourcePath})
     fs.mkdirSync(conf.cyclone.sourcePath, {recursive: true})
   } else {
-    logger.info("sourcePath found", {path: conf.cyclone.sourcePath})
+    serviceLogger.info("sourcePath found", {path: conf.cyclone.sourcePath})
   }
 
   if (conf.cyclone.mandatoryTimeoutMs <= 0) {
-    logger.warn("No valid timeout for code execution. A program could take forever to execute!")
+    serviceLogger.warn("No valid timeout for code execution. A program could take forever to execute!")
   }
 
   if (conf.cyclone.appendEnvPath) {
@@ -34,5 +34,5 @@ export const prepareDependencies = () => {
     process.env["PATH"] += `${env ? ";" : ""}${path.resolve(conf.cyclone.path)}`
   }
 
-  logger.info("ready")
+  serviceLogger.info("ready")
 }

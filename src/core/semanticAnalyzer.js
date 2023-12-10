@@ -999,7 +999,7 @@ export default class SemanticAnalyzer {
     this.deduceToType(IdentifierType.Bool, posPair)
   }
 
-  handleTrans(block, position) {
+  handleTrans(block, position, expr) {
     const md = block.metadata
     const {fromState, toStates, operators, excludedStates} = md
     const es = []
@@ -1039,7 +1039,7 @@ export default class SemanticAnalyzer {
       this.emit("errors", es)
     }
 
-    this.emit("trans", {metadata: md, targetStates, position})
+    this.emit("trans", {metadata: md, targetStates, position, expr})
   }
 
   handleTransScope(ident) {

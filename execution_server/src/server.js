@@ -8,7 +8,7 @@ import {checkProgram, execCycloneProgram} from "./cyclone.js"
 // DO NOT USE @koa/cors
 import cors from './utils/cors.js';
 import {RedisKey, ResponseCode} from "./definitions.js";
-import logger from "./logger.js";
+import {serviceLogger} from "./logger.js";
 import crypto from "node:crypto";
 import redis from "./redis.js";
 import cycloneQueue from "./queue.js";
@@ -21,7 +21,7 @@ app.use(cors())
 router.post("/exec", async ctx => {
   const id = crypto.randomBytes(config.cyclone.idLength).toString("hex")
   const logCtx = {path: "/run", ip: ctx.ip, id}
-  logger.info("incoming request", logCtx)
+  serviceLogger.info("incoming request", logCtx)
   const program = ctx.request.body?.program?.trim()
   if (!program) {
     return {code: ResponseCode.InvalidParams}
@@ -52,14 +52,14 @@ router.post("/exec", async ctx => {
       ctx.body = {code, data}
     }
   } catch (error) {
-    logger.error("error handling endpoint", {...logCtx, error})
+    serviceLogger.error("error handling endpoint", {...logCtx, error})
     ctx.body = {code: ResponseCode.InternalError}
   }
 })
 
 router.get("/get", async ctx => {
   const logCtx = {path: "/get", ip: ctx.ip}
-  logger.info("incoming request", logCtx)
+  serviceLogger.info("incoming request", logCtx)
   if (!config.queue.enabled) {
     return ctx.body = {code: ResponseCode.NotSupported}
   }
@@ -92,5 +92,5 @@ export const serve = () => {
   app.use(router.routes())
   app.listen(config.server.port, config.server.host)
 
-  logger.info(`server listening at ${config.server.host}:${config.server.port}`);
+  serviceLogger.info(`server listening at ${config.server.host}:${config.server.port}`);
 }

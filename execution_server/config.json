@@ -26,19 +26,43 @@
     "isProxy": false
   },
   "logger": {
-    "level": "debug",
-    "console": true,
-    "path": "./",
-    "file": {
-      "server": {
-        "filename": "exec_server-server-%DATE%.log",
-        "datePattern": "YYYY-MM-DD-HH",
-        "zippedArchive": false,
-        "maxSize": "20m",
-        "maxFiles": "14d"
-      },
-      "worker": {
-        "filename": "exec_server-worker-%DATE%.log",
+    "service": {
+      "level": "debug",
+      "console": true,
+      "file": {
+        "server": {
+          "dirname": "./",
+          "filename": "exec_server-server-%DATE%.log",
+          "datePattern": "YYYY-MM-DD-HH",
+          "zippedArchive": false,
+          "maxSize": "20m",
+          "maxFiles": "14d"
+        },
+        "worker": {
+          "dirname": "./",
+          "filename": "exec_server-worker-%DATE%.log",
+          "datePattern": "YYYY-MM-DD-HH",
+          "zippedArchive": false,
+          "maxSize": "20m",
+          "maxFiles": "14d"
+        }
+      }
+    },
+    "execution": {
+      "level": "debug",
+      "patterns": [
+        {
+          "re": "(\\s+\"org\\.nuim\\.cyclone)",
+          "reFlag": null,
+          "level": "error",
+          "sliceInput": -1,
+          "sliceOutput": -1
+        }
+      ],
+      "console": true,
+      "file": {
+        "dirname": "./",
+        "filename": "exec_server-execution-%DATE%.log",
         "datePattern": "YYYY-MM-DD-HH",
         "zippedArchive": false,
         "maxSize": "20m",

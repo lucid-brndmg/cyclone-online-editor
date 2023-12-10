@@ -10,7 +10,7 @@ import {
   cycloneCodeMD,
   formatErrorMessage,
   formatIdentifier,
-  formatKindDescription,
+  formatKindDescription, formatStateTransRelation,
   formatType
 } from "@/core/utils/format";
 import {cycloneFullKeywordsSet} from "@/core/specification";
@@ -242,16 +242,38 @@ export const CycloneCodeEditor = ({
           } else {
             const ident = found.value.identifiers.get(text)
             if (ident) {
-              const contents = [{value: cycloneCodeMD(formatIdentifier(ident))}]
-              if (ident.kind === IdentifierKind.Trans) {
-                const targetStates = editorSemanticContextRef.current.findTransition(ident.text)
-                if (targetStates?.size) {
-                  contents.push({value: `targeted to ${targetStates.size} states: ${[...targetStates].join(", ")}`})
+              const contents = [{value: cycloneCodeMD(formatIdentifier(ident))}, { value: formatKindDescription(ident.kind) }]
+              switch (ident.kind) {
+                case IdentifierKind.Trans: {
+                  const targetStates = editorSemanticContextRef.current.findTransition(ident.text)
+                  if (targetStates?.size) {
+                    contents.push({value: `targeted to ${targetStates.size} states: ${[...targetStates].join(", ")}`})
+                  }
+                  break
+                }
+                case IdentifierKind.State: {
+                  const state = editorSemanticContextRef.current.findState(ident.text)
+                  if (state) {
+                    const {namedTrans, exprList, trans} = state
+                    if (trans <= 0) {
+                      break
+                    }
+                    const insightSegments = [
+                      formatStateTransRelation({trans, namedTrans}).text,
+                    ]
+                    const exprLen = exprList.length
+                    if (exprLen) {
+                      const transInsightMax = 10
+                      insightSegments.push(...exprList.slice(0, transInsightMax).map(expr => cycloneCodeMD(expr)))
+                      if (exprLen > transInsightMax) {
+                        insightSegments.push(`... ${exprLen - transInsightMax} more`)
+                      }
+                    }
+                    contents.push({value: insightSegments.join("\n")})
+                  }
+                  break
                 }
               }
-              contents.push(
-                { value: formatKindDescription(ident.kind) },
-              )
               return {
                 contents,
               }
@@ -291,9 +313,7 @@ export const CycloneCodeEditor = ({
             }
           }) : []
         const lensesStates = codeOptionsRef.current.lensStateEnabled ? [...states.values()].map(({trans, namedTrans, position}, i) => {
-          const allNamed = [...namedTrans]
-          const hasAnon = allNamed.length < trans
-          const ellipses = hasAnon || allNamed.length > 5
+          const {text, named} = formatStateTransRelation({trans, namedTrans}, 5)
           return {
             range: {
               startLineNumber: position.startPosition.line,
@@ -304,9 +324,9 @@ export const CycloneCodeEditor = ({
             id: `state_${i}`,
             command: {
               id: "onStateLens",
-              title: `${trans} edges involved: ${allNamed.slice(0, 5).join(", ")}${ellipses ? " ..." : ""}${hasAnon ? ` <${trans - allNamed.length} unnamed>` : ""}`,
-              tooltip: allNamed.join(", "),
-              arguments: [trans, allNamed]
+              title: text,
+              tooltip: named.join(", "),
+              arguments: [{trans, namedTrans}]
             }
           }
         }) : []

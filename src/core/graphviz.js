@@ -49,7 +49,7 @@ const genGraphvizStatesDef = (states, options, resultPaths = null) => {
     labels.push(isNode ? "node" : "state")
     const props = labels.join(" ")
     const color = resultPaths?.states.has(identifier)
-      ? ", color=darkorange, fontcolor=darkorange"
+      ? ", color=darkgreen, fontcolor=darkgreen"
       : ""
     codePieces.push(`// ${props} ${identifier}\n${identifier}[label="${identifier}${options.showNodeProps ? `\\n[${props}]` : ""}"${color}];`)
   }
@@ -117,7 +117,7 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
         attrs.push(`dir=both`)
       }
       if (resultEdgesDef.has(`${fromState},${sTo}`) || (isBiWay && resultEdgesDef.has(`${sTo},${fromState}`))) {
-        attrs.push(`color=cyan`, `fontcolor=cyan`)
+        attrs.push(`color=darkgreen`, `fontcolor=darkgreen`)
       }
 
       let descriptions = []
