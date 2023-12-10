@@ -421,8 +421,8 @@ The second method is recommended in production.
 
 #### Loggers
 
-Currently, this execution has 2 types of loggers:
-- Service Logger: The logger for server and worker
+Currently, this execution server has 2 types of loggers:
+- Service Logger: The logger for the server end and the worker end
 - Execution Logger: A logger that targeted to the execution result, could help catching errors for the compiler. 
 
 The execution logger takes multiple regex patterns, and will log out the input (the program) and output (the result) when some pattern matches the current execution result. 
