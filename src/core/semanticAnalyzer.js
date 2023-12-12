@@ -441,7 +441,7 @@ export default class SemanticAnalyzer {
     // console.log("ref", identText, ident, shouldPushTypeStack, blockType)
 
     if (shouldPushTypeStack) {
-      this.context.typeStack.push(ident?.type ?? IdentifierType.Unknown)
+      this.context.typeStack.push(ident?.type ?? IdentifierType.Hole)
     }
 
     if (es.length) {
@@ -533,14 +533,14 @@ export default class SemanticAnalyzer {
     }
 
     const type = typeTokenToType[typeText]
-      ?? IdentifierType.Unknown
+      ?? IdentifierType.Hole
 
     switch (block.type) {
       case SemanticContextType.GlobalConstantDecl:
       case SemanticContextType.GlobalVariableDecl:
       case SemanticContextType.LocalVariableDecl:
       case SemanticContextType.RecordVariableDecl: {
-        if (type === IdentifierType.Unknown) {
+        if (type === IdentifierType.Hole) {
           console.log("warn: unknown type text", typeText)
         }
 
@@ -600,7 +600,7 @@ export default class SemanticAnalyzer {
       return
     }
 
-    let output = IdentifierType.Unknown
+    let output = IdentifierType.Hole
     let pass = false
     for (let signature of fn.signatures) {
       const inputExpectedLength = signature.input.length
@@ -612,9 +612,7 @@ export default class SemanticAnalyzer {
         const {passed, hole} = checkSignature(signature.input, types)
         if (passed) {
           pass = true
-          if (hole) {
-            output = IdentifierType.Hole
-          } else {
+          if (!hole) {
             output = signature.output
           }
           break
@@ -938,7 +936,7 @@ export default class SemanticAnalyzer {
       return
     }
 
-    const type = this.context.typeStack.pop() ?? IdentifierType.Unknown
+    const type = this.context.typeStack.pop() ?? IdentifierType.Hole
     const expectedType = decl.metadata.signatures[0].output
     if (type !== expectedType) {
       this.emit("errors", [{

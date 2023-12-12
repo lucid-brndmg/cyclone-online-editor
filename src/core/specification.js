@@ -124,21 +124,21 @@ const compareValueBinOpSignature = [
 ]
 
 const assignValueBinOpSignature = [
-  {input: [IdentifierType.Bool, IdentifierType.Bool], output: IdentifierType.Unknown},
-  {input: [IdentifierType.Int, IdentifierType.Int], output: IdentifierType.Unknown},
-  {input: [IdentifierType.Real, IdentifierType.Real], output: IdentifierType.Unknown},
-  {input: [IdentifierType.Int, IdentifierType.Real], output: IdentifierType.Unknown},
-  {input: [IdentifierType.Real, IdentifierType.Int], output: IdentifierType.Unknown},
-  {input: [IdentifierType.Enum, IdentifierType.Enum], output: IdentifierType.Unknown},
-  {input: [IdentifierType.String, IdentifierType.String], output: IdentifierType.Unknown},
-  {input: [IdentifierType.Char, IdentifierType.Char], output: IdentifierType.Unknown},
+  {input: [IdentifierType.Bool, IdentifierType.Bool], output: IdentifierType.Hole},
+  {input: [IdentifierType.Int, IdentifierType.Int], output: IdentifierType.Hole},
+  {input: [IdentifierType.Real, IdentifierType.Real], output: IdentifierType.Hole},
+  {input: [IdentifierType.Int, IdentifierType.Real], output: IdentifierType.Hole},
+  {input: [IdentifierType.Real, IdentifierType.Int], output: IdentifierType.Hole},
+  {input: [IdentifierType.Enum, IdentifierType.Enum], output: IdentifierType.Hole},
+  {input: [IdentifierType.String, IdentifierType.String], output: IdentifierType.Hole},
+  {input: [IdentifierType.Char, IdentifierType.Char], output: IdentifierType.Hole},
 ]
 
 const assignNumberBinOpSignature = [
-  {input: [IdentifierType.Int, IdentifierType.Int], output: IdentifierType.Unknown},
-  {input: [IdentifierType.Int, IdentifierType.Real], output: IdentifierType.Unknown},
-  {input: [IdentifierType.Real, IdentifierType.Real], output: IdentifierType.Unknown},
-  {input: [IdentifierType.Real, IdentifierType.Int], output: IdentifierType.Unknown},
+  {input: [IdentifierType.Int, IdentifierType.Int], output: IdentifierType.Hole},
+  {input: [IdentifierType.Int, IdentifierType.Real], output: IdentifierType.Hole},
+  {input: [IdentifierType.Real, IdentifierType.Real], output: IdentifierType.Hole},
+  {input: [IdentifierType.Real, IdentifierType.Int], output: IdentifierType.Hole},
 ]
 
 const boolUnaryOpSignature = [

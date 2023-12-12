@@ -148,8 +148,8 @@ export const IdentifierType = {
   Real: 11,
   Bool: 12,
 
-  Unknown: -1, // fallback
-  Hole: -2, // not expected to show to user yet
+  // Unknown: -2, // fallback
+  Hole: -1, // not expected to show to user yet
 }
 
 export const ActionKind = {

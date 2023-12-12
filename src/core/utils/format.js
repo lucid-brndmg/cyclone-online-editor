@@ -201,8 +201,8 @@ const typeMsgRepr = {
   [IdentifierType.Char]: "char",
   [IdentifierType.Real]: "real",
   [IdentifierType.Bool]: "bool",
-  [IdentifierType.Unknown]: "unknown_type", // void ???
-  [IdentifierType.Hole]: "expecting_type"
+  // [IdentifierType.Unknown]: "unknown_type", // void ???
+  [IdentifierType.Hole]: "unknown"
 }
 
 const kindDescription = {

@@ -9,7 +9,7 @@ export const scopeMetadata = () => ({
 })
 
 export const declareMetadata = () => ({
-  type: IdentifierType.Unknown,
+  type: IdentifierType.Hole,
   identifier: null,
 })
 
@@ -29,7 +29,7 @@ export const functionDeclarationMetadata = () => ({
 
   signatures: [{
     input: [],
-    output: IdentifierType.Unknown
+    output: IdentifierType.Hole
   }]
 })
 
