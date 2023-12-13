@@ -20,21 +20,21 @@ app.use(cors())
 
 router.post("/exec", async ctx => {
   const id = crypto.randomBytes(config.cyclone.idLength).toString("hex")
-  const logCtx = {path: "/run", ip: ctx.ip, id}
+  const logCtx = {path: "/exec", ip: ctx.ip, id}
   serviceLogger.info("incoming request", logCtx)
   const program = ctx.request.body?.program?.trim()
   if (!program) {
-    return {code: ResponseCode.InvalidParams}
+    return ctx.body = {code: ResponseCode.InvalidParams}
   }
 
   const {invalidOptions, syntaxError} = checkProgram(program)
 
   if (syntaxError) {
-    return {code: ResponseCode.SyntaxError}
+    return ctx.body =  {code: ResponseCode.SyntaxError}
   }
 
   if (invalidOptions) {
-    return {code: ResponseCode.InvalidOptions, data: invalidOptions}
+    return ctx.body = {code: ResponseCode.InvalidOptions, data: invalidOptions}
   }
 
   try {
