@@ -55,8 +55,8 @@
           "re": "(\\s+\"org\\.nuim\\.cyclone)",
           "reFlag": null,
           "level": "error",
-          "sliceInput": 0,
-          "sliceOutput": 0
+          "sliceInput": -1,
+          "sliceOutput": -1
         }
       ],
       "console": true,
