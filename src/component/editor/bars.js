@@ -9,7 +9,7 @@ import {
   IconDownload,
   IconFolderOpen,
   IconPlayerPlay,
-  IconSettings,
+  IconSettings, IconShare2,
   IconShare3
 } from "@tabler/icons-react";
 import {downloadTextFile} from "@/lib/dom";
@@ -21,6 +21,7 @@ import {pos} from "@/lib/position";
 import {sieveCount} from "@/lib/list";
 import {useMemo, useState} from "react";
 import {isWarning} from "@/core/specification";
+import {SharePopover} from "@/component/share/popover";
 
 const OpenInPlaygroundButton = () => {
   const {code} = useEditorStore()
@@ -33,6 +34,15 @@ const OpenInPlaygroundButton = () => {
 
   return (
     <Button onClick={onOpen} leftSection={<IconShare3 />} variant={"outline"} color={"blue"}>Open in Playground</Button>
+  )
+}
+
+const ShareButton = () => {
+  const [opened, setOpened] = useState(false)
+  return (
+    <SharePopover opened={opened} onChange={setOpened}>
+      <Button leftSection={<IconShare3 />} onClick={() => setOpened(!opened)} variant={"default"}>Share</Button>
+    </SharePopover>
   )
 }
 
@@ -74,13 +84,13 @@ export const Toolbar = ({
           : <FileSaveButton />
         }
         <Button leftSection={<IconDownload />} variant={"default"} disabled={code === ""} onClick={onDownload}>Download</Button>
-        <SettingsPopover>
-          <Button leftSection={<IconSettings />} variant={"default"}>Settings</Button>
-        </SettingsPopover>
+        {/* <SettingsPopover> */}
+        {/*   <Button leftSection={<IconSettings />} variant={"default"}>Settings</Button> */}
+        {/* </SettingsPopover> */}
       </Button.Group>
 
       {
-        light ? <OpenInPlaygroundButton /> : null
+        light ? <OpenInPlaygroundButton /> : <ShareButton />
       }
 
 

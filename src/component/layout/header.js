@@ -17,11 +17,12 @@ import {
   IconBrightnessUp, IconHelpCircle, IconHelpCircleFilled,
   IconLink,
   IconMoon,
-  IconQuestionMark,
+  IconQuestionMark, IconSettings,
   IconShare2,
   IconShare3
 } from "@tabler/icons-react";
 import {HelpModal} from "@/component/modal/helpModal";
+import {SettingsPopover} from "@/component/editor/settings";
 
 const links = [
   { link: '/', label: 'Home' },
@@ -84,20 +85,24 @@ export const LayoutHeader = () => {
           {items}
         </Group>
         <Group>
+          <SettingsPopover>
+            <Tooltip label="Settings">
+              <ActionIcon size={"lg"} variant="default" aria-label="Settings">
+                <IconSettings style={{ width: '70%', height: '70%' }} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+          </SettingsPopover>
+
           <Tooltip label="Language Reference">
-            <ActionIcon component={"a"} target="_blank" href={"https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"} size={"lg"} variant="default" aria-label="Github">
+            <ActionIcon component={"a"} target="_blank" href={"https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"} size={"lg"} variant="default" aria-label="Language Reference">
               <IconLink style={{ width: '70%', height: '70%' }} stroke={1.5} />
             </ActionIcon>
           </Tooltip>
 
-          <Tooltip label="Github">
-            <ActionIcon component={"a"} target="_blank" href={"https://github.com/classicwuhao/Cyclone"} size={"lg"} variant="default" aria-label="Github">
-              <IconBrandGithub style={{ width: '70%', height: '70%' }} stroke={1.5} />
-            </ActionIcon>
-          </Tooltip>
+
 
           <Tooltip label="Help">
-            <ActionIcon onClick={() => setHelpOpened(true)} size={"lg"} variant="default" aria-label="Github">
+            <ActionIcon onClick={() => setHelpOpened(true)} size={"lg"} variant="default" aria-label="Help">
               <IconHelpCircle style={{ width: '70%', height: '70%' }} stroke={1.5} />
             </ActionIcon>
           </Tooltip>

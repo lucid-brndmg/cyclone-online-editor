@@ -16,7 +16,6 @@
     "start": "next start",
     "lint": "next lint",
     "prep": "bash ./scripts/prepare_all.sh",
-
     "genparser": "bash ./scripts/generate_parser.sh",
     "gencodeexample": "node ./scripts/generate_code_example.js",
     "genhl": "node scripts/generate_highlight.mjs",
@@ -38,6 +37,7 @@
     "html-react-parser": "^4.2.9",
     "jszip": "^3.10.1",
     "localforage": "^1.10.0",
+    "lz-string": "^1.5.0",
     "next": "^13.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "js-yaml": "^4.1.0",
+    "monaco-editor": "^0.33.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
     "monaco-themes": "^0.4.4",
     "postcss": "^8.4.31",
@@ -58,7 +59,6 @@
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.0.0",
     "unified": "^11.0.3",
-    "unist-util-select": "^5.0.0",
-    "monaco-editor": "^0.33.0"
+    "unist-util-select": "^5.0.0"
   }
 }
