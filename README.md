@@ -7,7 +7,6 @@ The website includes an interactive online editor, a tutorial page and a playgro
 *This project is a final year project (CS440[A]) at Maynooth University.*
 
 ## TODO
-- This Document
 - Add more code examples
 - Add more tutorials
 - Styling improvement
@@ -502,6 +501,24 @@ Please do notice that Cyclone exposed certain sensitive file paths in the execut
 You may design your server asynchronously, and it doesn't have to return the result and trace immediately at `POST /exec`.
 
 If you want to execute Cyclone program in async mode, return `ResponseCode.Enqueued` (integer: 7) as `code` inside `POST /exec`'s response and put a generated request id as string inside `data`. Then implement the `GET /get` API which takes the query parameter `id` and returning its execution result when ready. For more, please read [execution server](#execution-server-1).
+
+##### Get Cyclone's Version
+The server could have a `GET /version` API. This API should return a string data that represents the current version of the Cyclone instance that handles `POST /exec`. The version string should be obtained by executing the current command:
+
+```shell
+java -jar cyclone.jar --version
+```
+
+This API should return a `ResponseCode.Success` (integer: 0) as `code`, and a string in `data` that represents the current version of Cyclone. Example response:
+
+```json
+{
+  "code": 1,
+  "data": "Cyclone: 1.08.801 - 64 bit (0699)\r\nSolver: Z3 4.12.2.0\r\n"
+}
+```
+
+Anything other than this response format will be ignored by the editor frontend. 
 
 ### Configurations
 

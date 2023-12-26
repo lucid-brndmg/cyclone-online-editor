@@ -10,6 +10,17 @@ import {ResponseCode} from "./definitions.js";
 import {executionLogger, serviceLogger} from "./logger.js";
 import {customSlice} from "./lib/string.js";
 
+// runs once at server start
+export const registerCycloneVersion = async () => {
+  const args = ["-jar", path.join(config.cyclone.path, config.cyclone.executable), "--version"]
+  const opts = {cwd: config.cyclone.sourcePath}
+  return global.cycloneVersion = await execFileAsync("java", args, opts)
+}
+
+export const getCycloneVersion = () => {
+  return global.cycloneVersion
+}
+
 // const regexOption = /option-\s*\w+\s*=.*[^;];/gm
 
 // Regex would be not accurate here

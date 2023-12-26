@@ -44,6 +44,6 @@ if (!config.queue.enabled) {
   process.exit()
 }
 
-prepareDependencies()
+await prepareDependencies()
 queue.process(config.queue.concurrency, processor)
 serviceLogger.info("worker listening ...", {concurrency: config.queue.concurrency})

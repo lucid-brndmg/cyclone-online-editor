@@ -3,8 +3,9 @@ import {serviceLogger} from "./logger.js";
 import {exit} from "node:process";
 import path from "node:path";
 import fs from "node:fs";
+import {registerCycloneVersion} from "./cyclone.js";
 
-export const prepareDependencies = () => {
+export const prepareDependencies = async () => {
   // if (conf.queue.enabled && !conf.redis) {
   //   logger.error("No redis config prepared for queue.")
   //   exit()
@@ -32,6 +33,14 @@ export const prepareDependencies = () => {
   if (conf.cyclone.appendEnvPath) {
     const env = process.env["PATH"]
     process.env["PATH"] += `${env ? ";" : ""}${path.resolve(conf.cyclone.path)}`
+  }
+
+  try {
+    const version = await registerCycloneVersion()
+    serviceLogger.info("Current cyclone version", {version})
+  } catch (e) {
+    serviceLogger.error("Can not get cyclone's version", {error: e})
+    exit()
   }
 
   serviceLogger.info("ready")

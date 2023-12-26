@@ -25,8 +25,8 @@ import {prepareDependencies} from "./src/dependencies.js";
 //   console.log("env initialized");
 // }
 
-const run = () => {
-  prepareDependencies()
+const run = async () => {
+  await prepareDependencies()
   serve()
 }
 

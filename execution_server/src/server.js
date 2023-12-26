@@ -2,7 +2,7 @@ import Koa from 'koa';
 import koaRouter from '@koa/router';
 import { bodyParser } from "@koa/bodyparser";
 import config from "../config.json" assert { type: "json" };
-import {checkProgram, execCycloneProgram} from "./cyclone.js"
+import {checkProgram, execCycloneProgram, getCycloneVersion} from "./cyclone.js"
 
 // THE ONLY CORS LIB THAT WORKS,
 // DO NOT USE @koa/cors
@@ -84,6 +84,12 @@ router.get("/get", async ctx => {
   //   code: ResponseCode.Success,
   //   data
   // }
+})
+
+router.get("/version", async ctx => {
+  const logCtx = {path: "/version", ip: ctx.ip}
+  serviceLogger.info("incoming request", logCtx)
+  ctx.body = {code: ResponseCode.Success, data: getCycloneVersion()}
 })
 
 export const serve = () => {
