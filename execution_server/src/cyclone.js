@@ -1,7 +1,7 @@
 import path from "node:path"
 import fs from "node:fs"
 import antlr4, {ParseTreeWalker} from "antlr4";
-import config from "../config.json" assert { type: "json" };
+import config from "./config.js"
 import {execFileAsync, execShellCommand, spawnAsync} from "./lib/system.js"
 import CycloneLexer from "./generated/antlr/CycloneLexer.js";
 import CycloneParser from "./generated/antlr/CycloneParser.js";

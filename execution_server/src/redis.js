@@ -1,4 +1,4 @@
-import config from "../config.json" assert { type: "json" };
+import config from "./config.js"
 import { createClient } from 'redis';
 import {serviceLogger} from "./logger.js";
 import {exit} from "node:process";

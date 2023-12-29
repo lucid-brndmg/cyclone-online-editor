@@ -71,6 +71,9 @@ If there is no existing execution server ready, it must be prepared as well:
 ```shell
 cd execution_server
 npm install
+mv config.json.example config.json
+
+# set up config or env file
 ```
 Please make sure that java environment is installed and cyclone's compiler could be executed locally.
 
@@ -275,7 +278,7 @@ The execution server is a simple server that provide the ability to execute cycl
 The default execution server is written in Node.js & Koa.js and locates at `execution_server/`.
 
 #### Configuration
-In the source code of the server there is a configuration file named `config.json`. This file contains a basic config of the execution server:
+In the source code of the server there is a configuration file named `config.json` (default is `config.json.example`, which should be renamed the first time). This file contains a basic config of the execution server:
 ```json5
 {
   "cyclone": {
@@ -332,7 +335,8 @@ In the source code of the server there is a configuration file named `config.jso
     "host": "127.0.0.1",
     "port": 9000,
     // is this server been deployed using a reverse proxy like nginx (koa options)
-    "isProxy": false
+    "isProxy": false,
+    "proxyIpHeader": "X-Forwarded-For"
   },
   // logger config
   "logger": {
@@ -387,6 +391,39 @@ In the source code of the server there is a configuration file named `config.jso
 ```
 
 Mainly when you're using the server, the `cyclone.sourcePath` and `cyclone.path` is worth noticing.
+
+##### Using .env File
+The execution server supports using `.env` file. This file would override some of the configuration in `config.json`.
+
+In the root of the server, a `.env.example` file exists as an example to the `.env` configuration. If you wish to use `.env`, please rename `.env.example` to `.env` and edit its content. Each key in `.env` represents a config option in `config.json`. For each key's JSON path please see the following table: 
+
+| `.env` Key                     | Config's Json path |
+|--------------------------------|--------------------|
+| CYCLONE_ES_CYCLONE_PATH        | cyclone.path       |
+| CYCLONE_ES_CYCLONE_EXECUTABLE  | cyclone.executable |
+| CYCLONE_ES_CYCLONE_APPEND_ENV  | cyclone.appendEnvPath|
+| CYCLONE_ES_CYCLONE_SOURCE_PATH |cyclone.sourcePath|
+| CYCLONE_ES_CYCLONE_TIMEOUT_MS  |cyclone.mandatoryTimeoutMs|
+|CYCLONE_ES_CYCLONE_ID_LENGTH|cyclone.idLength|
+|CYCLONE_ES_CYCLONE_TRACE_KEYWORD|cyclone.traceKeyword|
+|CYCLONE_ES_CYCLONE_DEL_AFTER_EXEC|cyclone.deleteAfterExec|
+|CYCLONE_ES_CYCLONE_EXTENSION|cyclone.extension|
+|CYCLONE_ES_CYCLONE_DISABLED_OPTIONS|cyclone.disabledOptions|
+|CYCLONE_ES_QUEUE_ENABLED|queue.enabled|
+|CYCLONE_ES_QUEUE_CONCURRENCY|queue.concurrency|
+|CYCLONE_ES_QUEUE_RESULT_TTL_SECS|queue.resultTTLSecs|
+|CYCLONE_ES_QUEUE_AUTO_CLEAR_FILE_MS|queue.autoClearFileIntervalMs|
+|CYCLONE_ES_REDIS_URL|redis.url|
+|CYCLONE_ES_SERVER_HOST|server.host|
+|CYCLONE_ES_SERVER_PORT|server.port|
+|CYCLONE_ES_SERVER_PROXY|server.isProxy|
+|CYCLONE_ES_SERVER_PROXY_HEADER|server.proxyIpHeader|
+|CYCLONE_ES_LOGGER_SERVICE_CONSOLE|logger.service.console|
+|CYCLONE_ES_LOGGER_SERVICE_LEVEL|logger.service.level|
+|CYCLONE_ES_LOGGER_EXECUTION_CONSOLE|logger.execution.console|
+|CYCLONE_ES_LOGGER_EXECUTION_LEVEL|logger.execution.level|
+
+Please note that all keys in `.env` starts with the `CYCLONE_ES_` prefix.
 
 #### Execution Modes
 This server got 2 modes for program execution: sync mode and queue mode (`queue.enabled = true`). In development the sync mode should be fine, but in production mode the queue mode is recommended.

@@ -1,4 +1,4 @@
-import conf from "../config.json" assert { type: "json" };
+import conf from "./config.js"
 import {serviceLogger} from "./logger.js";
 import {exit} from "node:process";
 import path from "node:path";

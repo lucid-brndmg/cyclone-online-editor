@@ -1,5 +1,5 @@
 import {serviceLogger} from "./src/logger.js";
-import config from "./config.json" assert { type: "json" };
+import config from "./src/config.js"
 import fs from "node:fs";
 import {execCycloneProgram} from "./src/cyclone.js";
 import redis from "./src/redis.js";

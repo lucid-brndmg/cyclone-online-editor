@@ -1,4 +1,4 @@
-import config from "../config.json" assert { type: "json" }
+import config from "./config.js"
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 import {isWorker} from "./utils/env.js";

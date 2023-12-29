@@ -1,9 +1,9 @@
 {
   "cyclone": {
-    "path": "D:\\mu\\cyclone-tutorial\\cyclone\\",
+    "path": "/path/to/cyclone",
     "executable": "cyclone.jar",
     "traceKeyword": "Trace Generated:",
-    "sourcePath": "D:\\tmp\\cyclone_src_backend",
+    "sourcePath": "/path/to/source",
     "deleteAfterExec": false,
     "extension": ".cyclone",
     "disabledOptions": ["debug", "log"],

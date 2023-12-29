@@ -1,3 +1,1 @@
-import {execFileAsync} from "../lib/system.js";
-
-export const isWorker = process.argv.some(arg => arg.endsWith("worker.js"))
+export const isWorker = process.argv[1].endsWith("worker.js")

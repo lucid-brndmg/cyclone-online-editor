@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import koaRouter from '@koa/router';
 import { bodyParser } from "@koa/bodyparser";
-import config from "../config.json" assert { type: "json" };
+import config from "./config.js"
 import {checkProgram, execCycloneProgram, getCycloneVersion} from "./cyclone.js"
 
 // THE ONLY CORS LIB THAT WORKS,
@@ -94,6 +94,9 @@ router.get("/version", async ctx => {
 
 export const serve = () => {
   app.proxy = config.server.isProxy
+  if (app.proxy) {
+    app.proxyIpHeader = config.server.proxyIpHeader
+  }
   app.use(bodyParser())
   app.use(router.routes())
   app.listen(config.server.port, config.server.host)

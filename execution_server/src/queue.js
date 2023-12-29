@@ -1,6 +1,6 @@
 import Queue from "bee-queue"
 import redis from "./redis.js";
-import config from "../config.json" assert { type: "json" };
+import config from "./config.js"
 import {isWorker} from "./utils/env.js";
 let cycloneQueue
 
