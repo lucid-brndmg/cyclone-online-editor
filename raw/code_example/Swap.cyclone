@@ -1,0 +1,32 @@
+/*
+ * Verify a sawp function using the initial keyword
+ */
+
+ option-trace=true;
+ machine swap{
+     int a;
+     int b;
+     int t;
+
+    start normal state S0 {
+        t=a;
+    }
+
+    normal state S1 {
+        a=b;
+        b=t;
+    }
+
+    trans {S0->S1}
+    trans {S1->S0}
+
+    goal {
+      /* use the initial keyword to refer to the state of a variable
+       * before entering the starting state
+       */
+      assert (a==initial(b) && b==initial(a));
+      check for 1 reach (S1)
+    }
+
+ }
+

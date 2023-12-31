@@ -1,0 +1,43 @@
+
+/**
+ * A zero sum game:
+ * player one wins the game, increase his stake by 1 otherwise decrease his stake by 1.
+ * player two wins the game, increase his stake by 1 otherwise decrease his stake by 1.
+ * The invariant: winer' stake + loser's stake must be equal to 0.
+ */
+machine zerosum {
+
+	int stake1; //player1's stake
+	int stake2; //player2's stake
+
+	start normal state Start{
+		stake1 = 0;
+		stake2 = 0;
+	}
+
+	normal state P1W{
+		stake1 = stake1 + 1;
+		stake2 = stake2 - 1;
+	}
+
+	normal state P2W{
+		stake1 = stake1 - 1;
+		stake2 = stake2 + 1;
+	}
+
+	trans {Start -> P1W}
+	trans {Start -> P2W}
+	trans {P1W -> P1W}
+	trans {P1W -> P2W}
+	trans {P2W -> P1W}
+	trans {P2W -> P2W}
+
+	/* zerosum invariant must hold in all states. */
+	invariant zerosum { stake1 + stake2 == 0; }
+
+	goal{
+		/* play 5 games */
+		check for 1,2,3,4,5 reach (P1W,P2W)
+	}
+
+}

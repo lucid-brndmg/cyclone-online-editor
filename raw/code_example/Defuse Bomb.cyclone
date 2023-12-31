@@ -1,0 +1,108 @@
+
+/**
+ * Defuse a bomb
+ * You have a 3 and a 5 litre water container, each container has no markings except for that
+ * which gives you it's total volume.
+ * You also have a running tap. You must use the containers and the tap in such away as to exactly measure
+ * out 4 litres of water.
+ * From movie: Die Hard with a Vengeance where Bruce Willis and Samuel L. Jackson have to defuse a bomb
+ * by placing a 4 gallon jug of water on a set of scales.
+ */
+option-trace=true;
+machine DefuseBomb{
+
+    /* two containers: 3L and 5L */
+    int jug1 where jug1>=0 && jug1<=3; // during ANY computation jug1 must not be underflow or overflow.
+    int jug2 where jug2>=0 && jug2<=5; // during ANY computation jug2 must not be underflow or overflow.
+
+    /* the amount of water we can fill */
+    int amount where amount>=0 && amount<=3; // amount: the amount of water we pour from jug2 to the other (decided by the smaller one of two jugs).
+
+    /*
+     * at the beginning, both of our containers are empty.
+     **/
+    start normal state Start{
+        jug1=0;
+        jug2=0;
+        amount=0;
+    }
+
+    /*
+     * Pour water from jug2 (5L) to jug1 (3L)
+     */
+    normal state Jug2ToJug1{
+        // create a fresh variable here for computing the amount of water we can pour
+        fresh(amount);
+
+        /* cover 2 cases to ensure no overflow for jug1.*/
+        (jug1+jug2>3) => (amount==3-jug1);
+        (jug1+jug2<=3) => (amount==jug2);
+
+        jug2=jug2 - amount;
+        jug1=jug1 + amount;
+    }
+
+    /*
+     * Pour water from jug1 (3L) to jug2 (5L)
+     */
+    normal state Jug1ToJug2{
+        // create a fresh variable here for computing the amount of water we can pour
+        fresh(amount);
+
+        /* cover 2 cases to ensure no overflow for jug2.*/
+        (jug1+jug2>5) => (amount==5-jug2);
+        (jug1+jug2<=5) => (amount==jug1);
+
+        jug1=jug1 - amount;
+        jug2=jug2 + amount;
+    }
+
+    /*
+     * Pour away the water in jug1 (3L)
+     */
+    normal state EmptyJug1{
+        jug1 = 0;
+    }
+
+    /*
+     * Pour away the water in jug2 (5L)
+     */
+    normal state EmptyJug2{
+        jug2 = 0;
+    }
+
+    /*
+     * Fill jug1 (3L) from tap.
+     */
+    normal state FillJug1{
+        jug1 = 3;
+    }
+
+    /*
+     * Fill jug2 (5L) from tap.
+     */
+    normal state FillJug2{
+        jug2 = 5;
+    }
+
+    /*
+     * all possible actions.
+     **/
+    trans {Start -> +}
+    trans {Jug2ToJug1 -> +}
+    trans {Jug1ToJug2 -> +}
+    trans {EmptyJug1 -> +}
+    trans {EmptyJug2 -> +}
+    trans {FillJug1 -> +}
+    trans {FillJug2 -> +}
+
+    goal{
+
+        /*
+         * Find a way of getting 4 liter water in jug2.
+         */
+        assert ( jug2==4 );
+        check for 2,3,4,5,6 reach (Jug1ToJug2,Jug2ToJug1,EmptyJug1,EmptyJug2,FillJug1,FillJug2)
+    }
+
+}

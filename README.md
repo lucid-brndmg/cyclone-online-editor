@@ -7,10 +7,15 @@ The website includes an interactive online editor, a tutorial page and a playgro
 *This project is a final year project (CS440[A]) at Maynooth University.*
 
 ## TODO
-- Add more code examples
 - Add more tutorials
 - Styling improvement
 - Fix bugs & finish TODOs
+
+## Acknowledgements
+
+This project is guided under the supervision of [Dr.Hao Wu](https://classicwuhao.github.io/) with some suggestions from [Dr. Vanush Paturyan](https://www.maynoothuniversity.ie/people/vanush-paturyan).
+
+All the Cyclone examples (files ended with `.cyclone`) & all the Cyclone tutorials (All the Markdown contents in `raw/tutorial`) are written by Dr.Hao Wu & The Cyclone Team. See [Contributors](https://classicwuhao.github.io/cyclone_tutorial/about.html) for details.
 
 ## Features
 

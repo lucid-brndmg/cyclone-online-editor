@@ -1,0 +1,38 @@
+/**
+ * Two bit counter
+ */
+ option-trace=true;
+ machine TwoBitCounterI{
+ 	bool l;
+ 	bool r;
+
+    /* initial state */
+    /**
+     * R: l'=(l!=r) /\ r'=~r
+     */
+ 	normal start state S{
+        l = (l!=r);
+        r = !r;
+    }
+
+ 	trans { S -> S }
+
+ 	/*
+ 	 * Use invariant to check the following LTL formula
+ 	 * LTL: G (~l \/ ~r)
+ 	 */
+ 	invariant property { !l || !r;}
+
+ 	goal{
+
+        /* initial state: ~l /\ ~r */
+        assert (!initial(l) && !initial(r));
+
+        /*
+         * Alternatively, you can also use the following assert statement
+         * LTL formula: F !(~l \/ ~r)
+         * assert (!(!l || !r));
+         */
+ 		check for 2,3,4 reach (S)
+ 	}
+ }

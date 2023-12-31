@@ -1,0 +1,100 @@
+/**
+ * Verify a tiny neural network
+ */
+
+option-trace=true;
+machine TinyNeuralNetwork{
+	/* input */
+	real x0=1;
+	real x1 where x1>=0 && x1<=1;
+
+	/* output */
+	real y11,y12,y13,y21,y22,y23,y31,y32;
+
+	/* parameter */
+	const real u=1.4;
+
+	/* weights */
+	real w11=1,w21=1,w31=1;
+	real w12=-0.5,w22=-0.5;
+	real w13=1,w14=1;
+	real w23=-2*u,w24=-2*u,w32=-2*u;
+	real w25=u,w26=u,w33=u;
+
+	function min:real (a:real,b:real){
+		real m;
+		(a>=b)=>m==b;
+		(a<b)=>m==a;
+		return m;
+	}
+
+	function tent:real (x:real){
+		return u*min(x,1-x);
+	}
+
+	abstract start node S{}
+	normal node R11{
+		(w11*x0)>=0 => (y11==w11*x0);
+		(w11*x0)<0 => (y11==0);
+	}
+
+	normal node R12{
+		(w12*x0+w13*x1>=0)=>(y12==w12*x0+w13*x1);
+		(w12*x0+w13*x1<0)=>(y12==0);
+	}
+
+	normal node R13{
+		(w14*x1>=0)=>(y13==w14*x1);
+		(w14*x1<0)=>(y13==w14*x1);
+	}
+
+	normal node R21{
+		(w21*y11>=0)=>(y21==w21*y11);
+		(w21*y11<0)=>(y21==0);
+	}
+
+	normal node R22{
+		(w22*y11+w23*y12+w25*y13>=0)=>(y22==w22*y11+w23*y12+w25*y13);
+		(w22*y11+w23*y12+w25*y13<0)=>(y22==0);
+	}
+
+	normal node R23{
+		(w24*y12+w26*y13>=0) => (y23==w24*y12+w26*y13);
+		(w24*y12+w26*y13)<0=> (y23==0);
+	}
+
+	normal node R31{
+		(w31*y21>=0)=>(y31==w31*y21);
+		(w31*y21<0)=>(y31==0);
+	}
+
+	normal node R32{
+		(w32*y22+w33*y23>=0)=>(y32==w32*y22+w33*y23);
+		(w32*y22+w33*y23<0)=>(y32==0);
+	}
+
+	abstract final node F{}
+
+	edge { S -> R11 }
+	edge { R11 -> R12 }
+	edge { R12 -> R13 }
+	edge { R13 -> R21 }
+	edge { R21 -> R22 }
+	edge { R22 -> R23 }
+	edge { R23 -> R31 }
+	edge { R31 -> R32 }
+	edge { R32 -> F }
+
+	goal{
+
+		assert (y11>=0 && y12>=0 && y13>=0 &&
+			y21>=0 && y22>=0 && y23>=0 && y31>=0 && y32>=0) in (S);
+
+		//Properties to be checked
+		assert !(y31==1);
+		assert !(y32==tent(tent(x1)));
+
+		check for 9
+	}
+
+}

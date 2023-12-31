@@ -140,7 +140,7 @@ const ExecPanel = () => {
             leftSection={leftSection}
           />
         </>
-        : <Text c={"dimmed"} size={"sm"}>No result preview available.</Text>
+        : <Text c={"dimmed"} size={"sm"}>No result preview available. Press "Run" to see the results.</Text>
       }
     </Stack>
   )

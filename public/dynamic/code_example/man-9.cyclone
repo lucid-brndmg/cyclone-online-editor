@@ -1,0 +1,36 @@
+/**
+ * verify a loop
+ */
+
+machine verify_loop{
+	int i where i >=0;
+	int z;
+	int x;
+	int y;
+
+	start normal state B0{
+		i=0;
+		z=0;
+	}
+
+	normal state B1{
+		i=i+1;
+		z=z+x;
+	}
+
+	normal state B2{
+		z=x*y;
+	}
+
+	trans {B0 -> B1 where i!=y;}
+	trans {B1 -> B1 where i!=y;}
+	trans {B1 -> B2 }
+	trans {B0 -> B2 }
+
+	invariant loop_inv {z==x*i;}
+
+	goal{
+		check each 1,2 condition (B1^{0:1}) reach (B2)
+	}
+
+}
