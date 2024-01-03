@@ -16,7 +16,7 @@ export class SyntaxErrorListener extends antlr4.error.ErrorListener {
     this.onError({
       source: this.source,
       startPosition: pos(line, column),
-      msg,
+      // msg,
 
       type: ErrorType.SyntaxError,
       params: {msg}

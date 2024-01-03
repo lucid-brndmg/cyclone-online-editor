@@ -127,7 +127,7 @@ const assignValueBinOpSignature = [
   {input: [IdentifierType.Bool, IdentifierType.Bool], output: IdentifierType.Hole},
   {input: [IdentifierType.Int, IdentifierType.Int], output: IdentifierType.Hole},
   {input: [IdentifierType.Real, IdentifierType.Real], output: IdentifierType.Hole},
-  {input: [IdentifierType.Int, IdentifierType.Real], output: IdentifierType.Hole},
+  // {input: [IdentifierType.Int, IdentifierType.Real], output: IdentifierType.Hole},
   {input: [IdentifierType.Real, IdentifierType.Int], output: IdentifierType.Hole},
   {input: [IdentifierType.Enum, IdentifierType.Enum], output: IdentifierType.Hole},
   {input: [IdentifierType.String, IdentifierType.String], output: IdentifierType.Hole},
