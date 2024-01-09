@@ -150,6 +150,11 @@ const numberUnaryOpSignature = [
   {input: [IdentifierType.Real], output: IdentifierType.Real},
 ]
 
+const numberUnaryHoleOpSignature = [
+  {input: [IdentifierType.Int], output: IdentifierType.Hole},
+  {input: [IdentifierType.Real], output: IdentifierType.Hole},
+]
+
 const infixOperators = [
   // numbers
   {action: '+', signatures: numberBinOpSignature},
@@ -190,8 +195,8 @@ const prefixOperators = [
 ]
 
 const suffixOperators = [
-  {action: '--', signatures: numberUnaryOpSignature},
-  {action: '++', signatures: numberUnaryOpSignature}
+  {action: '--', signatures: numberUnaryHoleOpSignature},
+  {action: '++', signatures: numberUnaryHoleOpSignature}
 ]
 
 export const builtinActions = (() => {

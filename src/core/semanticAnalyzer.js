@@ -949,31 +949,28 @@ export default class SemanticAnalyzer {
     }
   }
 
-  handleStatement(position) {
+  handleStatementEnter(position) {
     const scope = this.latestNthScope()
-    const es = []
     if (scope && scope.type === SemanticContextType.FnBodyScope && scope.metadata.isReturned) {
-      es.push({
+      this.emit("errors", [{
         source: ErrorSource.Semantic,
         ...position,
 
         type: ErrorType.StatementAfterReturn
-      })
+      }])
     }
+  }
 
+  handleStatementExit(position) {
     const type = this.context.typeStack[this.context.typeStack.length - 1]
     if (type != null && type !== IdentifierType.Hole && type !== IdentifierType.Bool) {
-      es.push({
+      this.emit("errors", [{
         source: ErrorSource.Semantic,
         ...position,
         params: {got: type},
 
         type: ErrorType.InvalidStatement
-      })
-    }
-
-    if (es.length) {
-      this.emit("errors", es)
+      }])
     }
   }
 

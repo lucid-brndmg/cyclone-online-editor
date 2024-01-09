@@ -121,12 +121,12 @@ export class SemanticListener extends CycloneParserListener {
     this.analyzer.popBlock()
   }
 
-  // enterStatement(ctx) {
-  //   this.analyzer.handleStatement(getBlockPositionPair(ctx))
-  // }
+  enterStatement(ctx) {
+    this.analyzer.handleStatementEnter(getBlockPositionPair(ctx))
+  }
 
   exitStatement(ctx) {
-    this.analyzer.handleStatement(getBlockPositionPair(ctx))
+    this.analyzer.handleStatementExit(getBlockPositionPair(ctx))
     this.analyzer.resetTypeStack()
   }
 
