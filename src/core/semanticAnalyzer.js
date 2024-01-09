@@ -195,7 +195,7 @@ export default class SemanticAnalyzer {
   }
 
   referenceEnum(identText, position) {
-    this.context.typeStack.push(IdentifierType.Enum)
+    this.pushTypeStack(IdentifierType.Enum)
     if (!this.context.enumFields.has(identText)) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
@@ -441,7 +441,7 @@ export default class SemanticAnalyzer {
     // console.log("ref", identText, ident, shouldPushTypeStack, blockType)
 
     if (shouldPushTypeStack) {
-      this.context.typeStack.push(ident?.type ?? IdentifierType.Hole)
+      this.pushTypeStack(ident?.type ?? IdentifierType.Hole)
     }
 
     if (es.length) {
@@ -481,10 +481,10 @@ export default class SemanticAnalyzer {
         type: ErrorType.UndefinedIdentifier,
         params: {desc: "record field", ident: `${parentIdentText}.${identText}`}
       })
-      this.context.typeStack.push(IdentifierType.Hole)
+      this.pushTypeStack(IdentifierType.Hole)
     } else {
       const recordField = this.context.recordFieldStack.peek(parentIdentText, identText)
-      this.context.typeStack.push(recordField.type)
+      this.pushTypeStack(recordField.type)
     }
 
     if (es.length) {
@@ -596,7 +596,7 @@ export default class SemanticAnalyzer {
       // pushing a hole will save the integrity of the type stack
 
       // console.log("warn: invalid fn when exit fnCall", action)
-      this.context.typeStack.push(IdentifierType.Hole)
+      this.pushTypeStack(IdentifierType.Hole)
       return
     }
 
@@ -634,7 +634,7 @@ export default class SemanticAnalyzer {
       output = IdentifierType.Hole
     }
 
-    this.context.typeStack.push(output)
+    this.pushTypeStack(output)
   }
 
   resetTypeStack() {
@@ -643,7 +643,7 @@ export default class SemanticAnalyzer {
     }
   }
 
-  pushKnownType(type) {
+  pushTypeStack(type) {
     this.context.typeStack.push(type)
   }
 
@@ -681,7 +681,7 @@ export default class SemanticAnalyzer {
       || (allowNull && actualType == null)
 
     if (pushType != null) {
-      this.context.typeStack.push(pushType)
+      this.pushTypeStack(pushType)
     }
 
     if (!isCorrect) {
@@ -700,7 +700,7 @@ export default class SemanticAnalyzer {
     const isCorrect = types.includes(actualType) || actualType === IdentifierType.Hole
 
     if (pushType != null || pushSelf) {
-      this.context.typeStack.push(pushType == null ? actualType : pushType)
+      this.pushTypeStack(pushType == null ? actualType : pushType)
     }
 
     if (!isCorrect) {
@@ -951,13 +951,29 @@ export default class SemanticAnalyzer {
 
   handleStatement(position) {
     const scope = this.latestNthScope()
+    const es = []
     if (scope && scope.type === SemanticContextType.FnBodyScope && scope.metadata.isReturned) {
-      this.emit("errors", [{
+      es.push({
         source: ErrorSource.Semantic,
         ...position,
 
         type: ErrorType.StatementAfterReturn
-      }])
+      })
+    }
+
+    const type = this.context.typeStack[this.context.typeStack.length - 1]
+    if (type != null && type !== IdentifierType.Hole && type !== IdentifierType.Bool) {
+      es.push({
+        source: ErrorSource.Semantic,
+        ...position,
+        params: {got: type},
+
+        type: ErrorType.InvalidStatement
+      })
+    }
+
+    if (es.length) {
+      this.emit("errors", es)
     }
   }
 

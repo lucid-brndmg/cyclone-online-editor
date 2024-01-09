@@ -20,7 +20,3 @@ export const posRangeIncludes = ({line, column}, targetPair) => {
     // && column >= startPosition.column
     // && ( line === startPosition.line && column <= stopPosition.column || )
 }
-
-export const coords = (x, y) => ({x, y})
-export const formatCoords = coords => `${coords.x},${coords.y}`
-export const fixedCoords = (x, y) => formatCoords(coords(x, y))

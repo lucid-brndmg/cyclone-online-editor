@@ -22,7 +22,7 @@ router.post("/exec", async ctx => {
   const id = crypto.randomBytes(config.cyclone.idLength).toString("hex")
   const logCtx = {path: "/exec", ip: ctx.ip, id}
   serviceLogger.info("incoming request", logCtx)
-  const program = ctx.request.body?.program?.trim()
+  const program = ctx.request.body?.program
   if (!program) {
     return ctx.body = {code: ResponseCode.InvalidParams}
   }

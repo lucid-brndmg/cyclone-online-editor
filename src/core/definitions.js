@@ -18,6 +18,7 @@ export const ErrorType = {
   ReturnExprViolation: 2008,
   StatementAfterReturn: 2009,
   InvalidNamedExprScope: 2010,
+  InvalidStatement: 2011,
 
   TypeMismatchFunction: 3001,
   TypeMismatchReturn: 3002,

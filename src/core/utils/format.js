@@ -26,6 +26,7 @@ const errorTypeDescription = {
   [ErrorType.ReturnExprViolation]: "Invalid Statement",
   [ErrorType.StatementAfterReturn]: "Invalid Statement",
   [ErrorType.InvalidNamedExprScope]: "Invalid Expression",
+  [ErrorType.InvalidStatement]: "Invalid Statement",
 
   [ErrorType.TypeMismatchFunction]: "Type Mismatch",
   [ErrorType.TypeMismatchReturn]: "Type Mismatch",
@@ -148,6 +149,10 @@ const eEmptyEdge = () => {
   return `this edge has no actual targeted state / node because every node is excluded`
 }
 
+const eInvalidStatement = ({got}) => {
+  return `invalid statement: expecting this statement to return nothing or bool, but got ${formatType(got)}`
+}
+
 const errorMessageFormatter = {
   [ErrorType.RemoteError]: eMsgBased,
   [ErrorType.SyntaxError]: eMsgBased,
@@ -172,6 +177,7 @@ const errorMessageFormatter = {
   [ErrorType.NoStartNodeDefined]: eNoStartNodeDefined,
   [ErrorType.DuplicatedEdge]: eDuplicatedEdge,
   [ErrorType.EmptyEdge]: eEmptyEdge,
+  [ErrorType.InvalidStatement]: eInvalidStatement
 }
 
 export const formatErrorMessage = (type, params, source) => {

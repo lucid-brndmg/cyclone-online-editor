@@ -121,11 +121,12 @@ export class SemanticListener extends CycloneParserListener {
     this.analyzer.popBlock()
   }
 
-  enterStatement(ctx) {
-    this.analyzer.handleStatement(getBlockPositionPair(ctx))
-  }
+  // enterStatement(ctx) {
+  //   this.analyzer.handleStatement(getBlockPositionPair(ctx))
+  // }
 
   exitStatement(ctx) {
+    this.analyzer.handleStatement(getBlockPositionPair(ctx))
     this.analyzer.resetTypeStack()
   }
 
@@ -293,7 +294,7 @@ export class SemanticListener extends CycloneParserListener {
     this.analyzer.popBlock()
     // this.#deduceToType(IdentifierType.State, getBlockPositionPair(ctx), IdentifierType.Bool)
     // this.analyzer.resetTypeStack() // for int literals
-    this.analyzer.pushKnownType(IdentifierType.Bool)
+    this.analyzer.pushTypeStack(IdentifierType.Bool)
   }
 
   enterPathPrimaryExpr(ctx) {
@@ -303,7 +304,7 @@ export class SemanticListener extends CycloneParserListener {
   exitPathPrimaryExpr(ctx) {
     this.analyzer.popBlock()
     // this.analyzer.resetTypeStack()
-    this.analyzer.pushKnownType(IdentifierType.Bool)
+    this.analyzer.pushTypeStack(IdentifierType.Bool)
   }
 
   enterRecord(ctx) {
@@ -451,7 +452,7 @@ export class SemanticListener extends CycloneParserListener {
     const identText = text.slice(1)
     this.analyzer.referenceEnum(identText, getBlockPositionPair(ctx))
 
-    // this.analyzer.pushKnownType(IdentifierType.Enum)
+    // this.analyzer.pushTypeStack(IdentifierType.Enum)
   }
 
   enterIdentifier(ctx) {
@@ -475,28 +476,28 @@ export class SemanticListener extends CycloneParserListener {
   }
 
   enterBoolLiteral(ctx) {
-    this.analyzer.pushKnownType(IdentifierType.Bool)
+    this.analyzer.pushTypeStack(IdentifierType.Bool)
   }
 
   enterCharLiteral(ctx) {
-    this.analyzer.pushKnownType(IdentifierType.Char)
+    this.analyzer.pushTypeStack(IdentifierType.Char)
   }
 
   enterIntLiteral(ctx) {
     const blockType = this.analyzer.peekBlock().type
 
     if (blockType !== SemanticContextType.StateInc && blockType !== SemanticContextType.PathPrimary) {
-      this.analyzer.pushKnownType(IdentifierType.Int)
+      this.analyzer.pushTypeStack(IdentifierType.Int)
 
     }
   }
 
   enterRealLiteral(ctx) {
-    this.analyzer.pushKnownType(IdentifierType.Real)
+    this.analyzer.pushTypeStack(IdentifierType.Real)
   }
 
   enterStringLiteral(ctx) {
-    this.analyzer.pushKnownType(IdentifierType.String)
+    this.analyzer.pushTypeStack(IdentifierType.String)
   }
 
   exitPathCondAssignExpr(ctx) {
@@ -639,7 +640,7 @@ export class SemanticListener extends CycloneParserListener {
       IdentifierType.Enum,
       IdentifierType.String,
       IdentifierType.Char
-    ], getBlockPositionPair(ctx), null, true)
+    ], getBlockPositionPair(ctx), IdentifierType.Hole)
   }
 
   enterCompOptions(ctx) {
