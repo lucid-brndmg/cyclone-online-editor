@@ -27,6 +27,7 @@ const errorTypeDescription = {
   [ErrorType.StatementAfterReturn]: "Invalid Statement",
   [ErrorType.InvalidNamedExprScope]: "Invalid Expression",
   [ErrorType.InvalidStatement]: "Invalid Statement",
+  [ErrorType.LetBodyUndefined]: "Path Condition Undefined",
 
   [ErrorType.TypeMismatchFunction]: "Type Mismatch",
   [ErrorType.TypeMismatchReturn]: "Type Mismatch",
@@ -153,6 +154,10 @@ const eInvalidStatement = ({got}) => {
   return `invalid statement: expecting this statement to return nothing or bool, but got ${formatType(got)}`
 }
 
+const eLetBodyUndefined = () => {
+  return `path expression not defined in a path variable. Expecting a concrete definition. For example: let path_var = S0->S1;`
+}
+
 const errorMessageFormatter = {
   [ErrorType.RemoteError]: eMsgBased,
   [ErrorType.SyntaxError]: eMsgBased,
@@ -177,7 +182,8 @@ const errorMessageFormatter = {
   [ErrorType.NoStartNodeDefined]: eNoStartNodeDefined,
   [ErrorType.DuplicatedEdge]: eDuplicatedEdge,
   [ErrorType.EmptyEdge]: eEmptyEdge,
-  [ErrorType.InvalidStatement]: eInvalidStatement
+  [ErrorType.InvalidStatement]: eInvalidStatement,
+  [ErrorType.LetBodyUndefined]: eLetBodyUndefined
 }
 
 export const formatErrorMessage = (type, params, source) => {

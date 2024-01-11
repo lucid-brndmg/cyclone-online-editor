@@ -1,244 +1,30 @@
-/*
- * Written by: Hao Wu
- * Created on: 23:45, Feb 17, 2023.
- *
- * EinsteinRiddle:
- * There are five houses lined up next to each other along a street. Each house is a different color, and
- * each homeowner is of a different nationality, drinks a different beverage, smokes a different brand of
- * cigar, and owns a different pet.
- *
- * Using the following 15 clues, can you figure out who owns a pet fish?
- *
- * 1. The Englishman lives in the house with red walls.
- * 2. The Swede keeps dogs.
- * 3. The Dane drinks tea.
- * 4. The house with green walls is just to the left of the house with white walls.
- * 5. The owner of the house with green walls drinks coffee.
- * 6. The man who smokes Pall Mall keeps birds.
- * 7. The owner of the house with yellow walls smokes Dunhills.
- * 8. The man in the center house drinks milk.
- * 9. The Norwegian lives in the first house.
- * 10.The Blend smoker has a neighbor who keeps cats.
- * 11.The man who smokes Blue Masters drinks beer.
- * 12.The man who keeps horses lives next to the Dunhill smoker.
- * 13.The German smokes Prince.
- * 14.The Norwegian lives next to the house with blue walls.
- * 15.The Blend smoker has a neighbor who drinks water.
- *
- *
- * We use record and enum data type to build each house with its attributes.
- */
+ /* A Simple Graph
+  * Demonstrate how to use path conditions.
+  *
+  */
 
-option-trace=true;
-machine EinsteinRiddle{
+graph G{
 
-	record HouseA{
-		enum {Red, Yellow, Blue, White, Green} Color;
-		enum {Dog, Fish, Cat, Bird, Horse} Pet;
-		enum {PallMall, Dunhill, BlueMaster, Prince, Blend} Cigar;
-		enum {Tea, Coffee, Milk, Beer, Water} Beverage;
-		enum {English, Sweedish, Danish, Norwegian, German} Nationality;
-	};
-
-	record HouseB{
-		enum {Red, Yellow, Blue, White, Green} Color;
-		enum {Dog, Fish, Cat, Bird, Horse} Pet;
-		enum {PallMall, Dunhill, BlueMaster, Prince, Blend} Cigar;
-		enum {Tea, Coffee, Milk, Beer, Water} Beverage;
-		enum {English, Sweedish, Danish, Norwegian, German} Nationality;
-	};
-
-	record HouseC{
-		enum {Red, Yellow, Blue, White, Green} Color;
-		enum {Dog, Fish, Cat, Bird, Horse} Pet;
-		enum {PallMall, Dunhill, BlueMaster, Prince, Blend} Cigar;
-		enum {Tea, Coffee, Milk, Beer, Water} Beverage;
-		enum {English, Sweedish, Danish, Norwegian, German} Nationality;
-	};
-
-	record HouseD{
-		enum {Red, Yellow, Blue, White, Green} Color;
-		enum {Dog, Fish, Cat, Bird, Horse} Pet;
-		enum {PallMall, Dunhill, BlueMaster, Prince, Blend} Cigar;
-		enum {Tea, Coffee, Milk, Beer, Water} Beverage;
-		enum {English, Sweedish, Danish, Norwegian, German} Nationality;
-	};
+    /* the set of nodes */
+    abstract start node S1{}
+    abstract node S2{}
 
 
-	record HouseE{
-		enum {Red, Yellow, Blue, White, Green} Color;
-		enum {Dog, Fish, Cat, Bird, Horse} Pet;
-		enum {PallMall, Dunhill, BlueMaster, Prince, Blend} Cigar;
-		enum {Tea, Coffee, Milk, Beer, Water} Beverage;
-		enum {English, Sweedish, Danish, Norwegian, German} Nationality;
-	};
+    /* the set of edges */
+    edge { S1 -> S1 }
+    edge { S1 -> S2 }
+    edge { S2 -> S1 }
+    edge { S2 -> S2 }
 
-	start normal state S{
+    goal{
 
-		/* Each house has a different color */
-		HouseA.Color != HouseB.Color;
-		HouseA.Color != HouseC.Color;
-		HouseA.Color != HouseD.Color;
-		HouseA.Color != HouseE.Color;
-		HouseB.Color != HouseC.Color;
-		HouseB.Color != HouseD.Color;
-		HouseB.Color != HouseE.Color;
-		HouseC.Color != HouseD.Color;
-		HouseC.Color != HouseE.Color;
-		HouseD.Color != HouseE.Color;
-
-		/* Each owner has a different pet */
-		HouseA.Pet != HouseB.Pet;
-		HouseA.Pet != HouseC.Pet;
-		HouseA.Pet != HouseD.Pet;
-		HouseA.Pet != HouseE.Pet;
-		HouseB.Pet != HouseC.Pet;
-		HouseB.Pet != HouseD.Pet;
-		HouseB.Pet != HouseE.Pet;
-		HouseC.Pet != HouseD.Pet;
-		HouseC.Pet != HouseE.Pet;
-		HouseD.Pet != HouseE.Pet;
-
-		/* Each owner smokes a different cigar */
-		HouseA.Cigar != HouseB.Cigar;
-		HouseA.Cigar != HouseC.Cigar;
-		HouseA.Cigar != HouseD.Cigar;
-		HouseA.Cigar != HouseE.Cigar;
-		HouseB.Cigar != HouseC.Cigar;
-		HouseB.Cigar != HouseD.Cigar;
-		HouseB.Cigar != HouseE.Cigar;
-		HouseC.Cigar != HouseD.Cigar;
-		HouseC.Cigar != HouseE.Cigar;
-		HouseD.Cigar != HouseE.Cigar;
-
-		/* Each owner drinks a different beverage */
-		HouseA.Beverage != HouseB.Beverage;
-		HouseA.Beverage != HouseC.Beverage;
-		HouseA.Beverage != HouseD.Beverage;
-		HouseA.Beverage != HouseE.Beverage;
-		HouseB.Beverage != HouseC.Beverage;
-		HouseB.Beverage != HouseD.Beverage;
-		HouseB.Beverage != HouseE.Beverage;
-		HouseC.Beverage != HouseD.Beverage;
-		HouseC.Beverage != HouseE.Beverage;
-		HouseD.Beverage != HouseE.Beverage;
-
-		/* Everyone has a different nationality */
-		HouseA.Nationality != HouseB.Nationality;
-		HouseA.Nationality != HouseC.Nationality;
-		HouseA.Nationality != HouseD.Nationality;
-		HouseA.Nationality != HouseE.Nationality;
-		HouseB.Nationality != HouseC.Nationality;
-		HouseB.Nationality != HouseD.Nationality;
-		HouseB.Nationality != HouseE.Nationality;
-		HouseC.Nationality != HouseD.Nationality;
-		HouseC.Nationality != HouseE.Nationality;
-		HouseD.Nationality != HouseE.Nationality;
-
-	}
-
-	final normal state F{
-		//clue 1
-		(HouseA.Nationality==#English && HouseA.Color==#Red) ||
-		(HouseB.Nationality==#English && HouseB.Color==#Red) ||
-		(HouseC.Nationality==#English && HouseC.Color==#Red) ||
-		(HouseD.Nationality==#English && HouseD.Color==#Red) ||
-		(HouseE.Nationality==#English && HouseE.Color==#Red);
-
-		//clue 2
-		(HouseA.Nationality==#Sweedish && HouseA.Pet==#Dog) ||
-		(HouseB.Nationality==#Sweedish && HouseB.Pet==#Dog) ||
-		(HouseC.Nationality==#Sweedish && HouseC.Pet==#Dog) ||
-		(HouseD.Nationality==#Sweedish && HouseD.Pet==#Dog) ||
-		(HouseE.Nationality==#Sweedish && HouseE.Pet==#Dog);
-
-		//clue 3
-		(HouseA.Nationality==#Danish && HouseA.Beverage==#Tea) ||
-		(HouseB.Nationality==#Danish && HouseB.Beverage==#Tea) ||
-		(HouseC.Nationality==#Danish && HouseC.Beverage==#Tea) ||
-		(HouseD.Nationality==#Danish && HouseD.Beverage==#Tea) ||
-		(HouseE.Nationality==#Danish && HouseE.Beverage==#Tea);
-
-		//clue 4
-		(HouseA.Color==#Green && HouseB.Color==#White) ||
-		(HouseB.Color==#Green && HouseC.Color==#White) ||
-		(HouseC.Color==#Green && HouseD.Color==#White) ||
-		(HouseD.Color==#Green && HouseE.Color==#White);
-
-		//clue 5
-		(HouseA.Color==#Green && HouseA.Beverage==#Coffee) ||
-		(HouseB.Color==#Green && HouseB.Beverage==#Coffee) ||
-		(HouseC.Color==#Green && HouseC.Beverage==#Coffee) ||
-		(HouseD.Color==#Green && HouseD.Beverage==#Coffee) ||
-		(HouseE.Color==#Green && HouseE.Beverage==#Coffee) ||
-
-		//clue 6
-		(HouseA.Cigar==#PallMall && HouseA.Pet==#Bird) ||
-		(HouseB.Cigar==#PallMall && HouseB.Pet==#Bird) ||
-		(HouseC.Cigar==#PallMall && HouseC.Pet==#Bird) ||
-		(HouseD.Cigar==#PallMall && HouseD.Pet==#Bird) ||
-		(HouseE.Cigar==#PallMall && HouseE.Pet==#Bird);
-
-		//clue 7
-		(HouseA.Cigar==#Dunhill && HouseA.Color==#Yellow) ||
-		(HouseB.Cigar==#Dunhill && HouseB.Color==#Yellow) ||
-		(HouseC.Cigar==#Dunhill && HouseC.Color==#Yellow) ||
-		(HouseD.Cigar==#Dunhill && HouseD.Color==#Yellow) ||
-		(HouseE.Cigar==#Dunhill && HouseE.Color==#Yellow);
-
-		//clue 8
-		HouseC.Beverage==#Milk;
-
-		//clue 9
-		HouseA.Nationality==#Norwegian;
-
-		//clue 10
-		(HouseA.Cigar==#Blend && HouseB.Pet==#Cat) ||
-		(HouseB.Cigar==#Blend && ((HouseA.Pet==#Cat) || (HouseC.Pet==#Cat))) ||
-		(HouseC.Cigar==#Blend && ((HouseB.Pet==#Cat) || (HouseD.Pet==#Cat))) ||
-		(HouseD.Cigar==#Blend && ((HouseC.Pet==#Cat) || (HouseE.Pet==#Cat))) ||
-		(HouseE.Cigar==#Blend && HouseD.Pet==#Cat);
-
-		//clue 11
-		(HouseA.Pet==#Horse && HouseB.Cigar==#Dunhill) ||
-		(HouseB.Pet==#Horse && ((HouseA.Cigar==#Dunhill) || (HouseC.Cigar==#Dunhill))) ||
-		(HouseC.Pet==#Horse && ((HouseB.Cigar==#Dunhill) || (HouseD.Cigar==#Dunhill))) ||
-		(HouseD.Pet==#Horse && ((HouseC.Cigar==#Dunhill) || (HouseE.Cigar==#Dunhill))) ||
-		(HouseE.Pet==#Horse && HouseD.Cigar==#Dunhill);
-
-		//clue 12
-		(HouseA.Cigar==#BlueMaster && HouseA.Beverage==#Beer) ||
-		(HouseB.Cigar==#BlueMaster && HouseB.Beverage==#Beer) ||
-		(HouseC.Cigar==#BlueMaster && HouseC.Beverage==#Beer) ||
-		(HouseD.Cigar==#BlueMaster && HouseD.Beverage==#Beer) ||
-		(HouseE.Cigar==#BlueMaster && HouseE.Beverage==#Beer);
-
-		//clue 13
-		(HouseA.Nationality==#German && HouseA.Cigar==#Prince) ||
-		(HouseB.Nationality==#German && HouseB.Cigar==#Prince) ||
-		(HouseC.Nationality==#German && HouseC.Cigar==#Prince) ||
-		(HouseD.Nationality==#German && HouseD.Cigar==#Prince) ||
-		(HouseE.Nationality==#German && HouseE.Cigar==#Prince);
-
-		//clue 14
-		(HouseA.Nationality==#Norwegian && HouseB.Color==#Blue) ||
-		(HouseB.Nationality==#Norwegian && ((HouseA.Color==#Blue) || (HouseC.Color==#Blue))) ||
-		(HouseC.Nationality==#Norwegian && ((HouseB.Color==#Blue) || (HouseD.Color==#Blue))) ||
-		(HouseD.Nationality==#Norwegian && ((HouseC.Color==#Blue) || (HouseE.Color==#Blue))) ||
-		(HouseE.Nationality==#Norwegian && HouseD.Color==#Blue);
-
-		//clue 15
-		(HouseA.Cigar==#Blend && HouseB.Beverage==#Water) ||
-		(HouseB.Cigar==#Blend && ((HouseA.Beverage==#Water) || (HouseC.Beverage==#Water))) ||
-		(HouseC.Cigar==#Blend && ((HouseB.Beverage==#Water) || (HouseD.Beverage==#Water))) ||
-		(HouseD.Cigar==#Blend && ((HouseC.Beverage==#Water) || (HouseE.Beverage==#Water))) ||
-		(HouseE.Cigar==#Blend && HouseD.Beverage==#Water);
-	}
-
-	edge { S -> F }
-
-	goal{
-		check for 1
-	}
+        /*
+         * Find a path (starts from node S1) that
+         *  has a length of 5,
+         *  must not include self-loops,
+         *  and eventually reach S2.
+         */
+        check for 5 condition (!(S1->S1) && !(S2->S2)) reach (S2)
+    }
 
 }

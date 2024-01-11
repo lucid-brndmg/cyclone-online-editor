@@ -1,43 +1,36 @@
 /**
- * Demonstrate how to find Hamiltonian Path for a graph.
+ * verify a loop
  */
 
- graph HamiltonianPathExample{
+machine verify_loop{
+	int i where i >=0;
+	int z;
+	int x;
+	int y;
 
-    /* the set of nodes */
-    abstract start node S0{}
-    abstract node S1{}
-    abstract node S2{}
-    abstract node S3{}
-    abstract node S4{}
-    abstract node S5{}
-    abstract node S6{}
+	start normal state B0{
+		i=0;
+		z=0;
+	}
 
-    /* the set of edges */
-    edge { S0 -> S1 }
-    edge { S0 -> S3 }
-    edge { S0 -> S6 }
-    edge { S1 -> S2 }
-    edge { S1 -> S3 }
-    edge { S2 -> S3 }
-    edge { S2 -> S1 }
-    edge { S3 -> S2 }
-    edge { S3 -> S4 }
-    edge { S4 -> S5 }
-    edge { S4 -> S1 }
-    edge { S5 -> S1 }
-    edge { S5 -> S2 }
-    edge { S5 -> S6 }
-    edge { S6 -> S1 }
-    edge { S6 -> S3 }
+	normal state B1{
+		i=i+1;
+		z=z+x;
+	}
 
-    goal{
-        // each node must appear exactly once.
-        check for 6 condition (
-                S0^{1} && S1^{1} &&
-                S2^{1} && S3^{1} &&
-                S4^{1} && S5^{1} &&
-                S6^{1} )
-        reach (S0,S1,S2,S3,S4,S5,S6) //any node could be a terminating node.
-    }
- }
+	normal state B2{
+		z=x*y;
+	}
+
+	trans {B0 -> B1 where i!=y;}
+	trans {B1 -> B1 where i!=y;}
+	trans {B1 -> B2 }
+	trans {B0 -> B2 }
+
+	invariant loop_inv {z==x*i;}
+
+	goal{
+		check each 1,2 condition (B1^{0:1}) reach (B2)
+	}
+
+}

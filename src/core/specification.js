@@ -212,7 +212,7 @@ const optBoolValues = ["true", "false"]
 export const optionAcceptableValues = new Map([
   ["log", {values: optBoolValues}],
   ["trace", {values: optBoolValues}],
-  ["debug", {values: optBoolValues}], // TODO
+  ["debug", {values: optBoolValues}],
   ["detect", {values: optBoolValues}],
   ["output", {values: [`"trace"`, `"dot"`]}],
   ["timeout", {regex: /^\d*$/, description: "integer values"}],

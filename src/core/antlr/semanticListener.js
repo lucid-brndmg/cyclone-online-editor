@@ -7,7 +7,7 @@ import {
   functionCallMetadata,
   functionDeclarationMetadata,
   functionParamsMetadata,
-  functionScopeMetadata, goalScopeMetadata,
+  functionScopeMetadata, goalScopeMetadata, letDeclMetadata,
   stateDeclMetadata,
   transDeclMetadata
 } from "@/core/utils/semantic";
@@ -37,7 +37,7 @@ const getSymbolPosition = (symbol, length) => {
 
 const getIdentifiersInList = ctx => ctx.children?.filter(c => c.constructor.name === "IdentifierContext") ?? []
 
-export class SemanticListener extends CycloneParserListener {
+class SemanticListener extends CycloneParserListener {
   analyzer
 
   constructor(semanticAnalyzer) {
@@ -271,14 +271,14 @@ export class SemanticListener extends CycloneParserListener {
   }
 
   enterLetExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.LetDecl, getBlockPositionPair(ctx))
+    this.analyzer.pushBlock(SemanticContextType.LetDecl, getBlockPositionPair(ctx), letDeclMetadata())
   }
 
   exitLetExpr(ctx) {
     // check
-
+    this.analyzer.handleLetExpr(getBlockPositionPair(ctx))
     this.analyzer.popBlock()
-    this.analyzer.deduceToType(IdentifierType.Bool, getBlockPositionPair(ctx), null, true)
+    // this.analyzer.deduceToType(IdentifierType.Bool, getBlockPositionPair(ctx), null, true)
     
   }
 
@@ -501,8 +501,8 @@ export class SemanticListener extends CycloneParserListener {
   }
 
   exitPathCondAssignExpr(ctx) {
-    this.analyzer.deduceToType(IdentifierType.Bool, getBlockPositionPair(ctx))
-    // this.analyzer.handlePathCondAssign()
+    // this.analyzer.deduceToType(IdentifierType.Bool, getBlockPositionPair(ctx))
+    this.analyzer.handlePathCondAssign()
   }
 
   exitPathExpr(ctx) {
@@ -665,3 +665,5 @@ export class SemanticListener extends CycloneParserListener {
     this.analyzer.resetTypeStack()
   }
 }
+
+export default SemanticListener

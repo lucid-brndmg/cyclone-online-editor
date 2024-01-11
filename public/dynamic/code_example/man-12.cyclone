@@ -1,32 +1,69 @@
-/*
- * Verify a sawp function using the initial keyword
+/**
+ * A boolean switch requirements
+ * Written by: Hao Wu
+ *
+ * A switch has two buttons: Set and Reset.
+ * Pressing Set turns the switch on.
+ * Pressing Reset turns the switch off.
+ *
+ * If both Set and Reset are initially both unpressed, the initial
+ * state of the switch is determined by the third signal.
  */
 
- option-trace=true;
- machine swap{
-     int a;
-     int b;
-     int t;
+option-trace=true;
+machine Switch{
 
-    start normal state S0 {
-        t=a;
-    }
+	enum {set,reset,unpressed} button;
+	/* use int to model the signal and switch */
+	int signal=2;
+	int switch=signal;
 
-    normal state S1 {
-        a=b;
-        b=t;
-    }
+	abstract start state S{}
 
-    trans {S0->S1}
-    trans {S1->S0}
+	normal final state On {
+		button=#set;
+		switch=1;
+	}
 
-    goal {
-      /* use the initial keyword to refer to the state of a variable
-       * before entering the starting state
-       */
-      assert (a==initial(b) && b==initial(a));
-      check for 1 reach (S1)
-    }
+	normal final state Off{
+		button=#reset;
+		switch=0;
+	}
 
- }
+	normal final state ThirdSignal{
+		button=#unpressed;
+		switch=signal;
+	}
 
+	trans { S -> On where button==#set;}
+	trans { S -> Off where button==#reset;}
+	trans { S -> ThirdSignal where button==#unpressed;}
+
+	trans { Off -> On }
+	trans { Off -> Off }
+
+	trans { On -> Off }
+	trans { On -> On }
+
+	trans {ThirdSignal -> ThirdSignal }
+	trans {ThirdSignal -> On }
+	trans {ThirdSignal -> Off }
+
+	goal{
+
+		/* R0: begin with the button unpressed. */
+		assert (initial(button)==#unpressed);
+
+		/* R1: if the button is unpressed,the switch should have the 3rd signal.*/
+		assert (initial(button)==#unpressed => initial(switch)==initial(signal));
+
+		/* R2: if the button is pressed,the switch should either be ON or OFF.*/
+		assert (initial(button)!=#unpressed => (switch==0 || switch==1));
+
+		/* R3: make sure a sequence covering all possible states of the switch. */
+		let state_coverage = (On && Off && ThirdSignal);
+
+
+		check for 3 condition (state_coverage)
+	}
+}

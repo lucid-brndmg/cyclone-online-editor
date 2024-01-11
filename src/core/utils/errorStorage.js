@@ -1,6 +1,4 @@
-const formatLineCol = (line, col) => `${line},${col}`
-
-export class ErrorStorage {
+class ErrorStorage {
   storage = [] // new Map()
   max = 0
 
@@ -80,3 +78,5 @@ export class ErrorStorage {
     this.events.onClear && this.events.onClear()
   }
 }
+
+export default ErrorStorage

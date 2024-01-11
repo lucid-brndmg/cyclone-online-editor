@@ -66,6 +66,10 @@ export const goalScopeMetadata = () => ({
   expr: ""
 })
 
+export const letDeclMetadata = () => ({
+  hasBody: false
+})
+
 export const recordBlockerFinder = block => {
   return block.metadata?.blockCurrentRecord === true
 }

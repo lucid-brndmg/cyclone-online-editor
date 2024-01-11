@@ -19,6 +19,7 @@ export const ErrorType = {
   StatementAfterReturn: 2009,
   InvalidNamedExprScope: 2010,
   InvalidStatement: 2011,
+  LetBodyUndefined: 2012,
 
   TypeMismatchFunction: 3001,
   TypeMismatchReturn: 3002,

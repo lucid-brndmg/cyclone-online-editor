@@ -1107,4 +1107,26 @@ export default class SemanticAnalyzer {
       block.metadata.gotParams += 1
     }
   }
+
+  handlePathCondAssign(position) {
+    this.deduceToType(IdentifierType.Bool, position)
+    const decl = this.findNearestBlock(SemanticContextType.LetDecl)
+    if (decl) {
+      decl.metadata.hasBody = true
+    }
+  }
+
+  handleLetExpr(position) {
+    this.deduceToType(IdentifierType.Bool, position, null, true)
+    const block = this.peekBlock()
+    if (block.type === SemanticContextType.LetDecl && !block.metadata.hasBody) {
+      this.emit("errors", [{
+        source: ErrorSource.Semantic,
+        ...position,
+        type: ErrorType.LetBodyUndefined
+      }])
+    } else if (block.type !== SemanticContextType.LetDecl) {
+      console.log("warn: let block not found")
+    }
+  }
 }

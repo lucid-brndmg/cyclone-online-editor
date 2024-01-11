@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import {Editor, loader} from "@monaco-editor/react";
-import {ErrorStorage} from "@/core/utils/errorStorage";
-import {SemanticListener} from "@/core/antlr/listener";
+import ErrorStorage from "@/core/utils/errorStorage";
+import SemanticListener from "@/core/antlr/semanticListener";
 import Config from "../../../resource/config.json";
 import SemanticAnalyzer from "@/core/semanticAnalyzer";
 import EditorSemanticContext from "@/core/editorSemanticContext";
