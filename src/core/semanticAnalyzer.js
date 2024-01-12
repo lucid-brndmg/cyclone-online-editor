@@ -102,12 +102,12 @@ export default class SemanticAnalyzer {
     if (isScope) {
       this.context.scopedBlocks.push(blockContent)
       // this.context.editorCtx.pushScopeLayerScope(this.context.scopedBlocks.length, type, position)
-      this.emit("enterScope", blockContent)
+      this.emit("scope:enter", blockContent)
     }
   }
 
   clearScope(block) {
-    this.emit("exitScope", block)
+    this.emit("scope:exit", block)
 
     if (block.metadata) {
       this.context.identifierStack.subCountTable(block.metadata?.identifierCounts)
@@ -297,7 +297,7 @@ export default class SemanticAnalyzer {
 
     // this.context.editorCtx.pushScopeLayerIdent(identText, type, identPos, identKind, blockType, this.context.scopedBlocks.length)
 
-    this.emit("identifierReg", {text: identText, type, position: identPos, kind: identKind, blockType})
+    this.emit("lang:identifier:register", {text: identText, type, position: identPos, kind: identKind, blockType})
 
     if (!isEnum) {
       const info = {
@@ -883,7 +883,7 @@ export default class SemanticAnalyzer {
       this.emit("errors", es)
     }
     this.context.stateSet.add(identifier)
-    this.emit("state", {identifier, attrs, position})
+    this.emit("lang:state", {identifier, attrs, position})
   }
 
   handleStateScope(hasStatement) {
@@ -892,7 +892,7 @@ export default class SemanticAnalyzer {
 
   handleGoal(block) {
     this.context.goalDefined = true
-    this.emit("goal", block)
+    this.emit("lang:goal", block)
   }
 
   handleMachineDecl(pos) {
@@ -1066,7 +1066,7 @@ export default class SemanticAnalyzer {
       this.emit("errors", es)
     }
 
-    this.emit("trans", {metadata: md, targetStates, position, expr})
+    this.emit("lang:transition", {metadata: md, targetStates, position, expr})
   }
 
   handleTransScope(ident) {
@@ -1082,12 +1082,12 @@ export default class SemanticAnalyzer {
       const block = this.peekBlock(1)
       switch (block.type) {
         case SemanticContextType.AssertExpr: {
-          this.emit("statesAssertion", {expr, position, identifiers})
+          this.emit("lang:assertion:states", {expr, position, identifiers})
           break
         }
         case SemanticContextType.InvariantDecl: {
           const name = block.metadata.identifier
-          this.emit("statesInvariant", {name, identifiers})
+          this.emit("lang:invariant:states", {name, identifiers})
           break
         }
       }

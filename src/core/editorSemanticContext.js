@@ -92,11 +92,11 @@ export default class EditorSemanticContext {
 
   // execute this BEFORE ready
   attach(analyzer) {
-    analyzer.on("enterScope", (context, block) => {
+    analyzer.on("scope:enter", (context, block) => {
       this.pushScopeLayerScope(context.scopedBlocks.length, block.type, block.position)
     })
 
-    analyzer.on("exitScope", (context, block) => {
+    analyzer.on("scope:exit", (context, block) => {
       this.setSortIdentifier(block.position, {
         type: block.type,
         identifiers: context.identifierStack.extractLatestToMap(ident => ident.text),
@@ -104,7 +104,7 @@ export default class EditorSemanticContext {
       })
     })
 
-    analyzer.on("identifierReg", (context, {text, type, position, kind, blockType}) => {
+    analyzer.on("lang:identifier:register", (context, {text, type, position, kind, blockType}) => {
       this.pushScopeLayerIdent(text, type, position, kind, blockType, context.scopedBlocks.length)
     })
 
@@ -112,7 +112,7 @@ export default class EditorSemanticContext {
     //   this.defineState(identifier, attributes)
     // })
 
-    analyzer.on("trans", (context, {metadata, targetStates, position, expr}) => {
+    analyzer.on("lang:transition", (context, {metadata, targetStates, position, expr}) => {
       // const md = block.metadata
       this.defineTransition(
         metadata.identifier,
@@ -126,15 +126,15 @@ export default class EditorSemanticContext {
       )
     })
 
-    analyzer.on("statesAssertion", (ctx, assertion) => {
+    analyzer.on("lang:assertion:states", (ctx, assertion) => {
       this.assertions.push(assertion)
     })
 
-    analyzer.on("statesInvariant", (ctx, invariant) => {
+    analyzer.on("lang:invariant:states", (ctx, invariant) => {
       this.invariants.push(invariant)
     })
 
-    analyzer.on("goal", (ctx, block) => {
+    analyzer.on("lang:goal", (ctx, block) => {
       const md = block.metadata
       if (md.invariants.size || md.states.size) {
         this.goal = {
@@ -146,7 +146,7 @@ export default class EditorSemanticContext {
       }
     })
 
-    analyzer.on("state", (ctx, {identifier, attrs, position}) => {
+    analyzer.on("lang:state", (ctx, {identifier, attrs, position}) => {
       this.stateTable.set(identifier, {identifier, attrs, position, trans: 0, namedTrans: new Set(), exprList: []})
     })
 
