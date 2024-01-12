@@ -7,7 +7,7 @@ import {
   IconAlertTriangleFilled,
   IconCursorText,
   IconDownload,
-  IconFolderOpen,
+  IconFolderOpen, IconPencil,
   IconPlayerPlay,
   IconSettings, IconShare2,
   IconShare3
@@ -33,15 +33,16 @@ const OpenInPlaygroundButton = () => {
   }
 
   return (
-    <Button onClick={onOpen} leftSection={<IconShare3 />} variant={"outline"} color={"blue"}>Open in Playground</Button>
+    <Button onClick={onOpen} leftSection={<IconPencil />} variant={"outline"} color={"blue"} disabled={!code.trim().length}>Open in Playground</Button>
   )
 }
 
 const ShareButton = () => {
   const [opened, setOpened] = useState(false)
+  const {code} = useEditorStore()
   return (
     <SharePopover opened={opened} onChange={setOpened}>
-      <Button leftSection={<IconShare3 />} onClick={() => setOpened(!opened)} variant={"default"}>Share</Button>
+      <Button leftSection={<IconShare3 />} onClick={() => setOpened(!opened)} variant={"default"} disabled={!code.trim().length}>Share</Button>
     </SharePopover>
   )
 }
@@ -89,9 +90,12 @@ export const Toolbar = ({
         {/* </SettingsPopover> */}
       </Button.Group>
 
-      {
-        light ? <OpenInPlaygroundButton /> : <ShareButton />
-      }
+      <Button.Group>
+        {
+          light ? <OpenInPlaygroundButton /> : null
+        }
+        <ShareButton />
+      </Button.Group>
 
 
     </Group>

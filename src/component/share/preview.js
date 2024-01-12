@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import {useEffect, useState} from "react";
 import hljs from "highlight.js";
-import {IconCopy, IconPlayerPlayFilled} from "@tabler/icons-react";
+import {IconCopy, IconPencil, IconPlayerPlayFilled} from "@tabler/icons-react";
 import {CycloneLanguageId} from "@/core/monaco/language";
 import hljsCyclone from "@/generated/hljs/cyclone";
 import localforage from "localforage";
@@ -48,12 +48,12 @@ export const SharedCodePreview = ({shared}) => {
       <Group grow>
         <CopyButton value={code}>
           {({ copied, copy }) => (
-            <Button variant={"default"} leftSection={<IconCopy size={14} />} onClick={copy}>
+            <Button variant={"default"} leftSection={<IconCopy size={16} />} onClick={copy}>
               {copied ? 'Copied' : 'Copy'}
             </Button>
           )}
         </CopyButton>
-        <Button onClick={onTry} rightSection={<IconPlayerPlayFilled size={14} />}>Open In Editor</Button>
+        <Button onClick={onTry} rightSection={<IconPencil size={16} />}>Open In Editor</Button>
       </Group>
       <ScrollArea.Autosize h={`70svh`}>
         <TypographyStylesProvider fz={"sm"} p={0}>

@@ -44,11 +44,31 @@ export default class SemanticAnalyzer {
       transitionSet: new Set(),
       stateSet: new Set(),
       enumFields: new Set(),
-      startNodeIdentifier: null,
-      goalDefined: false,
+      // startNodeIdentifier: null,
+      // goalDefined: false,
     }
 
     this.events = new Map()
+  }
+
+  currentBlockPath() {
+    return this.context.blockContextStack.map(it => it.type)
+  }
+
+  emitLangComponent(context, data, position = null, pathOverride = null) {
+    // TODO: emit if someone listening ...
+    // store context inside block??
+
+    this.emit("lang:component", {
+      path: pathOverride ?? this.currentBlockPath(),
+      context,
+      data,
+      position: position ?? this.peekBlock().position,
+    })
+  }
+
+  currentMachineBlock() {
+    return this.context.blockContextStack[1]
   }
 
   ready(endPos) {
@@ -135,8 +155,8 @@ export default class SemanticAnalyzer {
     return block
   }
 
-  peekBlock(skip = 0) {
-    return this.context.blockContextStack[this.context.blockContextStack.length - 1 - skip]
+  peekBlock() {
+    return this.context.blockContextStack[this.context.blockContextStack.length - 1]
   }
 
   hasBlock() {
@@ -297,7 +317,13 @@ export default class SemanticAnalyzer {
 
     // this.context.editorCtx.pushScopeLayerIdent(identText, type, identPos, identKind, blockType, this.context.scopedBlocks.length)
 
-    this.emit("lang:identifier:register", {text: identText, type, position: identPos, kind: identKind, blockType})
+    this.emit("lang:identifier:register", {
+      text: identText,
+      type,
+      position: identPos,
+      kind: identKind,
+      blockType
+    })
 
     if (!isEnum) {
       const info = {
@@ -592,7 +618,9 @@ export default class SemanticAnalyzer {
     }
   }
 
-  handleFunCall(actionKind, block, position) {
+  handleFunCall(actionKind) {
+    const block = this.peekBlock()
+    const position = block.position
     if (this.findNearestBlock(SemanticContextType.WhereExpr)) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
@@ -662,7 +690,9 @@ export default class SemanticAnalyzer {
     this.context.typeStack.push(type)
   }
 
-  deduceVariableDecl(block, pos) {
+  deduceVariableDecl() {
+    const block = this.peekBlock()
+    const pos = block.position
     const ident = block.metadata.identifier
     const identInfo = this.context.identifierStack.peek(ident)
 
@@ -690,7 +720,7 @@ export default class SemanticAnalyzer {
     // this.resetTypeStack()
   }
 
-  deduceToType(type, position, pushType = null, allowNull = false) {
+  deduceToType(type, position = null, pushType = null, allowNull = false) {
     const actualType = this.context.typeStack.pop()
     const isCorrect = actualType === type
       || actualType === IdentifierType.Hole
@@ -703,7 +733,7 @@ export default class SemanticAnalyzer {
     if (!isCorrect) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        ...position,
+        ...(position ?? this.peekBlock().position),
 
         type: ErrorType.TypeMismatchExpr,
         params: {expected: [type], got: [actualType]}
@@ -766,7 +796,10 @@ export default class SemanticAnalyzer {
     return allowedScopes.includes(scope.type)
   }
 
-  checkOption(optName, lit, position) {
+  checkOption(optName, lit, context) {
+    const position = this.peekBlock().position
+    this.emitLangComponent(context, {name: optName, value: lit})
+
     const opt = optionAcceptableValues.get(optName)
     if (!opt) {
       return
@@ -852,11 +885,15 @@ export default class SemanticAnalyzer {
     }
   }
 
-  handleStateDecl(block, attrs, position) {
+  handleStateDecl(attrs) {
+    const block = this.peekBlock()
+    const position = block.position
+
     const es = []
     const identifier = block.metadata.identifier
     if (attrs.isStart) {
-      const startIdent = this.context.startNodeIdentifier
+      const machine = this.currentMachineBlock()
+      const startIdent = machine.metadata.startNodeIdentifier
       if (startIdent != null) {
         es.push({
           source: ErrorSource.Semantic,
@@ -866,7 +903,7 @@ export default class SemanticAnalyzer {
           params: {ident: startIdent}
         })
       } else {
-        this.context.startNodeIdentifier = identifier
+        machine.metadata.startNodeIdentifier = identifier
       }
     }
 
@@ -890,18 +927,27 @@ export default class SemanticAnalyzer {
     this.peekBlock().metadata.hasChildren = hasStatement
   }
 
-  handleGoal(block) {
-    this.context.goalDefined = true
+  handleGoal() {
+    const block = this.peekBlock()
+    this.currentMachineBlock().metadata.goalDefined = true
     this.emit("lang:goal", block)
   }
 
-  handleMachineDecl(pos) {
+  handleMachineDeclEnter(keyword, keywordPosition, context) {
+    const block = this.peekBlock()
+    block.metadata.keywordPosition = keywordPosition
+    this.emitLangComponent(context, {keyword})
+  }
+
+  handleMachineDeclExit() {
+    const block = this.peekBlock()
+    const pos = block.metadata.keywordPosition
     if (!pos) {
       return
     }
 
     const es = []
-    if (!this.context.goalDefined) {
+    if (!block.metadata.goalDefined) {
       es.push({
         source: ErrorSource.Semantic,
         ...pos,
@@ -910,7 +956,7 @@ export default class SemanticAnalyzer {
       })
     }
 
-    if (this.context.startNodeIdentifier == null) {
+    if (block.metadata.startNodeIdentifier == null) {
       es.push({
         source: ErrorSource.Semantic,
         ...pos,
@@ -923,7 +969,7 @@ export default class SemanticAnalyzer {
       this.emit("errors", es)
     }
 
-    this.emit("finished", {})
+    this.emit("finished")
   }
 
   handleReturn(position) {
@@ -991,7 +1037,7 @@ export default class SemanticAnalyzer {
   }
 
   handleTransExclusion(idents) {
-    const transDecl = this.peekBlock(1).metadata
+    const transDecl = this.findNearestBlock(SemanticContextType.TransDecl).metadata
     for (let id of idents) {
       transDecl.excludedStates.add(id)
     }
@@ -1000,33 +1046,37 @@ export default class SemanticAnalyzer {
   }
 
   handleTransOp(op) {
-    this.peekBlock(1).metadata.operators.add(op)
+    this.findNearestBlock(SemanticContextType.TransDecl).metadata.operators.add(op)
   }
 
   handleTransToStates(idents) {
     for (let id of idents) {
-      this.peekBlock(1).metadata.toStates.add(id)
+      this.findNearestBlock(SemanticContextType.TransDecl).metadata.toStates.add(id)
     }
   }
 
   handleTransLabel(label) {
-    this.peekBlock(1).metadata.label = label.slice(1, label.length - 1).trim()
+    this.findNearestBlock(SemanticContextType.TransDecl).metadata.label = label.slice(1, label.length - 1).trim()
   }
 
-  handleWhereExpr(expr, posPair) {
-    const block = this.peekBlock(1)
+  handleWhereExpr(expr) {
+    const transBlock = this.findNearestBlock(SemanticContextType.TransDecl)
 
-    if (block.type === SemanticContextType.TransDecl) {
-      block.metadata.whereExpr = expr
+    // const block = this.peekBlock(1)
+
+    if (transBlock) {
+      transBlock.metadata.whereExpr = expr
         .slice("where ".length)
         .replace(/(?:\r\n|\r|\n)/g, " ")
         .replace(/\s\s+/g, " ")
     }
 
-    this.deduceToType(IdentifierType.Bool, posPair)
+    this.deduceToType(IdentifierType.Bool, this.peekBlock().position)
   }
 
-  handleTrans(block, position, expr) {
+  handleTrans(expr) {
+    const block = this.peekBlock()
+    const position = block.position
     const md = block.metadata
     const {fromState, toStates, operators, excludedStates} = md
     const es = []
@@ -1071,7 +1121,7 @@ export default class SemanticAnalyzer {
 
   handleTransScope(ident) {
     if (ident) {
-      this.peekBlock(1).metadata.fromState = ident
+      this.findNearestBlock(SemanticContextType.TransDecl).metadata.fromState = ident
     } else {
       console.trace("warn: start state not found for trans")
     }
@@ -1079,16 +1129,14 @@ export default class SemanticAnalyzer {
 
   handleInExpr(identifiers, expr, position) {
     if (identifiers?.length) {
-      const block = this.peekBlock(1)
-      switch (block.type) {
-        case SemanticContextType.AssertExpr: {
-          this.emit("lang:assertion:states", {expr, position, identifiers})
-          break
-        }
-        case SemanticContextType.InvariantDecl: {
-          const name = block.metadata.identifier
+      const assertionBlock = this.findNearestBlock(SemanticContextType.AssertExpr)
+      if (assertionBlock) {
+        this.emit("lang:assertion:states", {expr, position, identifiers})
+      } else {
+        const invariantBlock = this.findNearestBlock(SemanticContextType.InvariantDecl)
+        if (invariantBlock) {
+          const name = invariantBlock.metadata.identifier
           this.emit("lang:invariant:states", {name, identifiers})
-          break
         }
       }
     }
@@ -1132,9 +1180,10 @@ export default class SemanticAnalyzer {
     }
   }
 
-  handleLetExpr(position) {
-    this.deduceToType(IdentifierType.Bool, position, null, true)
+  handleLetExpr() {
     const block = this.peekBlock()
+    const position = block.position
+    this.deduceToType(IdentifierType.Bool, position, null, true)
     if (block.type === SemanticContextType.LetDecl && !block.metadata.hasBody) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,

@@ -104,7 +104,9 @@ export const SemanticContextType = {
 
   DotExpr: 200,
 
-  AssertExpr: 210
+  AssertExpr: 210,
+
+  CompilerOption: 220,
 
   // PathCondition: 210,
 

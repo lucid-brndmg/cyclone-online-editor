@@ -67,7 +67,9 @@ export default class EditorSemanticContext {
       this.namedTransitions.set(identifier, targetStates)
     }
     for (let state of targetStates) {
-      this.registerTransInState(state, identifier, expr)
+      if (state !== fromState) {
+        this.registerTransInState(state, identifier, expr)
+      }
     }
     this.registerTransInState(fromState, identifier, expr)
   }

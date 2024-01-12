@@ -77,6 +77,12 @@ const letDeclMetadata = () => ({
   hasBody: false
 })
 
+const machineDeclMetadata = () => ({
+  keywordPosition: null,
+  startNodeIdentifier: null,
+  goalDefined: false
+})
+
 // export const recordBlockerFinder = block => {
 //   return block.metadata?.blockCurrentRecord === true
 // }
@@ -91,5 +97,6 @@ export const semanticContextMetadataTable = {
   [SemanticContextType.TransDecl]: transDeclMetadata,
   [SemanticContextType.GoalScope]: goalScopeMetadata,
   [SemanticContextType.LetDecl]: letDeclMetadata,
-  [SemanticContextType.FnCall]: functionCallMetadata
+  [SemanticContextType.FnCall]: functionCallMetadata,
+  [SemanticContextType.MachineDecl]: machineDeclMetadata
 }
