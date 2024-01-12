@@ -12,7 +12,7 @@ export const scopedContextType = new Set([
   SemanticContextType.FnBodyScope,
 ])
 
-export const declarationContextType = new Set([
+export const singleDeclarationContextType = new Set([
   SemanticContextType.MachineDecl,
   SemanticContextType.StateDecl,
   SemanticContextType.TransDecl,
@@ -20,13 +20,17 @@ export const declarationContextType = new Set([
   SemanticContextType.LetDecl,
   SemanticContextType.RecordDecl,
   SemanticContextType.GlobalConstantDecl,
-  SemanticContextType.EnumDecl,
+  // SemanticContextType.EnumMultiDecl,
   SemanticContextType.GlobalVariableDecl,
   SemanticContextType.LocalVariableDecl,
   SemanticContextType.RecordVariableDecl,
   SemanticContextType.FnDecl,
   SemanticContextType.FnParamsDecl,
   SemanticContextType.AnnotationDecl
+])
+
+export const multiDeclarationContextType = new Set([
+  SemanticContextType.EnumMultiDecl
 ])
 
 export const declarationContextTypeToIdentifierKind = {
@@ -36,7 +40,7 @@ export const declarationContextTypeToIdentifierKind = {
   [SemanticContextType.InvariantDecl]: IdentifierKind.Invariant,
   [SemanticContextType.LetDecl]: IdentifierKind.Let,
   [SemanticContextType.RecordDecl]: IdentifierKind.Record,
-  [SemanticContextType.EnumDecl]: IdentifierKind.EnumField,
+  [SemanticContextType.EnumMultiDecl]: IdentifierKind.EnumField,
   [SemanticContextType.GlobalVariableDecl]: IdentifierKind.GlobalVariable,
   [SemanticContextType.LocalVariableDecl]: IdentifierKind.LocalVariable,
   [SemanticContextType.RecordVariableDecl]: IdentifierKind.RecordField,

@@ -9,8 +9,9 @@ export const scopeMetadata = () => ({
 })
 
 export const declareMetadata = () => ({
-  type: IdentifierType.Hole,
+  fieldType: IdentifierType.Hole,
   identifier: null,
+  members: []
 })
 
 /*
@@ -43,9 +44,9 @@ const functionDeclarationMetadata = () => ({
 //   blockCurrentRecord: true
 // })
 
-const functionParamsMetadata = () => ({
-  currentIdentifier: null
-})
+// const functionParamsMetadata = () => ({
+//   currentIdentifier: null
+// })
 
 const functionCallMetadata = () => ({
   fnName: null,
@@ -84,8 +85,8 @@ export const semanticContextMetadataTable = {
   [SemanticContextType.FnBodyScope]: functionScopeMetadata,
   [SemanticContextType.DotExpr]: dotIdentifierExprMetadata,
   [SemanticContextType.FnDecl]: functionDeclarationMetadata,
-  [SemanticContextType.FnParamsDecl]: functionParamsMetadata,
-  // [SemanticContextType.EnumDecl]: enumDeclarationMetadata,
+  // [SemanticContextType.FnParamsDecl]: functionParamsMetadata,
+  // [SemanticContextType.EnumMultiDecl]: enumDeclarationMetadata,
   [SemanticContextType.StateDecl]: stateDeclMetadata,
   [SemanticContextType.TransDecl]: transDeclMetadata,
   [SemanticContextType.GoalScope]: goalScopeMetadata,

@@ -76,7 +76,7 @@ export const SemanticContextType = {
 
   GlobalConstantDecl: 120, // decl
 
-  EnumDecl: 130, // decl
+  EnumMultiDecl: 130, // decl, multi
 
   GlobalVariableDecl: 140, // decl
   LocalVariableDecl: 141, // decl

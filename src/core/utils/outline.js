@@ -39,7 +39,7 @@ const sanitizeScopeLayers = layers => {
             enumLayers.push({
               layer: enumLayerIdx,
               outlineKind: OutlineKind.Scope,
-              type: SemanticContextType.EnumDecl,
+              type: SemanticContextType.EnumMultiDecl,
               position: layer.position,
               text: layer.text
             })

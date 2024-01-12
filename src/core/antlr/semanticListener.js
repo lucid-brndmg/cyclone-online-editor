@@ -346,7 +346,7 @@ class SemanticListener extends CycloneParserListener {
 
   enterEnumType(ctx) {
     this.analyzer.handleTypeToken("enum")
-    this.analyzer.pushBlock(SemanticContextType.EnumDecl, getBlockPositionPair(ctx))
+    this.analyzer.pushBlock(SemanticContextType.EnumMultiDecl, getBlockPositionPair(ctx))
   }
 
   exitEnumType(ctx) {
