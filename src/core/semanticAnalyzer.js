@@ -5,8 +5,8 @@ import {
   IdentifierType,
   SemanticContextType
 } from "@/core/definitions";
-import {CategorizedStackTable, PositionTable, StackedTable} from "@/lib/storage";
-import {pos, posPair} from "@/lib/position";
+import {CategorizedStackTable, StackedTable} from "@/lib/storage";
+import {posPair} from "@/lib/position";
 import {
   builtinActions,
   declarationContextType,
@@ -18,7 +18,7 @@ import {
   scopeSupportsShadowing,
   typeTokenToType
 } from "@/core/specification";
-import {declareMetadata, recordBlockerFinder, scopeMetadata} from "@/core/utils/semantic";
+import {declareMetadata, scopeMetadata, semanticContextMetadataTable} from "@/core/utils/metadata";
 import {popMulti, popMultiStore} from "@/lib/list";
 import {checkSignature} from "@/core/utils/types";
 
@@ -77,7 +77,7 @@ export default class SemanticAnalyzer {
     }
   }
 
-  pushBlock(type, position, metadata = null) {
+  pushBlock(type, position, metadataParams = null) {
     let table = null
     const isScope = scopedContextType.has(type)
     if (isScope) {
@@ -86,6 +86,9 @@ export default class SemanticAnalyzer {
     } else if (declarationContextType.has(type)) {
       table = declareMetadata()
     }
+
+    const metadataBuilder = semanticContextMetadataTable[type]
+    const metadata = metadataBuilder ? metadataBuilder(metadataParams) : null
 
     const blockContent = {
       type,
@@ -161,11 +164,14 @@ export default class SemanticAnalyzer {
     return null
   }
 
-  findNearestBlock(type) {
+  findNearestBlock(type, stopAt = null) {
     for (let i = this.context.blockContextStack.length - 1; i >= 0; i--) {
       const block = this.context.blockContextStack[i]
       if (block.type === type) {
         return block
+      }
+      if (stopAt !== null && block.type === stopAt) {
+        return null
       }
     }
 
@@ -298,11 +304,12 @@ export default class SemanticAnalyzer {
         fnParams: []
       }
       const isInsideRecord = scope.type === SemanticContextType.RecordScope
-        && this.searchNearestBlock(
-          recordBlockerFinder,
-          SemanticContextType.RecordScope,
-          // this.context.blockContextStack.length - scope.index
-        ) === null
+        && this.findNearestBlock(SemanticContextType.EnumDecl, SemanticContextType.RecordScope) === null
+        // && this.searchNearestBlock(
+        //   block => block.metadata?.blockCurrentRecord === true,
+        //   SemanticContextType.RecordScope,
+        //   // this.context.blockContextStack.length - scope.index
+        // ) === null
       if (isInsideRecord) {
         const recordIdent = this.context.currentRecordIdent[this.context.currentRecordIdent.length - 1]
         if (recordIdent) {

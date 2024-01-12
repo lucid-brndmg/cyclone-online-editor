@@ -10,7 +10,7 @@ import {
   functionScopeMetadata, goalScopeMetadata, letDeclMetadata,
   stateDeclMetadata,
   transDeclMetadata
-} from "@/core/utils/semantic";
+} from "@/core/utils/metadata";
 
 const getBlockPositionPair = ctx => {
   const text = ctx.start.text || ctx.stop.text
@@ -45,13 +45,35 @@ class SemanticListener extends CycloneParserListener {
     this.analyzer = semanticAnalyzer
   }
 
-  enterMachine(ctx) {
-    // this.analyzer.pushBlock(
-    //   SemanticContextType.Machine
-    // )
-    this.analyzer.pushBlock(SemanticContextType.MachineDecl, getBlockPositionPair(ctx))
+  #handleBinaryOp(ctx) {
+    for (let child of ctx.children) {
+      const symbol = child.symbol
+      if (symbol) {
+        const op = symbol.text
+        // console.log("exit bin op", op)
+        this.analyzer.deduceActionCall(ActionKind.InfixOperator, op, 2, getSymbolPosition(symbol, op.length))
+      }
+    }
+  }
 
-    // console.log("enter machine", ctx, ctx.start.line, ctx.start.column, ctx.stop.line, ctx.stop.column)
+  #handleUnaryOp(ctx) {
+    // console.log("possible unary", ctx)
+
+    if (ctx.children.length !== 2) {
+      return
+    }
+
+    const isSuffix = ctx.children[1].hasOwnProperty("symbol")
+    const symbol = ctx.children[isSuffix ? 1 : 0]?.symbol
+    const op = symbol?.text
+    if (op) {
+      // console.log("exit unary op", op)
+      this.analyzer.deduceActionCall(isSuffix ? ActionKind.SuffixOperator : ActionKind.PrefixOperator, op, 1, getSymbolPosition(symbol, op.length))
+    }
+  }
+
+  enterMachine(ctx) {
+    this.analyzer.pushBlock(SemanticContextType.MachineDecl, getBlockPositionPair(ctx))
   }
 
   exitMachine(ctx) {
@@ -84,7 +106,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterStateExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.StateDecl, getBlockPositionPair(ctx), stateDeclMetadata())
+    this.analyzer.pushBlock(SemanticContextType.StateDecl, getBlockPositionPair(ctx))
   }
 
   exitStateExpr(ctx) {
@@ -131,7 +153,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterTrans(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.TransDecl, getBlockPositionPair(ctx), transDeclMetadata())
+    this.analyzer.pushBlock(SemanticContextType.TransDecl, getBlockPositionPair(ctx))
   }
 
   exitTrans(ctx) {
@@ -232,7 +254,7 @@ class SemanticListener extends CycloneParserListener {
 
   enterGoal(ctx) {
     // const expr = ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop)
-    this.analyzer.pushBlock(SemanticContextType.GoalScope, getBlockPositionPair(ctx), goalScopeMetadata())
+    this.analyzer.pushBlock(SemanticContextType.GoalScope, getBlockPositionPair(ctx))
   }
 
   exitGoal(ctx) {
@@ -271,7 +293,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterLetExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.LetDecl, getBlockPositionPair(ctx), letDeclMetadata())
+    this.analyzer.pushBlock(SemanticContextType.LetDecl, getBlockPositionPair(ctx))
   }
 
   exitLetExpr(ctx) {
@@ -334,7 +356,7 @@ class SemanticListener extends CycloneParserListener {
 
   enterEnumType(ctx) {
     this.analyzer.handleTypeToken("enum")
-    this.analyzer.pushBlock(SemanticContextType.EnumDecl, getBlockPositionPair(ctx), enumDeclarationMetadata())
+    this.analyzer.pushBlock(SemanticContextType.EnumDecl, getBlockPositionPair(ctx))
   }
 
   exitEnumType(ctx) {
@@ -388,7 +410,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterFunctionDeclaration(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.FnDecl, getBlockPositionPair(ctx), functionDeclarationMetadata())
+    this.analyzer.pushBlock(SemanticContextType.FnDecl, getBlockPositionPair(ctx))
   }
 
   exitFunctionDeclaration(ctx) {
@@ -396,7 +418,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterFunctionBodyScope(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.FnBodyScope, getBlockPositionPair(ctx), functionScopeMetadata())
+    this.analyzer.pushBlock(SemanticContextType.FnBodyScope, getBlockPositionPair(ctx))
   }
 
   exitFunctionBodyScope(ctx) {
@@ -412,7 +434,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterFunctionParamsDecl(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.FnParamsDecl, getBlockPositionPair(ctx), functionParamsMetadata())
+    this.analyzer.pushBlock(SemanticContextType.FnParamsDecl, getBlockPositionPair(ctx))
   }
 
   exitFunctionParamsDecl(ctx) {
@@ -420,7 +442,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterFunCall(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.FnCall, getBlockPositionPair(ctx), functionCallMetadata())
+    this.analyzer.pushBlock(SemanticContextType.FnCall, getBlockPositionPair(ctx))
   }
 
   exitFunCall(ctx) {
@@ -463,7 +485,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterDotIdentifierExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.DotExpr, getBlockPositionPair(ctx), dotIdentifierExprMetadata())
+    this.analyzer.pushBlock(SemanticContextType.DotExpr, getBlockPositionPair(ctx))
   }
 
   exitDotIdentifierExpr(ctx) {
@@ -508,33 +530,6 @@ class SemanticListener extends CycloneParserListener {
   exitPathExpr(ctx) {
     // only used in VIA
     this.analyzer.deduceToType(IdentifierType.Bool, getBlockPositionPair(ctx))
-  }
-
-  #handleBinaryOp(ctx) {
-    for (let child of ctx.children) {
-      const symbol = child.symbol
-      if (symbol) {
-        const op = symbol.text
-        // console.log("exit bin op", op)
-        this.analyzer.deduceActionCall(ActionKind.InfixOperator, op, 2, getSymbolPosition(symbol, op.length))
-      }
-    }
-  }
-
-  #handleUnaryOp(ctx) {
-    // console.log("possible unary", ctx)
-
-    if (ctx.children.length !== 2) {
-      return
-    }
-
-    const isSuffix = ctx.children[1].hasOwnProperty("symbol")
-    const symbol = ctx.children[isSuffix ? 1 : 0]?.symbol
-    const op = symbol?.text
-    if (op) {
-      // console.log("exit unary op", op)
-      this.analyzer.deduceActionCall(isSuffix ? ActionKind.SuffixOperator : ActionKind.PrefixOperator, op, 1, getSymbolPosition(symbol, op.length))
-    }
   }
 
   exitAdditiveExpression(ctx) {
