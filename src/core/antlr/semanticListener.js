@@ -1,16 +1,6 @@
 import {ActionKind, IdentifierType, SemanticContextType} from "@/core/definitions";
 import CycloneParserListener from "@/generated/antlr/CycloneParserListener";
 import {pos, posPair} from "@/lib/position";
-import {
-  dotIdentifierExprMetadata,
-  enumDeclarationMetadata,
-  functionCallMetadata,
-  functionDeclarationMetadata,
-  functionParamsMetadata,
-  functionScopeMetadata, goalScopeMetadata, letDeclMetadata,
-  stateDeclMetadata,
-  transDeclMetadata
-} from "@/core/utils/metadata";
 
 const getBlockPositionPair = ctx => {
   const text = ctx.start.text || ctx.stop.text
