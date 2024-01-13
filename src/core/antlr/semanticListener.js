@@ -294,7 +294,12 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterCheckExpr(ctx) {
-    this.analyzer.handleCheckExpr(ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop))
+    this.analyzer.pushBlock(SemanticContextType.GoalFinal, getBlockPositionPair(ctx))
+    this.analyzer.handleCheckExpr(ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop), ctx)
+  }
+
+  exitCheckExpr(ctx) {
+    this.analyzer.popBlock()
   }
 
   enterStateIncExpr(ctx) {
@@ -401,6 +406,7 @@ class SemanticListener extends CycloneParserListener {
 
   enterFunctionDeclaration(ctx) {
     this.analyzer.pushBlock(SemanticContextType.FnDecl, getBlockPositionPair(ctx))
+    this.analyzer.handleFunctionDecl(ctx)
   }
 
   exitFunctionDeclaration(ctx) {
@@ -460,10 +466,8 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterIdentifier(ctx) {
-    const hasBlock = this.analyzer.hasBlock()
-    if (!hasBlock) {return}
     const text = ctx.start.text
-    this.analyzer.handleIdentifier(text, getBlockPositionPair(ctx))
+    this.analyzer.handleIdentifier(text, getBlockPositionPair(ctx), ctx)
   }
 
   enterDotIdentifierExpr(ctx) {
@@ -630,6 +634,15 @@ class SemanticListener extends CycloneParserListener {
 
   exitCompOptions(ctx) {
     this.analyzer.resetTypeStack()
+    this.analyzer.popBlock()
+  }
+
+  enterVariableInitializer(ctx) {
+    this.analyzer.pushBlock(SemanticContextType.VariableInit, getBlockPositionPair(ctx))
+    this.analyzer.handleVariableInit(ctx)
+  }
+
+  exitVariableInitializer(ctx) {
     this.analyzer.popBlock()
   }
 }

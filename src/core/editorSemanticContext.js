@@ -110,6 +110,10 @@ export default class EditorSemanticContext {
       this.pushScopeLayerIdent(text, type, position, kind, blockType, context.scopedBlocks.length)
     })
 
+    analyzer.on("lang:component", (e, {path}) => {
+      console.log(path)
+    })
+
     // analyzer.on("state", (context, {identifier, attributes}) => {
     //   this.defineState(identifier, attributes)
     // })
@@ -143,7 +147,8 @@ export default class EditorSemanticContext {
           invariants: md.invariants,
           states: md.states,
           expr: md.expr,
-          position: block.position
+          // position: block.position,
+          finalPosition: md.finalPosition
         }
       }
     })

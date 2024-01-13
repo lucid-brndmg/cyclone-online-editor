@@ -159,10 +159,6 @@ export default class SemanticAnalyzer {
     return this.context.blockContextStack[this.context.blockContextStack.length - 1]
   }
 
-  hasBlock() {
-    return this.context.blockContextStack.length > 0
-  }
-
   latestNthScope(skip = 0) {
     return this.context.scopedBlocks[this.context.scopedBlocks.length - 1 - skip]
   }
@@ -234,7 +230,7 @@ export default class SemanticAnalyzer {
     // return null
   }
 
-  registerIdentifier(block, identText, identPos) {
+  registerIdentifier(block, identText, identPos, context) {
     // check duplication
     const blockType = block.type
     const scope = this.latestNthScope()
@@ -317,13 +313,16 @@ export default class SemanticAnalyzer {
 
     // this.context.editorCtx.pushScopeLayerIdent(identText, type, identPos, identKind, blockType, this.context.scopedBlocks.length)
 
-    this.emit("lang:identifier:register", {
+    const payload = {
       text: identText,
       type,
       position: identPos,
       kind: identKind,
       blockType
-    })
+    }
+
+    this.emit("lang:identifier:register", payload)
+    this.emitLangComponent(context, payload)
 
     if (!isEnum) {
       const info = {
@@ -533,7 +532,7 @@ export default class SemanticAnalyzer {
 
   }
 
-  handleIdentifier(identifierText, identifierPos) {
+  handleIdentifier(identifierText, identifierPos, context) {
     const block = this.peekBlock()
     if (!block) {
       console.log("warn: block type not found")
@@ -545,7 +544,7 @@ export default class SemanticAnalyzer {
       if (blockType === SemanticContextType.FnDecl) {
         block.metadata.name = identifierText
       }
-      this.registerIdentifier(block, identifierText, identifierPos)
+      this.registerIdentifier(block, identifierText, identifierPos, context)
     } else if (blockType === SemanticContextType.DotExpr) {
       if (block.metadata.parent != null) {
         const [parentIdent, parentPos] = block.metadata.parent
@@ -1160,9 +1159,15 @@ export default class SemanticAnalyzer {
     }
   }
 
-  handleCheckExpr(expr) {
+  handleCheckExpr(expr, context) {
     // this.latestNthScope().metadata.keyword = keyword
-    this.latestNthScope().metadata.expr = expr
+    const goal = this.latestNthScope()
+    goal.metadata.expr = expr
+    goal.metadata.finalPosition = this.peekBlock().position
+
+    this.emitLangComponent(context, {
+      expr
+    })
   }
 
   handleExpression() {
@@ -1193,5 +1198,13 @@ export default class SemanticAnalyzer {
     } else if (block.type !== SemanticContextType.LetDecl) {
       console.log("warn: let block not found")
     }
+  }
+
+  handleVariableInit(context) {
+    this.emitLangComponent(context, null)
+  }
+
+  handleFunctionDecl(context) {
+    this.emitLangComponent(context, null)
   }
 }

@@ -108,6 +108,11 @@ export const SemanticContextType = {
 
   CompilerOption: 220,
 
+  VariableInit: 230,
+
+  // check for / check each / enumerate for
+  GoalFinal: 240,
+
   // PathCondition: 210,
 
 }

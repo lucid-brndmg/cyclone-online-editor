@@ -70,7 +70,8 @@ const transDeclMetadata = () => ({
 const goalScopeMetadata = () => ({
   invariants: new Set(),
   states: new Set(),
-  expr: ""
+  expr: "",
+  finalPosition: null
 })
 
 const letDeclMetadata = () => ({

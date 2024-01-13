@@ -207,7 +207,7 @@ const genGraphvizAssertionsDef = (assertions, statesDef, definedStates, previewO
   return def
 }
 
-const genGraphvizGoalDef = ({invariants, states, expr, position}, statesDef, invariantCtx, definedStates, opts) => {
+const genGraphvizGoalDef = ({invariants, states, expr, finalPosition}, statesDef, invariantCtx, definedStates, opts) => {
   const def = []
   const id = `<goal>`
   const cleanRes = []
@@ -219,7 +219,7 @@ const genGraphvizGoalDef = ({invariants, states, expr, position}, statesDef, inv
   }
   const cleanExpr = opts.showDetailedExpressions
     ? dropRegexes(expr, cleanRes).trim()
-    : `${expr.split(" ")[0] ?? "check"} (${position.startPosition.line}:${position.startPosition.column + 1})`
+    : `${expr.split(" ").slice(0, 2).join(" ") ?? "check"} ${finalPosition ? `(${finalPosition.startPosition.line}:${finalPosition.startPosition.column + 1})` : ""}`
   statesDef.push(`${id}[label=" ${cleanExpr} ", color=darkorange, fontcolor=darkorange];`)
   if (opts.showInvariant) {
     for (let inv of invariants) {
