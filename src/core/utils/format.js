@@ -289,7 +289,7 @@ const scopeBlockTypeRepr = {
   [SemanticContextType.GoalScope]: "goal",
   [SemanticContextType.RecordScope]: "record",
   [SemanticContextType.FnBodyScope]: "function",
-  [SemanticContextType.EnumMultiDecl]: "enum"
+  [SemanticContextType.EnumDecl]: "enum"
 }
 
 export const formatScopeBlockType = t => scopeBlockTypeRepr[t] ?? ""

@@ -203,11 +203,12 @@ class SemanticListener extends CycloneParserListener {
 
   enterWhereExpr(ctx) {
     this.analyzer.pushBlock(SemanticContextType.WhereExpr, getBlockPositionPair(ctx))
+    const expr = ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop)
+    this.analyzer.handleWhereExpr(expr, ctx)
   }
 
   exitWhereExpr(ctx) {
-    const expr = ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop)
-    this.analyzer.handleWhereExpr(expr)
+    this.analyzer.deduceToType(IdentifierType.Bool)
     this.analyzer.popBlock()
   }
 
@@ -338,52 +339,104 @@ class SemanticListener extends CycloneParserListener {
     this.analyzer.popBlock()
   }
 
-  enterGlobalConstant(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.GlobalConstantDecl, getBlockPositionPair(ctx))
+  // enterGlobalConstant(ctx) {
+  //   this.analyzer.pushBlock(SemanticContextType.GlobalConstantGroup, getBlockPositionPair(ctx))
+  //   // TODO: emit
+  // }
+  //
+  // exitGlobalConstant(ctx) {
+  //   this.analyzer.deduceVariableDecl()
+  //   this.analyzer.popBlock()
+  // }
+
+  enterGlobalConstantGroup(ctx) {
+    this.analyzer.pushBlock(SemanticContextType.GlobalConstantGroup, getBlockPositionPair(ctx))
   }
 
-  exitGlobalConstant(ctx) {
+  exitGlobalConstantGroup(ctx) {
+    this.analyzer.popBlock()
+  }
+
+  enterLocalVariableGroup(ctx) {
+    this.analyzer.pushBlock(SemanticContextType.LocalVariableGroup, getBlockPositionPair(ctx))
+  }
+
+  exitLocalVariableGroup(ctx) {
+    this.analyzer.popBlock()
+  }
+
+  enterGlobalVariableGroup(ctx) {
+    this.analyzer.pushBlock(SemanticContextType.GlobalVariableGroup, getBlockPositionPair(ctx))
+  }
+
+  exitGlobalVariableGroup(ctx) {
+    this.analyzer.popBlock()
+  }
+
+  enterRecordVariableDecl(ctx) {
+    this.analyzer.pushBlock(SemanticContextType.RecordVariableDeclGroup, getBlockPositionPair(ctx))
+  }
+
+  exitRecordVariableDecl(ctx) {
+    this.analyzer.popBlock()
+  }
+
+  enterGlobalConstantDecl(ctx) {
+    this.analyzer.pushBlock(SemanticContextType.VariableDecl, getBlockPositionPair(ctx))
+    this.analyzer.registerTypeForVariableDecl()
+  }
+
+  exitGlobalConstantDecl(ctx) {
+    this.analyzer.deduceVariableDecl()
+    this.analyzer.popBlock()
+  }
+
+  enterVariableDeclarator(ctx) {
+    this.analyzer.pushBlock(SemanticContextType.VariableDecl, getBlockPositionPair(ctx))
+    this.analyzer.registerTypeForVariableDecl()
+  }
+
+  exitVariableDeclarator(ctx) {
     this.analyzer.deduceVariableDecl()
     this.analyzer.popBlock()
   }
 
   enterEnumType(ctx) {
     this.analyzer.handleTypeToken("enum")
-    this.analyzer.pushBlock(SemanticContextType.EnumMultiDecl, getBlockPositionPair(ctx))
+    // this.analyzer.pushBlock(SemanticContextType.EnumDecl, getBlockPositionPair(ctx))
   }
 
-  exitEnumType(ctx) {
+  // exitEnumType(ctx) {
+  //   this.analyzer.popBlock()
+  // }
+
+  enterEnumDecl(ctx) {
+    this.analyzer.pushBlock(SemanticContextType.EnumDecl, getBlockPositionPair(ctx))
+  }
+
+  exitEnumDecl(ctx) {
     this.analyzer.popBlock()
   }
 
-  enterGlobalVariableDecl(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.GlobalVariableDecl, getBlockPositionPair(ctx))
-  }
-
-  exitGlobalVariableDecl(ctx) {
-    this.analyzer.deduceVariableDecl()
-    // In order to let errors get correct path
-    // pop blocks should be the last action
-    this.analyzer.popBlock()
-  }
-
-  enterLocalVariableDecl(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.LocalVariableDecl, getBlockPositionPair(ctx))
-  }
-
-  exitLocalVariableDecl(ctx) {
-    this.analyzer.deduceVariableDecl()
-    this.analyzer.popBlock()
-  }
-
-  enterRecordVariableDecl(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.RecordVariableDecl, getBlockPositionPair(ctx))
-  }
-
-  exitRecordVariableDecl(ctx) {
-    this.analyzer.deduceVariableDecl()
-    this.analyzer.popBlock()
-  }
+  // enterGlobalVariableDecl(ctx) {
+  //   this.analyzer.pushBlock(SemanticContextType.GlobalVariableGroup, getBlockPositionPair(ctx))
+  // }
+  //
+  // exitGlobalVariableDecl(ctx) {
+  //   this.analyzer.deduceVariableDecl()
+  //   // In order to let errors get correct path
+  //   // pop blocks should be the last action
+  //   this.analyzer.popBlock()
+  // }
+  //
+  // enterLocalVariableDecl(ctx) {
+  //   this.analyzer.pushBlock(SemanticContextType.LocalVariableGroup, getBlockPositionPair(ctx))
+  // }
+  //
+  // exitLocalVariableDecl(ctx) {
+  //   this.analyzer.deduceVariableDecl()
+  //   this.analyzer.popBlock()
+  // }
 
   enterExpression(ctx) {
     this.analyzer.handleExpression()
@@ -406,10 +459,10 @@ class SemanticListener extends CycloneParserListener {
 
   enterFunctionDeclaration(ctx) {
     this.analyzer.pushBlock(SemanticContextType.FnDecl, getBlockPositionPair(ctx))
-    this.analyzer.handleFunctionDecl(ctx)
   }
 
   exitFunctionDeclaration(ctx) {
+    this.analyzer.handleFunctionDecl()
     this.analyzer.popBlock()
   }
 

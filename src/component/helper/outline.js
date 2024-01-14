@@ -53,7 +53,7 @@ const outlineBlockTypeIcons = {
   [SemanticContextType.TransScope]: IconArrowRightCircle,
   [SemanticContextType.GoalScope]: IconViewfinder,
   [SemanticContextType.RecordScope]: IconBraces,
-  [SemanticContextType.EnumMultiDecl]: IconBraces,
+  [SemanticContextType.EnumDecl]: IconBraces,
   [SemanticContextType.FnBodyScope]: IconMathFunction,
   [SemanticContextType.InvariantScope]: IconVariableMinus,
 }

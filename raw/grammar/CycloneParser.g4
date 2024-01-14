@@ -27,7 +27,7 @@ machine:
 
 machineScope:
   LBRACE
-  ((globalVariableDecl) | (globalConstant) | (record) | (functionDeclaration))*
+  ((globalVariableGroup) | (globalConstantGroup) | (record) | (functionDeclaration))*
   (stateExpr)*
   (trans)*
   (invariantExpression)*
@@ -268,21 +268,25 @@ recordVariableDecl:
   ;
 
 // registration
-globalConstant:
-  CONST type identifier EQUAL variableInitializer
-  (COMMA identifier EQUAL variableInitializer)*
+globalConstantGroup:
+  CONST type globalConstantDecl
+  (COMMA globalConstantDecl)*
   SEMI
   ;
 
+globalConstantDecl:
+  identifier EQUAL variableInitializer
+  ;
+
 // listen
-globalVariableDecl:
+globalVariableGroup:
   type variableDeclarator
   (COMMA variableDeclarator)*
   SEMI
   ;
 
 // listen
-localVariableDecl:
+localVariableGroup:
   type variableDeclarator
   (COMMA variableDeclarator)*
   SEMI
@@ -307,12 +311,16 @@ primitiveType:
 
 // register
 enumType:
-  ENUM LBRACE identifier
-  (COMMA identifier)* RBRACE
+  ENUM LBRACE enumDecl
+  (COMMA enumDecl)* RBRACE
   ;
 
-// skip current block, push parent block (global / localVariableDecl)
-// enter: peek = globalVarDecl | localVariableDecl | recordDecl
+enumDecl:
+  identifier
+  ;
+
+// skip current block, push parent block (global / localVariableGroup)
+// enter: peek = globalVarDecl | localVariableGroup | recordDecl
 variableDeclarator:
   identifier 
   (EQUAL variableInitializer)?
@@ -411,7 +419,7 @@ functionDeclaration:
 functionBodyScope:
   functionParamsDecl
   LBRACE
-  (localVariableDecl )*
+  (localVariableGroup )*
   (statement)+
   RBRACE
   ;

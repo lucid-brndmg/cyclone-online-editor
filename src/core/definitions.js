@@ -74,13 +74,16 @@ export const SemanticContextType = {
   RecordDecl: 110, // decl
   RecordScope: 111, // scope
 
-  GlobalConstantDecl: 120, // decl
+  VariableDecl: 120,
+  GlobalConstantGroup: 121, // decl
+  GlobalVariableGroup: 122, // decl
+  LocalVariableGroup: 123, // decl
 
-  EnumMultiDecl: 130, // decl, multi
+  EnumDecl: 130, // decl
 
-  GlobalVariableDecl: 140, // decl
-  LocalVariableDecl: 141, // decl
-  RecordVariableDecl: 142, // decl
+  // Although it is NOT A GROUP for now
+  // the analyzer would treat it as a group in case for future updates, etc
+  RecordVariableDeclGroup: 140, // decl
 
   WhereExpr: 150,
 
@@ -110,7 +113,7 @@ export const SemanticContextType = {
 
   VariableInit: 230,
 
-  // check for / check each / enumerate for
+  // check for / check each / ...
   GoalFinal: 240,
 
   // PathCondition: 210,

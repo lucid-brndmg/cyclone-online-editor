@@ -437,30 +437,39 @@ export default class CycloneParserListener extends antlr4.tree.ParseTreeListener
 	}
 
 
-	// Enter a parse tree produced by CycloneParser#globalConstant.
-	enterGlobalConstant(ctx) {
+	// Enter a parse tree produced by CycloneParser#globalConstantGroup.
+	enterGlobalConstantGroup(ctx) {
 	}
 
-	// Exit a parse tree produced by CycloneParser#globalConstant.
-	exitGlobalConstant(ctx) {
-	}
-
-
-	// Enter a parse tree produced by CycloneParser#globalVariableDecl.
-	enterGlobalVariableDecl(ctx) {
-	}
-
-	// Exit a parse tree produced by CycloneParser#globalVariableDecl.
-	exitGlobalVariableDecl(ctx) {
+	// Exit a parse tree produced by CycloneParser#globalConstantGroup.
+	exitGlobalConstantGroup(ctx) {
 	}
 
 
-	// Enter a parse tree produced by CycloneParser#localVariableDecl.
-	enterLocalVariableDecl(ctx) {
+	// Enter a parse tree produced by CycloneParser#globalConstantDecl.
+	enterGlobalConstantDecl(ctx) {
 	}
 
-	// Exit a parse tree produced by CycloneParser#localVariableDecl.
-	exitLocalVariableDecl(ctx) {
+	// Exit a parse tree produced by CycloneParser#globalConstantDecl.
+	exitGlobalConstantDecl(ctx) {
+	}
+
+
+	// Enter a parse tree produced by CycloneParser#globalVariableGroup.
+	enterGlobalVariableGroup(ctx) {
+	}
+
+	// Exit a parse tree produced by CycloneParser#globalVariableGroup.
+	exitGlobalVariableGroup(ctx) {
+	}
+
+
+	// Enter a parse tree produced by CycloneParser#localVariableGroup.
+	enterLocalVariableGroup(ctx) {
+	}
+
+	// Exit a parse tree produced by CycloneParser#localVariableGroup.
+	exitLocalVariableGroup(ctx) {
 	}
 
 
@@ -497,6 +506,15 @@ export default class CycloneParserListener extends antlr4.tree.ParseTreeListener
 
 	// Exit a parse tree produced by CycloneParser#enumType.
 	exitEnumType(ctx) {
+	}
+
+
+	// Enter a parse tree produced by CycloneParser#enumDecl.
+	enterEnumDecl(ctx) {
+	}
+
+	// Exit a parse tree produced by CycloneParser#enumDecl.
+	exitEnumDecl(ctx) {
 	}
 
 

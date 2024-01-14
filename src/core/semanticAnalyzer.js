@@ -9,16 +9,21 @@ import {CategorizedStackTable, StackedTable} from "@/lib/storage";
 import {posPair} from "@/lib/position";
 import {
   builtinActions,
-  singleDeclarationContextType,
-  declarationContextTypeToIdentifierKind,
+  declarationContextType,
+  declarationContextTypeToIdentifierKind, declarationGroupContextTypeToIdentifierKind,
   identifierKindToType,
-  identifierNoPushTypeStackBlocks, multiDeclarationContextType,
+  identifierNoPushTypeStackBlocks,
   optionAcceptableValues,
   scopedContextType,
-  scopeSupportsShadowing,
+  scopeSupportsShadowing, singleTypedDeclarationGroupContextType,
   typeTokenToType
 } from "@/core/specification";
-import {declareMetadata, scopeMetadata, semanticContextMetadataTable} from "@/core/utils/metadata";
+import {
+  declareMetadata,
+  scopeMetadata,
+  semanticContextMetadataTable,
+  singleTypedDeclGroupMetadata
+} from "@/core/utils/metadata";
 import {popMulti, popMultiStore} from "@/lib/list";
 import {checkSignature} from "@/core/utils/types";
 
@@ -36,7 +41,6 @@ export default class SemanticAnalyzer {
       recordFieldStack: new CategorizedStackTable(),
       identifierStack: new StackedTable(),
       blockContextStack: [],
-      currentRecordIdent: [],
       scopedBlocks: [],
       actionTable: new CategorizedStackTable(builtinActions),
       typeStack: [],
@@ -44,8 +48,6 @@ export default class SemanticAnalyzer {
       transitionSet: new Set(),
       stateSet: new Set(),
       enumFields: new Set(),
-      // startNodeIdentifier: null,
-      // goalDefined: false,
     }
 
     this.events = new Map()
@@ -103,8 +105,10 @@ export default class SemanticAnalyzer {
     if (isScope) {
       // const [x, y] = this.context.scopeCoords
       table = scopeMetadata()
-    } else if (singleDeclarationContextType.has(type) || multiDeclarationContextType.has(type)) {
+    } else if (declarationContextType.has(type)) {
       table = declareMetadata()
+    } else if (singleTypedDeclarationGroupContextType.has(type)) {
+      table = singleTypedDeclGroupMetadata()
     }
 
     const metadataBuilder = semanticContextMetadataTable[type]
@@ -115,7 +119,7 @@ export default class SemanticAnalyzer {
       position,
       // index: this.context.blockContextStack.length,
       // identifierTable: new Map(), // Map<Kind, Map<Ident, [definitions]>>
-      metadata: table || metadata ? {...metadata, ...table} : null
+      metadata: table || metadata ? {...table, ...metadata} : null
     }
 
     this.context.blockContextStack.push(blockContent)
@@ -146,17 +150,17 @@ export default class SemanticAnalyzer {
         this.clearScope(block)
         this.context.scopedBlocks.pop()
       }
-      if (block.type === SemanticContextType.RecordDecl) {
-        this.context.currentRecordIdent.pop()
-      }
+      // if (block.type === SemanticContextType.RecordDecl) {
+      //   this.context.currentRecordIdent.pop()
+      // }
     } else if (clear) {
       console.log("warn: no block to pop")
     }
     return block
   }
 
-  peekBlock() {
-    return this.context.blockContextStack[this.context.blockContextStack.length - 1]
+  peekBlock(skip = 0) {
+    return this.context.blockContextStack[this.context.blockContextStack.length - 1 - skip]
   }
 
   latestNthScope(skip = 0) {
@@ -238,9 +242,15 @@ export default class SemanticAnalyzer {
       console.log("warn: scope not found", blockType, identText, identPos)
     }
 
-    const identKind = declarationContextTypeToIdentifierKind[blockType]
+    let identKind = declarationContextTypeToIdentifierKind[blockType]
       ?? IdentifierKind.Unknown
-    let isEnum = blockType === SemanticContextType.EnumMultiDecl
+    if (identKind === IdentifierKind.Unknown) {
+      const prev = this.peekBlock(1)
+      identKind = declarationGroupContextTypeToIdentifierKind[prev.type] ?? IdentifierKind.Unknown
+    }
+    let isEnum = blockType === SemanticContextType.EnumDecl
+
+    // NOTE: Enum fields don't have types, their types are always -1
     const type = identifierKindToType[identKind]
       ?? block.metadata.fieldType
     // console.log("support shadowing: ", scopeSupportsShadowing.get(scope.type)?.has(identKind), scope.type, identKind)
@@ -265,11 +275,11 @@ export default class SemanticAnalyzer {
     let fnSignature = null
 
     switch (blockType) {
-      case SemanticContextType.RecordDecl: {
-        this.context.currentRecordIdent.push(identText)
-        // block.metadata.identifier = identText
-        break
-      }
+      // case SemanticContextType.RecordDecl: {
+      //   this.context.currentRecordIdent.push(identText)
+      //   // block.metadata.identifier = identText
+      //   break
+      // }
       case SemanticContextType.FnDecl: {
         this.context.actionTable.push(ActionKind.Function, identText, {
           action: identText,
@@ -291,24 +301,22 @@ export default class SemanticAnalyzer {
       // case SemanticContextType.TransDecl:
       // case SemanticContextType.StateDecl:
       // case SemanticContextType.InvariantDecl:
-      // case SemanticContextType.LocalVariableDecl:
-      // case SemanticContextType.GlobalConstantDecl:
-      // case SemanticContextType.GlobalVariableDecl:
-      // case SemanticContextType.RecordVariableDecl: {
+      // case SemanticContextType.LocalVariableGroup:
+      // case SemanticContextType.GlobalConstantGroup:
+      // case SemanticContextType.GlobalVariableGroup:
+      // case SemanticContextType.RecordVariableDeclGroup: {
       //   block.metadata.identifier = identText
       //   break
       // }
 
-      case SemanticContextType.EnumMultiDecl: {
+      case SemanticContextType.EnumDecl: {
         this.context.enumFields.add(identText)
         break
       }
     }
 
-    if (singleDeclarationContextType.has(blockType)) {
+    if (declarationContextType.has(blockType)) {
       block.metadata.identifier = identText
-    } else if (multiDeclarationContextType.has(blockType)) {
-      block.metadata.members.push(identText)
     }
 
     // this.context.editorCtx.pushScopeLayerIdent(identText, type, identPos, identKind, blockType, this.context.scopedBlocks.length)
@@ -335,15 +343,21 @@ export default class SemanticAnalyzer {
         fnSignature,
         fnParams: []
       }
-      const isInsideRecord = scope.type === SemanticContextType.RecordScope
-        && this.findNearestBlock(SemanticContextType.EnumMultiDecl, SemanticContextType.RecordScope) === null
+      const isRecordMemberDef = scope.type === SemanticContextType.RecordScope
+        // current block is not enum decl
+        // (since enum decl also involves identifiers)
+        && this.peekBlock().type !== SemanticContextType.EnumDecl
+
+
+        // this.findNearestBlock(SemanticContextType.EnumDecl, SemanticContextType.RecordScope) === null
         // && this.searchNearestBlock(
         //   block => block.metadata?.blockCurrentRecord === true,
         //   SemanticContextType.RecordScope,
         //   // this.context.blockContextStack.length - scope.index
         // ) === null
-      if (isInsideRecord) {
-        const recordIdent = this.context.currentRecordIdent[this.context.currentRecordIdent.length - 1]
+      if (isRecordMemberDef) {
+        const recordDecl = this.findNearestBlock(SemanticContextType.RecordDecl)
+        const recordIdent = recordDecl.metadata.identifier // this.context.currentRecordIdent[this.context.currentRecordIdent.length - 1]
         if (recordIdent) {
           // info.recordIdent = recordIdent
 
@@ -430,7 +444,7 @@ export default class SemanticAnalyzer {
       case SemanticContextType.FnCall: {
         if (ident) {
           const functionDecl = this.findNearestBlock(SemanticContextType.FnDecl)
-          const fnName = functionDecl?.metadata.name
+          const fnName = functionDecl?.metadata.identifier
           if (fnName === identText && ident.kind === IdentifierKind.FnName) {
             es.push({
               source: ErrorSource.Semantic,
@@ -448,11 +462,7 @@ export default class SemanticAnalyzer {
 
     const whereBlock = this.findNearestBlock(SemanticContextType.WhereExpr)
     if (whereBlock) {
-      const variableDeclBlock = this.findNearestBlockByTypes([
-        SemanticContextType.RecordVariableDecl,
-        SemanticContextType.LocalVariableDecl,
-        SemanticContextType.GlobalVariableDecl
-      ])
+      const variableDeclBlock = this.findNearestBlock(SemanticContextType.VariableDecl)
       if (variableDeclBlock) {
         const ident = variableDeclBlock.metadata.identifier
         if (ident !== identText && this.context.identifierStack.peek(identText)?.kind !== IdentifierKind.GlobalConst) {
@@ -540,10 +550,7 @@ export default class SemanticAnalyzer {
     }
 
     const blockType = block.type
-    if (singleDeclarationContextType.has(blockType) || multiDeclarationContextType.has(blockType)) {
-      if (blockType === SemanticContextType.FnDecl) {
-        block.metadata.name = identifierText
-      }
+    if (declarationContextType.has(blockType)) {
       this.registerIdentifier(block, identifierText, identifierPos, context)
     } else if (blockType === SemanticContextType.DotExpr) {
       if (block.metadata.parent != null) {
@@ -575,19 +582,6 @@ export default class SemanticAnalyzer {
       ?? IdentifierType.Hole
 
     switch (block.type) {
-      case SemanticContextType.EnumMultiDecl:
-      case SemanticContextType.GlobalConstantDecl:
-      case SemanticContextType.GlobalVariableDecl:
-      case SemanticContextType.LocalVariableDecl:
-      case SemanticContextType.RecordVariableDecl: {
-        if (type === IdentifierType.Hole) {
-          console.log("warn: unknown type text", typeText)
-        }
-
-        block.metadata.fieldType = type
-        break
-      }
-
       case SemanticContextType.FnDecl: {
         block.metadata.signatures[0].output = type
         break
@@ -613,6 +607,28 @@ export default class SemanticAnalyzer {
           console.log("warn: no fn decl block exists before fn params block", block)
         }
         break
+      }
+
+      default: {
+        if (singleTypedDeclarationGroupContextType.has(block.type)) {
+          // case SemanticContextType.EnumGroup:
+          // case SemanticContextType.GlobalConstantGroup:
+          // case SemanticContextType.GlobalVariableGroup:
+          // case SemanticContextType.LocalVariableGroup:
+          block.metadata.fieldType = type
+        }
+
+        break
+
+        // if (singleTypedDeclarationContextType.has(block.type)) {
+        //   // case SemanticContextType.RecordVariableDeclGroup:
+        //   if (type === IdentifierType.Hole) {
+        //     console.log("warn: unknown type text", typeText)
+        //   }
+        //   block.metadata.fieldType = type
+        //   break
+        // }
+
       }
     }
   }
@@ -1058,7 +1074,7 @@ export default class SemanticAnalyzer {
     this.findNearestBlock(SemanticContextType.TransDecl).metadata.label = label.slice(1, label.length - 1).trim()
   }
 
-  handleWhereExpr(expr) {
+  handleWhereExpr(expr, ctx) {
     const transBlock = this.findNearestBlock(SemanticContextType.TransDecl)
 
     // const block = this.peekBlock(1)
@@ -1070,7 +1086,7 @@ export default class SemanticAnalyzer {
         .replace(/\s\s+/g, " ")
     }
 
-    this.deduceToType(IdentifierType.Bool, this.peekBlock().position)
+    this.emitLangComponent(ctx, {expr})
   }
 
   handleTrans(expr) {
@@ -1205,6 +1221,14 @@ export default class SemanticAnalyzer {
   }
 
   handleFunctionDecl(context) {
-    this.emitLangComponent(context, null)
+    const block = this.peekBlock()
+    this.emitLangComponent(context, block.metadata)
+  }
+
+  registerTypeForVariableDecl() {
+    const prevBlock = this.peekBlock(1)
+    if (singleTypedDeclarationGroupContextType.has(prevBlock.type)) {
+      this.peekBlock().metadata.fieldType = prevBlock.metadata.fieldType
+    }
   }
 }

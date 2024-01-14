@@ -12,26 +12,35 @@ export const scopedContextType = new Set([
   SemanticContextType.FnBodyScope,
 ])
 
-export const singleDeclarationContextType = new Set([
+export const declarationContextType = new Set([
   SemanticContextType.MachineDecl,
   SemanticContextType.StateDecl,
   SemanticContextType.TransDecl,
   SemanticContextType.InvariantDecl,
   SemanticContextType.LetDecl,
   SemanticContextType.RecordDecl,
-  SemanticContextType.GlobalConstantDecl,
-  // SemanticContextType.EnumMultiDecl,
-  SemanticContextType.GlobalVariableDecl,
-  SemanticContextType.LocalVariableDecl,
-  SemanticContextType.RecordVariableDecl,
+  // SemanticContextType.GlobalConstantGroup,
+  SemanticContextType.EnumDecl,
+  SemanticContextType.VariableDecl,
+  // SemanticContextType.GlobalVariableGroup,
+  // SemanticContextType.LocalVariableGroup,
+  // SemanticContextType.RecordVariableDeclGroup,
   SemanticContextType.FnDecl,
   SemanticContextType.FnParamsDecl,
   SemanticContextType.AnnotationDecl
 ])
 
-export const multiDeclarationContextType = new Set([
-  SemanticContextType.EnumMultiDecl
+export const singleTypedDeclarationGroupContextType = new Set([
+  // SemanticContextType.EnumGroup,
+  SemanticContextType.GlobalConstantGroup,
+  SemanticContextType.GlobalVariableGroup,
+  SemanticContextType.LocalVariableGroup,
+  SemanticContextType.RecordVariableDeclGroup,
 ])
+
+// export const singleTypedDeclarationContextType = new Set([
+//   SemanticContextType.RecordVariableDeclGroup,
+// ])
 
 export const declarationContextTypeToIdentifierKind = {
   [SemanticContextType.MachineDecl]: IdentifierKind.Machine,
@@ -40,14 +49,22 @@ export const declarationContextTypeToIdentifierKind = {
   [SemanticContextType.InvariantDecl]: IdentifierKind.Invariant,
   [SemanticContextType.LetDecl]: IdentifierKind.Let,
   [SemanticContextType.RecordDecl]: IdentifierKind.Record,
-  [SemanticContextType.EnumMultiDecl]: IdentifierKind.EnumField,
-  [SemanticContextType.GlobalVariableDecl]: IdentifierKind.GlobalVariable,
-  [SemanticContextType.LocalVariableDecl]: IdentifierKind.LocalVariable,
-  [SemanticContextType.RecordVariableDecl]: IdentifierKind.RecordField,
-  [SemanticContextType.GlobalConstantDecl]: IdentifierKind.GlobalConst,
+  [SemanticContextType.EnumDecl]: IdentifierKind.EnumField,
+  // [SemanticContextType.GlobalVariableGroup]: IdentifierKind.GlobalVariable,
+  // [SemanticContextType.LocalVariableGroup]: IdentifierKind.LocalVariable,
+  // [SemanticContextType.GlobalConstantGroup]: IdentifierKind.GlobalConst,
   [SemanticContextType.FnDecl]: IdentifierKind.FnName,
   [SemanticContextType.FnParamsDecl]: IdentifierKind.FnParam,
   [SemanticContextType.AnnotationDecl]: IdentifierKind.Annotation
+}
+
+export const declarationGroupContextTypeToIdentifierKind = {
+  // [SemanticContextType.EnumGroup]: IdentifierKind.EnumField,
+  [SemanticContextType.GlobalConstantGroup]: IdentifierKind.GlobalConst,
+  [SemanticContextType.LocalVariableGroup]: IdentifierKind.LocalVariable,
+  [SemanticContextType.RecordVariableDeclGroup]: IdentifierKind.RecordField,
+  [SemanticContextType.GlobalVariableGroup]: IdentifierKind.GlobalVariable,
+
 }
 
 export const identifierKindToType = {

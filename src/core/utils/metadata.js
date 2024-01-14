@@ -11,7 +11,11 @@ export const scopeMetadata = () => ({
 export const declareMetadata = () => ({
   fieldType: IdentifierType.Hole,
   identifier: null,
-  members: []
+  // members: []
+})
+
+export const singleTypedDeclGroupMetadata = () => ({
+  fieldType: IdentifierType.Hole
 })
 
 /*
@@ -39,14 +43,6 @@ const functionDeclarationMetadata = () => ({
     output: IdentifierType.Hole
   }]
 })
-
-// const enumDeclarationMetadata = () => ({
-//   blockCurrentRecord: true
-// })
-
-// const functionParamsMetadata = () => ({
-//   currentIdentifier: null
-// })
 
 const functionCallMetadata = () => ({
   fnName: null,
@@ -84,20 +80,16 @@ const machineDeclMetadata = () => ({
   goalDefined: false
 })
 
-// export const recordBlockerFinder = block => {
-//   return block.metadata?.blockCurrentRecord === true
-// }
-
 export const semanticContextMetadataTable = {
   [SemanticContextType.FnBodyScope]: functionScopeMetadata,
   [SemanticContextType.DotExpr]: dotIdentifierExprMetadata,
   [SemanticContextType.FnDecl]: functionDeclarationMetadata,
   // [SemanticContextType.FnParamsDecl]: functionParamsMetadata,
-  // [SemanticContextType.EnumMultiDecl]: enumDeclarationMetadata,
+  // [SemanticContextType.EnumDecl]: enumDeclarationMetadata,
   [SemanticContextType.StateDecl]: stateDeclMetadata,
   [SemanticContextType.TransDecl]: transDeclMetadata,
   [SemanticContextType.GoalScope]: goalScopeMetadata,
   [SemanticContextType.LetDecl]: letDeclMetadata,
   [SemanticContextType.FnCall]: functionCallMetadata,
-  [SemanticContextType.MachineDecl]: machineDeclMetadata
+  [SemanticContextType.MachineDecl]: machineDeclMetadata,
 }
