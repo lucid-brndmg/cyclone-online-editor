@@ -1,5 +1,7 @@
 import {PositionTable} from "@/lib/storage";
-import {OutlineKind} from "@/core/definitions";
+import {OutlineKind, SemanticContextType} from "@/core/definitions";
+import {declarationContextType, scopedContextType} from "@/core/specification";
+import {getParentExpression} from "@/core/utils/antlr";
 
 export default class EditorSemanticContext {
   scopePosition = new PositionTable()
@@ -92,74 +94,181 @@ export default class EditorSemanticContext {
     }
   }
 
+  makeMachineSnapshot(context, block) {
+    const machineCtx = context.currentMachineBlock.metadata
+    const enums = machineCtx.enumFields
+    const identifiers = machineCtx.identifierStack
+    this.setSortIdentifier(block.position, {
+      type: block.type,
+      identifiers: identifiers.extractLatestToMap(ident => ident.text),
+      enums: new Set(enums)
+    })
+  }
+
   // execute this BEFORE ready
   attach(analyzer) {
-    analyzer.on("scope:enter", (context, block) => {
-      this.pushScopeLayerScope(context.scopedBlocks.length, block.type, block.position)
+    // analyzer.on("scope:enter", (context, block) => {
+    // })
+
+    // analyzer.on("scope:exit", (context, block) => {
+    //   const machineCtx = context.currentMachineBlock.metadata
+    //   const enums = machineCtx.enumFields
+    //   const identifiers = machineCtx.identifierStack
+    //   this.setSortIdentifier(block.position, {
+    //     type: block.type,
+    //     identifiers: identifiers.extractLatestToMap(ident => ident.text),
+    //     enums: new Set(enums)
+    //   })
+    // })
+
+    analyzer.on("lang:block:enter", (context, {block}) => {
+      if (scopedContextType.has(block.type)) {
+        this.pushScopeLayerScope(context.scopedBlocks.length, block.type, block.position)
+      }
     })
 
-    analyzer.on("scope:exit", (context, block) => {
-      const machineCtx = context.currentMachineBlock.metadata
-      const enums = machineCtx.enumFields
-      const identifiers = machineCtx.identifierStack
-      this.setSortIdentifier(block.position, {
-        type: block.type,
-        identifiers: identifiers.extractLatestToMap(ident => ident.text),
-        enums: new Set(enums)
-      })
+    analyzer.on("lang:block:exit", (context, {payload, block}) => {
+      if (scopedContextType.has(block.type)) {
+        this.makeMachineSnapshot(context, block)
+      }
+      switch (block.type) {
+        case SemanticContextType.StateDecl: {
+          const {metadata, position} = block
+          const {identifier, attributes} = metadata
+          this.stateTable.set(identifier, {identifier, attrs: attributes, position, trans: 0, namedTrans: new Set(), exprList: []})
+          break
+        }
+        case SemanticContextType.TransDecl: {
+          const {metadata, position} = block
+          const expr = payload.start.getInputStream().getText(payload.start.start, payload.stop.stop)
+          console.log("expr is", expr)
+          this.defineTransition(
+            metadata.identifier,
+            metadata.label,
+            metadata.whereExpr,
+            metadata.fromState,
+            metadata.operators,
+            metadata.involvedStates,
+            position,
+            expr
+          )
+          break
+        }
+
+        case SemanticContextType.InExpr: {
+          const {metadata, position} = block
+          const {identifiers} = metadata
+          if (!metadata.identifiers?.length) {
+            break
+          }
+
+          const prev = context.blockContextStack[context.blockContextStack.length - 2]
+          switch (prev?.type) {
+            case SemanticContextType.AssertExpr: {
+              const expr = getParentExpression(payload)
+              this.assertions.push({expr, position, identifiers})
+              break
+            }
+            case SemanticContextType.InvariantDecl: {
+              // -3 = invariant decl
+              const name = prev.metadata.identifier
+              this.invariants.push({name, identifiers})
+              break
+            }
+          }
+
+          break
+        }
+
+        case SemanticContextType.GoalScope: {
+          const md = block.metadata
+          if (md.invariants.size || md.states.size) {
+            this.goal = {
+              invariants: md.invariants,
+              states: md.states,
+              expr: md.expr,
+              // position: block.position,
+              finalPosition: md.finalPosition
+            }
+          }
+        }
+      }
     })
 
     analyzer.on("lang:identifier:register", (context, {text, type, position, kind, blockType}) => {
       this.pushScopeLayerIdent(text, type, position, kind, blockType, context.scopedBlocks.length)
     })
 
-    analyzer.on("lang:component", (e, {path}) => {
-      console.log(path)
-    })
+    // analyzer.on("lang:component", (e, {path, context, position, data}) => {
+    //   console.log(path)
+    //   const lastPath = path[path.length - 1]
+    //   switch (lastPath) {
+    //     case SemanticContextType.StateDecl: {
+    //       const {identifier, attrs} = data
+    //       this.stateTable.set(identifier, {identifier, attrs, position, trans: 0, namedTrans: new Set(), exprList: []})
+    //       break
+    //     }
+    //
+    //     case SemanticContextType.TransDecl: {
+    //       const {targetStates} = data
+    //       const expr = context.start.getInputStream().getText(context.start.start, context.stop.stop)
+    //       const metadata = e.currentBlock.metadata
+    //       this.defineTransition(
+    //         metadata.identifier,
+    //         metadata.label,
+    //         metadata.whereExpr,
+    //         metadata.fromState,
+    //         metadata.operators,
+    //         targetStates,
+    //         position,
+    //         expr
+    //       )
+    //     }
+    //   }
+    // })
 
     // analyzer.on("state", (context, {identifier, attributes}) => {
     //   this.defineState(identifier, attributes)
     // })
 
-    analyzer.on("lang:transition", (context, {metadata, targetStates, position, expr}) => {
-      // const md = block.metadata
-      this.defineTransition(
-        metadata.identifier,
-        metadata.label,
-        metadata.whereExpr,
-        metadata.fromState,
-        metadata.operators,
-        targetStates,
-        position,
-        expr
-      )
-    })
+    // analyzer.on("lang:transition", (context, {metadata, targetStates, position, expr}) => {
+    //   // const md = block.metadata
+    //   this.defineTransition(
+    //     metadata.identifier,
+    //     metadata.label,
+    //     metadata.whereExpr,
+    //     metadata.fromState,
+    //     metadata.operators,
+    //     targetStates,
+    //     position,
+    //     expr
+    //   )
+    // })
 
-    analyzer.on("lang:assertion:states", (ctx, assertion) => {
-      this.assertions.push(assertion)
-    })
+    // analyzer.on("lang:assertion:states", (ctx, assertion) => {
+    //   this.assertions.push(assertion)
+    // })
+    //
+    // analyzer.on("lang:invariant:states", (ctx, invariant) => {
+    //   this.invariants.push(invariant)
+    // })
 
-    analyzer.on("lang:invariant:states", (ctx, invariant) => {
-      this.invariants.push(invariant)
-    })
+    // analyzer.on("lang:goal", (ctx, block) => {
+    //   const md = block.metadata
+    //   if (md.invariants.size || md.states.size) {
+    //     this.goal = {
+    //       invariants: md.invariants,
+    //       states: md.states,
+    //       expr: md.expr,
+    //       // position: block.position,
+    //       finalPosition: md.finalPosition
+    //     }
+    //   }
+    // })
 
-    analyzer.on("lang:goal", (ctx, block) => {
-      const md = block.metadata
-      if (md.invariants.size || md.states.size) {
-        this.goal = {
-          invariants: md.invariants,
-          states: md.states,
-          expr: md.expr,
-          // position: block.position,
-          finalPosition: md.finalPosition
-        }
-      }
-    })
+    // analyzer.on("lang:state", (ctx, {identifier, attrs, position}) => {
+    //   this.stateTable.set(identifier, {identifier, attrs, position, trans: 0, namedTrans: new Set(), exprList: []})
+    // })
 
-    analyzer.on("lang:state", (ctx, {identifier, attrs, position}) => {
-      this.stateTable.set(identifier, {identifier, attrs, position, trans: 0, namedTrans: new Set(), exprList: []})
-    })
-
-    // Don't need to listen to "state" cuz stateTable is already defined
   }
 }

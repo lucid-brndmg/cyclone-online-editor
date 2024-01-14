@@ -111,10 +111,14 @@ export const SemanticContextType = {
 
   CompilerOption: 220,
 
+  // variants of expr
   VariableInit: 230,
+  Statement: 231,
 
   // check for / check each / ...
   GoalFinal: 240,
+
+  PathAssignStatement: 250 // should get identifier via regex
 
   // PathCondition: 210,
 

@@ -1,31 +1,9 @@
 import {ActionKind, IdentifierType, SemanticContextType} from "@/core/definitions";
 import CycloneParserListener from "@/generated/antlr/CycloneParserListener";
 import {pos, posPair} from "@/lib/position";
+import {getSymbolPosition, getBlockPositionPair, getIdentifiersInList} from "@/core/utils/antlr";
 
-const getBlockPositionPair = ctx => {
-  const text = ctx.start.text || ctx.stop.text
-  const textLength= !text || text === "<EOF>" ? 1 : text.length
-  const startLine = ctx.start.line
-  const stopLine = ctx.stop.line
-  const startCol = ctx.start.column
-  const stopCol = ctx.stop.column
 
-  return posPair(
-    startLine, startCol,
-    stopLine, stopCol + (stopLine === startLine && stopCol === startCol ? textLength : 0) // + textLength
-  )
-}
-
-const getSymbolPosition = (symbol, length) => {
-  const line = symbol.line
-  const col = symbol.column
-  return posPair(
-    line, col,
-    line, col + (length || symbol.text.length)
-  )
-}
-
-const getIdentifiersInList = ctx => ctx.children?.filter(c => c.constructor.name === "IdentifierContext") ?? []
 
 class SemanticListener extends CycloneParserListener {
   analyzer
@@ -62,8 +40,11 @@ class SemanticListener extends CycloneParserListener {
     }
   }
 
+  #pushBlock(type, ctx) {
+    this.analyzer.pushBlock(type, getBlockPositionPair(ctx), ctx)
+  }
+
   enterMachine(ctx) {
-    const pos = getBlockPositionPair(ctx)
     const token = ctx.children.find(child => {
       const kwd = child?.symbol?.text
       return kwd === "machine" || kwd === "graph"
@@ -73,31 +54,32 @@ class SemanticListener extends CycloneParserListener {
       const symbol = token.symbol
       symbolPos = getSymbolPosition(symbol)
     }
-
+    // const pos = getBlockPositionPair(ctx)
     // PUSH BLOCK BEFORE EMIT LANG COMPONENT
-    this.analyzer.pushBlock(SemanticContextType.MachineDecl, pos)
-    this.analyzer.handleMachineDeclEnter(token, symbolPos, ctx)
+    // this.analyzer.pushBlock(SemanticContextType.MachineDecl, pos)
+    this.#pushBlock(SemanticContextType.MachineDecl, ctx)
+    this.analyzer.handleMachineDeclEnter(token, symbolPos)
   }
 
   exitMachine(ctx) {
     this.analyzer.handleMachineDeclExit()
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterMachineScope(ctx) {
     // console.log("enter machine scope")
-    this.analyzer.pushBlock(SemanticContextType.MachineScope, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.MachineScope, ctx)
   }
 
   exitMachineScope(ctx) {
     // console.log("exit machine scope")
 
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
     
   }
 
   enterStateExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.StateDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.StateDecl, ctx)
   }
 
   exitStateExpr(ctx) {
@@ -120,46 +102,48 @@ class SemanticListener extends CycloneParserListener {
     }
 
     this.analyzer.handleStateDecl({isAbstract, isStart, isNormal, isFinal, isNode})
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterStateScope(ctx) {
     // this.analyzer.peekBlock().metadata.hasChildren = ctx.children.length > 2
-    this.analyzer.handleStateScope(ctx.children.length > 2)
-    this.analyzer.pushBlock(SemanticContextType.StateScope, getBlockPositionPair(ctx))
+    this.analyzer.handleStateScope(ctx.children.length > 2, ctx)
+    this.#pushBlock(SemanticContextType.StateScope, ctx)
   }
 
   exitStateScope(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterStatement(ctx) {
+    this.#pushBlock(SemanticContextType.Statement, ctx)
     this.analyzer.handleStatementEnter(getBlockPositionPair(ctx))
   }
 
   exitStatement(ctx) {
     this.analyzer.handleStatementExit(getBlockPositionPair(ctx))
     this.analyzer.resetTypeStack()
+    this.analyzer.popBlock(ctx)
   }
 
   enterTrans(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.TransDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.TransDecl, ctx)
   }
 
   exitTrans(ctx) {
-    this.analyzer.handleTrans(ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop))
-    this.analyzer.popBlock()
+    this.analyzer.handleTrans()
+    this.analyzer.popBlock(ctx)
   }
 
   enterTransScope(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.TransScope, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.TransScope, ctx)
     const ident = getIdentifiersInList(ctx)[0]
-    this.analyzer.handleTransScope(ident?.start.text)
+    this.analyzer.handleTransScope(ident)
   }
 
   exitTransScope(ctx) {
     // check
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterTransDef(ctx) {
@@ -171,7 +155,7 @@ class SemanticListener extends CycloneParserListener {
       this.analyzer.handleTransOp(symbol)
     } else {
       const idents = getIdentifiersInList(ctx)
-      this.analyzer.handleTransToStates(idents.map(c => c.start.text))
+      this.analyzer.handleTransToStates(idents)
     }
     // const idents = []
     // for (let child of ctx.children) {
@@ -197,59 +181,67 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterTransExclExpr(ctx) {
-    const idents = getIdentifiersInList(ctx).map(it => it.start.text)
+    const idents = getIdentifiersInList(ctx)// .map(it => it.start.text)
     this.analyzer.handleTransExclusion(idents)
   }
 
   enterWhereExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.WhereExpr, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.WhereExpr, ctx)
     const expr = ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop)
-    this.analyzer.handleWhereExpr(expr, ctx)
+    this.analyzer.handleWhereExpr(expr)
   }
 
   exitWhereExpr(ctx) {
     this.analyzer.deduceToType(IdentifierType.Bool)
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterInvariantExpression(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.InvariantDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.InvariantDecl, ctx)
     // this.analyzer.pushMark(SemanticContextMark.Invariant)
   }
 
   exitInvariantExpression(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterInExpr(ctx) {
     // invariant | assert
-    this.analyzer.pushBlock(SemanticContextType.InExpr, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.InExpr, ctx)
     const idents = getIdentifiersInList(ctx)
-    const [line, column] = [ctx.parentCtx.start.start, ctx.parentCtx.stop.stop]
-    const expr = ctx.parentCtx.start.getInputStream().getText(line, column)
-    this.analyzer.handleInExpr(idents?.map(it => it.start.text), expr, pos(ctx.parentCtx.start.line, ctx.parentCtx.start.column))
+    // const expr = ctx.parentCtx.start.getInputStream().getText(ctx.parentCtx.start.start, ctx.parentCtx.stop.stop)
+    // this.analyzer.handleInExpr(idents?.map(it => it.start.text), expr, pos(ctx.parentCtx.start.line, ctx.parentCtx.start.column))
+    this.analyzer.handleInExpr(idents)
   }
 
   exitInExpr(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
+  }
+
+  enterPathAssignStatement(ctx) {
+    this.#pushBlock(SemanticContextType.PathAssignStatement, ctx)
+  }
+
+  exitPathAssignStatement(ctx) {
+    this.analyzer.popBlock(ctx)
   }
 
   enterInvariantScope(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.InvariantScope, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.InvariantScope, ctx)
   }
 
   exitInvariantScope(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterGoal(ctx) {
     // const expr = ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop)
-    this.analyzer.pushBlock(SemanticContextType.GoalScope, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.GoalScope, ctx)
   }
 
   exitGoal(ctx) {
     this.analyzer.handleGoal()
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   exitForExpr(ctx) {
@@ -258,147 +250,137 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterStopExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.Stop, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.Stop, ctx)
 
     const idents = getIdentifiersInList(ctx)
     // const [line, column] = [ctx.parentCtx.start.start, ctx.parentCtx.stop.stop]
     // const expr = ctx.parentCtx.start.getInputStream().getText(line, column)
-    this.analyzer.handleStopExpr(idents?.map(it => it.start.text))
+    this.analyzer.handleStopExpr(idents)
   }
 
   exitStopExpr(ctx) {
     // check
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterWithExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.With, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.With, ctx)
     const idents = getIdentifiersInList(ctx)
-    this.analyzer.handleWithExpr(idents?.map(it => it.start.text))
+    this.analyzer.handleWithExpr(idents)
   }
 
   exitWithExpr(ctx) {
     // check
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterLetExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.LetDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.LetDecl, ctx)
   }
 
   exitLetExpr(ctx) {
     // check
     this.analyzer.handleLetExpr()
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
     // this.analyzer.deduceToType(IdentifierType.Bool, getBlockPositionPair(ctx), null, true)
     
   }
 
   enterCheckExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.GoalFinal, getBlockPositionPair(ctx))
-    this.analyzer.handleCheckExpr(ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop), ctx)
+    this.#pushBlock(SemanticContextType.GoalFinal, ctx)
+    this.analyzer.handleCheckExpr(ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop))
   }
 
   exitCheckExpr(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterStateIncExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.StateInc, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.StateInc, ctx)
   }
 
   exitStateIncExpr(ctx) {
     // this.#deduceToType(IdentifierType.State, getBlockPositionPair(ctx), IdentifierType.Bool)
     // this.analyzer.resetTypeStack() // for int literals
     this.analyzer.pushTypeStack(IdentifierType.Bool)
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterPathPrimaryExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.PathPrimary, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.PathPrimary, ctx)
   }
 
   exitPathPrimaryExpr(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
     this.analyzer.pushTypeStack(IdentifierType.Bool)
   }
 
   enterRecord(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.RecordDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.RecordDecl, ctx)
   }
 
   exitRecord(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterRecordScope(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.RecordScope, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.RecordScope, ctx)
   }
 
   exitRecordScope(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
-  // enterGlobalConstant(ctx) {
-  //   this.analyzer.pushBlock(SemanticContextType.GlobalConstantGroup, getBlockPositionPair(ctx))
-  //   // TODO: emit
-  // }
-  //
-  // exitGlobalConstant(ctx) {
-  //   this.analyzer.deduceVariableDecl()
-  //   this.analyzer.popBlock()
-  // }
-
   enterGlobalConstantGroup(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.GlobalConstantGroup, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.GlobalConstantGroup, ctx)
   }
 
   exitGlobalConstantGroup(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterLocalVariableGroup(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.LocalVariableGroup, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.LocalVariableGroup, ctx)
   }
 
   exitLocalVariableGroup(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterGlobalVariableGroup(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.GlobalVariableGroup, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.GlobalVariableGroup, ctx)
   }
 
   exitGlobalVariableGroup(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterRecordVariableDecl(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.RecordVariableDeclGroup, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.RecordVariableDeclGroup, ctx)
   }
 
   exitRecordVariableDecl(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterGlobalConstantDecl(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.VariableDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.VariableDecl, ctx)
     this.analyzer.registerTypeForVariableDecl()
   }
 
   exitGlobalConstantDecl(ctx) {
     this.analyzer.deduceVariableDecl()
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterVariableDeclarator(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.VariableDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.VariableDecl, ctx)
     this.analyzer.registerTypeForVariableDecl()
   }
 
   exitVariableDeclarator(ctx) {
     this.analyzer.deduceVariableDecl()
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterEnumType(ctx) {
@@ -406,37 +388,13 @@ class SemanticListener extends CycloneParserListener {
     // this.analyzer.pushBlock(SemanticContextType.EnumDecl, getBlockPositionPair(ctx))
   }
 
-  // exitEnumType(ctx) {
-  //   this.analyzer.popBlock()
-  // }
-
   enterEnumDecl(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.EnumDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.EnumDecl, ctx)
   }
 
   exitEnumDecl(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
-
-  // enterGlobalVariableDecl(ctx) {
-  //   this.analyzer.pushBlock(SemanticContextType.GlobalVariableGroup, getBlockPositionPair(ctx))
-  // }
-  //
-  // exitGlobalVariableDecl(ctx) {
-  //   this.analyzer.deduceVariableDecl()
-  //   // In order to let errors get correct path
-  //   // pop blocks should be the last action
-  //   this.analyzer.popBlock()
-  // }
-  //
-  // enterLocalVariableDecl(ctx) {
-  //   this.analyzer.pushBlock(SemanticContextType.LocalVariableGroup, getBlockPositionPair(ctx))
-  // }
-  //
-  // exitLocalVariableDecl(ctx) {
-  //   this.analyzer.deduceVariableDecl()
-  //   this.analyzer.popBlock()
-  // }
 
   enterExpression(ctx) {
     this.analyzer.handleExpression()
@@ -445,33 +403,31 @@ class SemanticListener extends CycloneParserListener {
 
   exitExpression(ctx) {
     this.#handleBinaryOp(ctx)
-    // this.analyzer.popBlock()
   }
 
   enterAssertExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.AssertExpr, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.AssertExpr, ctx)
   }
 
   exitAssertExpr(ctx) {
     this.analyzer.deduceToType(IdentifierType.Bool)
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterFunctionDeclaration(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.FnDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.FnDecl, ctx)
   }
 
   exitFunctionDeclaration(ctx) {
-    this.analyzer.handleFunctionDecl()
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterFunctionBodyScope(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.FnBodyScope, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.FnBodyScope, ctx)
   }
 
   exitFunctionBodyScope(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   // enterReturnExpr(ctx) {
@@ -483,29 +439,29 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterFunctionParamsDecl(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.FnParamsDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.FnParamsDecl, ctx)
   }
 
   exitFunctionParamsDecl(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterFunCall(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.FnCall, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.FnCall, ctx)
   }
 
   exitFunCall(ctx) {
     this.analyzer.handleFunCall(ActionKind.Function)
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
     // this.analyzer.deduceActionCall(ActionKind.Function, block.metadata.fnName, block.metadata.gotParams, getBlockPositionPair(ctx))
   }
 
   enterAnnotationExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.AnnotationDecl, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.AnnotationDecl, ctx)
   }
 
   exitAnnotationExpr(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterEnumLiteral(ctx) {
@@ -524,11 +480,11 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterDotIdentifierExpr(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.DotExpr, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.DotExpr, ctx)
   }
 
   exitDotIdentifierExpr(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterPrimitiveType(ctx) {
@@ -666,7 +622,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterCompOptions(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.CompilerOption, getBlockPositionPair(ctx))
+    this.#pushBlock(SemanticContextType.CompilerOption, ctx)
 
     const optName = ctx.children[1]?.children[0]?.symbol?.text
     if (!optName) {
@@ -682,21 +638,20 @@ class SemanticListener extends CycloneParserListener {
 
     // console.log("option", optName, lit)
 
-    this.analyzer.checkOption(optName, lit, ctx)
+    this.analyzer.checkOption(optName, lit)
   }
 
   exitCompOptions(ctx) {
     this.analyzer.resetTypeStack()
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 
   enterVariableInitializer(ctx) {
-    this.analyzer.pushBlock(SemanticContextType.VariableInit, getBlockPositionPair(ctx))
-    this.analyzer.handleVariableInit(ctx)
+    this.#pushBlock(SemanticContextType.VariableInit, ctx)
   }
 
   exitVariableInitializer(ctx) {
-    this.analyzer.popBlock()
+    this.analyzer.popBlock(ctx)
   }
 }
 

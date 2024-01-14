@@ -105,7 +105,7 @@ goal:
   LBRACE 
   (
     (letExpr)
-    | (identifier pathCondAssignExpr SEMI)
+    | (pathAssignStatement)
     | (assertExpr)
   )*
   checkExpr
@@ -133,6 +133,10 @@ withExpr:
 
 letExpr:
   LET identifier (pathCondAssignExpr)? SEMI
+  ;
+
+pathAssignStatement:
+  identifier pathCondAssignExpr SEMI
   ;
 
 pathCondAssignExpr:

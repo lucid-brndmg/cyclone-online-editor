@@ -193,7 +193,7 @@ const genGraphvizAssertionsDef = (assertions, statesDef, definedStates, previewO
     const assertionId = `<assertion${numberId}>`
     const cleanExpr = previewOptions.showDetailedExpressions
       ? dropRegex(expr, /in\s*\(/g).trim()
-      : `assertion (${position.line}:${position.column + 1})`
+      : `assertion (${position.startPosition.line}:${position.startPosition.column + 1})`
     statesDef.push(`${assertionId}[label=" ${cleanExpr} ", fontcolor=green, color=green];`)
     for (let ident of identifiers) {
       if (!definedStates.has(ident)) {

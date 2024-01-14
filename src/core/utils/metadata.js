@@ -50,7 +50,8 @@ const functionCallMetadata = () => ({
 })
 
 const stateDeclMetadata = () => ({
-  hasChildren: false
+  hasChildren: false,
+  attributes: null
 })
 
 const transDeclMetadata = () => ({
@@ -60,6 +61,8 @@ const transDeclMetadata = () => ({
   toStates: new Set(),
   operators: new Set(),
   excludedStates: new Set(),
+
+  involvedStates: null
   // exclusionFlag: false
 })
 
@@ -75,6 +78,7 @@ const letDeclMetadata = () => ({
 })
 
 const machineDeclMetadata = () => ({
+  keyword: "machine",
   keywordPosition: null,
   startNodeIdentifier: null,
   goalDefined: false,
@@ -84,6 +88,20 @@ const machineDeclMetadata = () => ({
   actionTable: new CategorizedStackTable(),
   identifierStack: new StackedTable(),
   recordFieldStack: new CategorizedStackTable()
+})
+
+const compilerOptionMetadata = () => ({
+  name: null,
+  value: null
+})
+
+const whereExprMetadata = () => ({
+  expr: ""
+})
+
+const inExprMetadata = () => ({
+  // expr: "",
+  identifiers: null
 })
 
 export const semanticContextMetadataTable = {
@@ -98,4 +116,7 @@ export const semanticContextMetadataTable = {
   [SemanticContextType.LetDecl]: letDeclMetadata,
   [SemanticContextType.FnCall]: functionCallMetadata,
   [SemanticContextType.MachineDecl]: machineDeclMetadata,
+  [SemanticContextType.CompilerOption]: compilerOptionMetadata,
+  [SemanticContextType.WhereExpr]: whereExprMetadata,
+  [SemanticContextType.InExpr]: inExprMetadata
 }
