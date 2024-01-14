@@ -23,7 +23,7 @@ export default class EditorSemanticContext {
   }
 
   pushScopeLayerScope(layer, type, position) {
-    this.scopeLayers.push({layer, outlineKind: OutlineKind.Scope, type, position})
+    this.scopeLayers.push({layer, outlineKind: OutlineKind.Group, type, position})
   }
 
   pushScopeLayerIdent(text, type, position, kind, blockType, currentLayer) {
@@ -99,10 +99,13 @@ export default class EditorSemanticContext {
     })
 
     analyzer.on("scope:exit", (context, block) => {
+      const machineCtx = context.currentMachineBlock.metadata
+      const enums = machineCtx.enumFields
+      const identifiers = machineCtx.identifierStack
       this.setSortIdentifier(block.position, {
         type: block.type,
-        identifiers: context.identifierStack.extractLatestToMap(ident => ident.text),
-        enums: new Set(context.enumFields)
+        identifiers: identifiers.extractLatestToMap(ident => ident.text),
+        enums: new Set(enums)
       })
     })
 

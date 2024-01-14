@@ -37,40 +37,41 @@ export default class SemanticAnalyzer {
   events
 
   constructor() {
+    const blockContextStack = []
+
     this.context = {
-      recordFieldStack: new CategorizedStackTable(),
-      identifierStack: new StackedTable(),
-      blockContextStack: [],
+      // recordFieldStack: new CategorizedStackTable(),
+      // identifierStack: new StackedTable(),
+      blockContextStack,
       scopedBlocks: [],
       actionTable: new CategorizedStackTable(builtinActions),
       typeStack: [],
       definedOptions: new Set(),
-      transitionSet: new Set(),
-      stateSet: new Set(),
-      enumFields: new Set(),
+      // transitionSet: new Set(),
+      // stateSet: new Set(),
+      // enumFields: new Set(),
+
+      get currentMachineBlock() {
+        return blockContextStack[1]
+      },
+
+      get currentBlockPath() {
+        return blockContextStack.map(it => it.type)
+      }
     }
 
     this.events = new Map()
   }
-
-  currentBlockPath() {
-    return this.context.blockContextStack.map(it => it.type)
-  }
-
   emitLangComponent(context, data, position = null, pathOverride = null) {
     // TODO: emit if someone listening ...
     // store context inside block??
 
     this.emit("lang:component", {
-      path: pathOverride ?? this.currentBlockPath(),
+      path: pathOverride ?? this.context.currentBlockPath,
       context,
       data,
       position: position ?? this.peekBlock().position,
     })
-  }
-
-  currentMachineBlock() {
-    return this.context.blockContextStack[1]
   }
 
   ready(endPos) {
@@ -132,12 +133,12 @@ export default class SemanticAnalyzer {
 
   clearScope(block) {
     this.emit("scope:exit", block)
-
-    if (block.metadata) {
-      this.context.identifierStack.subCountTable(block.metadata?.identifierCounts)
+    const machineCtx = this.context.currentMachineBlock?.metadata
+    if (block.metadata && machineCtx) {
+      machineCtx.identifierStack.subCountTable(block.metadata?.identifierCounts)
       // this.context.identifierCounts.sub(block.metadata?.identifierCounts)
       // this.context.recordCounts.sub(block.metadata?.recordCounts)
-      this.context.recordFieldStack.subCategorizedCountTable(block.metadata.recordCounts)
+      machineCtx.recordFieldStack.subCategorizedCountTable(block.metadata.recordCounts)
     } else {
       console.log("warn: no local identifier count table found")
     }
@@ -222,7 +223,8 @@ export default class SemanticAnalyzer {
 
   referenceEnum(identText, position) {
     this.pushTypeStack(IdentifierType.Enum)
-    if (!this.context.enumFields.has(identText)) {
+    const machine = this.context.currentMachineBlock
+    if (!machine.metadata.enumFields.has(identText)) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
         ...position,
@@ -253,12 +255,13 @@ export default class SemanticAnalyzer {
     // NOTE: Enum fields don't have types, their types are always -1
     const type = identifierKindToType[identKind]
       ?? block.metadata.fieldType
+    const machineCtx = this.context.currentMachineBlock.metadata
     // console.log("support shadowing: ", scopeSupportsShadowing.get(scope.type)?.has(identKind), scope.type, identKind)
     const hasCount = !isEnum && (scope
       ? scopeSupportsShadowing.get(scope.type)?.has(identKind)
         ? scope.metadata.identifierCounts.get(identText) > 0
-        : this.context.identifierStack.getLength(identText) > 0
-      : this.context.identifierStack.getLength(identText) > 0)
+        : machineCtx.identifierStack.getLength(identText) > 0
+      : machineCtx.identifierStack.getLength(identText) > 0)
 
     // this.context.identifierCounts.hasCounts(registrationCheckKinds, identText)
 
@@ -274,6 +277,7 @@ export default class SemanticAnalyzer {
 
     let fnSignature = null
 
+
     switch (blockType) {
       // case SemanticContextType.RecordDecl: {
       //   this.context.currentRecordIdent.push(identText)
@@ -281,7 +285,7 @@ export default class SemanticAnalyzer {
       //   break
       // }
       case SemanticContextType.FnDecl: {
-        this.context.actionTable.push(ActionKind.Function, identText, {
+        machineCtx.actionTable.push(ActionKind.Function, identText, {
           action: identText,
           kind: ActionKind.Function,
           signatures: block.metadata.signatures
@@ -310,7 +314,7 @@ export default class SemanticAnalyzer {
       // }
 
       case SemanticContextType.EnumDecl: {
-        this.context.enumFields.add(identText)
+        machineCtx.enumFields.add(identText)
         break
       }
     }
@@ -361,7 +365,7 @@ export default class SemanticAnalyzer {
         if (recordIdent) {
           // info.recordIdent = recordIdent
 
-          const recordInfo = this.context.identifierStack.peek(recordIdent)
+          const recordInfo = machineCtx.identifierStack.peek(recordIdent)
           recordInfo?.recordChild?.push({
             text: identText,
             type,
@@ -378,14 +382,14 @@ export default class SemanticAnalyzer {
             console.log("warn: no previous scope exists before current scope")
           }
           // this.context.recordCounts.incr(recordIdent, identText)
-          this.context.recordFieldStack.push(recordIdent, identText, info)
+          machineCtx.recordFieldStack.push(recordIdent, identText, info)
           // maybe for scoped too ?
         } else {
           console.log("warn: no record context exists when defining record field: ", identText)
         }
       }
 
-      this.context.identifierStack.push(identText, info)
+      machineCtx.identifierStack.push(identText, info)
       scope.metadata.identifierCounts.incr(identText)
     }
 
@@ -400,8 +404,9 @@ export default class SemanticAnalyzer {
       ident: identText
     }
     let kindLimitations = null
+    const identifiers = this.context.currentMachineBlock.metadata.identifierStack
 
-    const ident = this.context.identifierStack.peek(identText)
+    const ident = identifiers.peek(identText)
     const shouldPushTypeStack = !identifierNoPushTypeStackBlocks.has(blockType)
     const es = []
 
@@ -465,7 +470,7 @@ export default class SemanticAnalyzer {
       const variableDeclBlock = this.findNearestBlock(SemanticContextType.VariableDecl)
       if (variableDeclBlock) {
         const ident = variableDeclBlock.metadata.identifier
-        if (ident !== identText && this.context.identifierStack.peek(identText)?.kind !== IdentifierKind.GlobalConst) {
+        if (ident !== identText && identifiers.peek(identText)?.kind !== IdentifierKind.GlobalConst) {
           es.push({
             source: ErrorSource.Semantic,
             ...identPos,
@@ -503,12 +508,13 @@ export default class SemanticAnalyzer {
     this.context.typeStack.pop()
     const scope = this.latestNthScope()
     const es = []
+    const machineCtx = this.context.currentMachineBlock.metadata
 
     if (!scope) {
       console.log("warn: scope not found when reference record field", parentIdentText, identText, identPos)
     }
 
-    const ident = this.context.identifierStack.peek(parentIdentText)
+    const ident = machineCtx.identifierStack.peek(parentIdentText)
 
     const hasRecord = ident && ident.kind === IdentifierKind.Record // this.context.identifierCounts.hasCounts([IdentifierKind.Record], parentIdentText)
     if (!hasRecord) {
@@ -521,7 +527,7 @@ export default class SemanticAnalyzer {
       })
     }
 
-    const hasRecordField = hasRecord && this.context.recordFieldStack.getLength(parentIdentText, identText) > 0 // this.context.recordCounts.hasCounts([parentIdentText], identText)
+    const hasRecordField = hasRecord && machineCtx.recordFieldStack.getLength(parentIdentText, identText) > 0 // this.context.recordCounts.hasCounts([parentIdentText], identText)
     if (!hasRecordField) {
       es.push({
         source: ErrorSource.Semantic,
@@ -532,7 +538,7 @@ export default class SemanticAnalyzer {
       })
       this.pushTypeStack(IdentifierType.Hole)
     } else {
-      const recordField = this.context.recordFieldStack.peek(parentIdentText, identText)
+      const recordField = machineCtx.recordFieldStack.peek(parentIdentText, identText)
       this.pushTypeStack(recordField.type)
     }
 
@@ -592,11 +598,12 @@ export default class SemanticAnalyzer {
         if (fnBlock) {
           fnBlock.metadata.signatures[0].input.push(type)
           const currentIdentText = block.metadata.identifier
-          const currentIdent = this.context.identifierStack.peek(currentIdentText)
+          const machineCtx = this.context.currentMachineBlock.metadata
+          const currentIdent = machineCtx.identifierStack.peek(currentIdentText)
           if (currentIdent) {
             currentIdent.type = type
             // block.metadata.currentIdentifier = null
-            const currentFn = this.context.identifierStack.peek(fnBlock.metadata.identifier)
+            const currentFn = machineCtx.identifierStack.peek(fnBlock.metadata.identifier)
             if (currentFn) {
               currentFn.fnParams.push(currentIdentText)
             }
@@ -647,8 +654,21 @@ export default class SemanticAnalyzer {
     this.deduceActionCall(actionKind, block.metadata.fnName, block.metadata.gotParams, position)
   }
 
+  getAction(actionKind, action) {
+    // TODO: optimize certain action kind
+
+    const machine = this.context.currentMachineBlock
+    let fn = machine.metadata.actionTable.peek(actionKind, action)
+    if (!fn) {
+      // public actions
+      fn = this.context.actionTable.peek(actionKind, action)
+    }
+
+    return fn
+  }
+
   deduceActionCall(actionKind, action, inputActualLength, position) {
-    const fn = this.context.actionTable.peek(actionKind, action)
+    const fn = this.getAction(actionKind, action)
     if (!fn) {
       // This will happen when calling from an unregistered function
       // pushing a hole will save the integrity of the type stack
@@ -709,7 +729,7 @@ export default class SemanticAnalyzer {
     const block = this.peekBlock()
     const pos = block.position
     const ident = block.metadata.identifier
-    const identInfo = this.context.identifierStack.peek(ident)
+    const identInfo = this.context.currentMachineBlock.metadata.identifierStack.peek(ident)
 
     if (!identInfo) {
       console.log("warn: invalid identifier when exit variableDecl", block)
@@ -906,8 +926,8 @@ export default class SemanticAnalyzer {
 
     const es = []
     const identifier = block.metadata.identifier
+    const machine = this.context.currentMachineBlock
     if (attrs.isStart) {
-      const machine = this.currentMachineBlock()
       const startIdent = machine.metadata.startNodeIdentifier
       if (startIdent != null) {
         es.push({
@@ -934,7 +954,7 @@ export default class SemanticAnalyzer {
     if (es.length) {
       this.emit("errors", es)
     }
-    this.context.stateSet.add(identifier)
+    machine.metadata.stateSet.add(identifier)
     this.emit("lang:state", {identifier, attrs, position})
   }
 
@@ -944,7 +964,7 @@ export default class SemanticAnalyzer {
 
   handleGoal() {
     const block = this.peekBlock()
-    this.currentMachineBlock().metadata.goalDefined = true
+    this.context.currentMachineBlock.metadata.goalDefined = true
     this.emit("lang:goal", block)
   }
 
@@ -1098,21 +1118,23 @@ export default class SemanticAnalyzer {
 
     if (!md.whereExpr) {
       const label = `${fromState ?? ""}|${[...toStates].sort().join(",")}|${[...operators].sort().join(",")}|${[...excludedStates].sort().join(",")}`
-      if (this.context.transitionSet.has(label)) {
+      const machine = this.context.currentMachineBlock
+      if (machine.metadata.transitionSet.has(label)) {
         es.push({
           source: ErrorSource.Semantic,
           ...position,
           type: ErrorType.DuplicatedEdge
         })
       } else {
-        this.context.transitionSet.add(label)
+        machine.metadata.transitionSet.add(label)
       }
     }
 
     const targetStates = new Set(toStates)
     if (!toStates.size) {
       const isExcludeSelf = operators.has("+")
-      for (let state of this.context.stateSet) {
+      const machine = this.context.currentMachineBlock
+      for (let state of machine.metadata.stateSet) {
         if (!(isExcludeSelf && state === fromState) && !excludedStates.has(state)) {
           targetStates.add(state)
         }

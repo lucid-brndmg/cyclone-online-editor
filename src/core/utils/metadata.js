@@ -1,4 +1,4 @@
-import {CategorizedCountTable, CountTable} from "@/lib/storage";
+import {CategorizedCountTable, CategorizedStackTable, CountTable, StackedTable} from "@/lib/storage";
 import {IdentifierType, SemanticContextType} from "@/core/definitions";
 
 export const scopeMetadata = () => ({
@@ -77,7 +77,13 @@ const letDeclMetadata = () => ({
 const machineDeclMetadata = () => ({
   keywordPosition: null,
   startNodeIdentifier: null,
-  goalDefined: false
+  goalDefined: false,
+  enumFields: new Set(),
+  stateSet: new Set(),
+  transitionSet: new Set(),
+  actionTable: new CategorizedStackTable(),
+  identifierStack: new StackedTable(),
+  recordFieldStack: new CategorizedStackTable()
 })
 
 export const semanticContextMetadataTable = {

@@ -70,7 +70,7 @@ const outlineIdentKindIcons = {
 
 const getOutlineNodeStyle = node => {
   switch (node.outlineKind) {
-    case OutlineKind.Scope: {
+    case OutlineKind.Group: {
       const Icon = outlineBlockTypeIcons[node.type] ?? IconBraces
 
       return {

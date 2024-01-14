@@ -172,6 +172,6 @@ export const ActionKind = {
 }
 
 export const OutlineKind = {
-  Scope: 1,
+  Group: 1,
   Identifier: 2
 }

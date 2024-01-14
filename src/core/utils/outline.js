@@ -38,7 +38,7 @@ const sanitizeScopeLayers = layers => {
             const enumLayerIdx = currentLayer.layer + 1
             enumLayers.push({
               layer: enumLayerIdx,
-              outlineKind: OutlineKind.Scope,
+              outlineKind: OutlineKind.Group,
               type: SemanticContextType.EnumDecl,
               position: layer.position,
               text: layer.text
@@ -58,7 +58,7 @@ const sanitizeScopeLayers = layers => {
         break
       }
 
-      case OutlineKind.Scope: {
+      case OutlineKind.Group: {
         if (enumLayers.length) {
           for (let j = 0; j < enumLayers.length; j++) {
             const enumLayer = enumLayers[j]
@@ -106,7 +106,7 @@ export const scopeLayersToOutline = (layers) => {
 
   for (let layer of sanitized) {
     switch (layer.outlineKind) {
-      case OutlineKind.Scope: {
+      case OutlineKind.Group: {
         currLayer = layer.layer
         layer.children = []
         if (currLayer <= parent.layer) {
