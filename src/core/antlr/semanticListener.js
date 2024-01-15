@@ -1,7 +1,7 @@
 import {ActionKind, IdentifierType, SemanticContextType} from "@/core/definitions";
 import CycloneParserListener from "@/generated/antlr/CycloneParserListener";
 import {pos, posPair} from "@/lib/position";
-import {getSymbolPosition, getBlockPositionPair, getIdentifiersInList} from "@/core/utils/antlr";
+import {getSymbolPosition, getBlockPositionPair, getIdentifiersInList, firstSymbol} from "@/core/utils/antlr";
 
 
 
@@ -486,11 +486,15 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterDotIdentifierExpr(ctx) {
-    this.#pushBlock(SemanticContextType.DotExpr, ctx)
+    if (firstSymbol(ctx)) {
+      this.#pushBlock(SemanticContextType.DotExpr, ctx)
+    }
   }
 
   exitDotIdentifierExpr(ctx) {
-    this.analyzer.popBlock(ctx)
+    if (firstSymbol(ctx)) {
+      this.analyzer.popBlock(ctx)
+    }
   }
 
   enterPrimitiveType(ctx) {

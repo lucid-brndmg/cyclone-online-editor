@@ -110,26 +110,13 @@ export default class EditorSemanticContext {
 
   // execute this BEFORE ready
   attach(analyzer) {
-    // analyzer.on("scope:enter", (context, block) => {
-    // })
-
-    // analyzer.on("scope:exit", (context, block) => {
-    //   const machineCtx = context.currentMachineBlock.metadata
-    //   const enums = machineCtx.enumFields
-    //   const identifiers = machineCtx.identifierStack
-    //   this.setSortIdentifier(block.position, {
-    //     type: block.type,
-    //     identifiers: identifiers.extractLatestToMap(ident => ident.text),
-    //     enums: new Set(enums)
-    //   })
-    // })
 
     const fmtContextType = {}
     Object.entries(SemanticContextType).forEach(([key, value]) => {
       fmtContextType[value] = key
     })
 
-    analyzer.on("lang:block:enter", (context, {block}) => {
+    analyzer.on("block:enter", (context, {block}) => {
       if (scopedContextType.has(block.type)) {
         this.pushScopeLayerScope(context.scopeLength, block.type, block.position)
       }
@@ -137,7 +124,7 @@ export default class EditorSemanticContext {
       console.log(path.map(it => fmtContextType[it]).join("."))
     })
 
-    analyzer.on("lang:block:exit", (context, {payload, block}) => {
+    analyzer.on("block:exit", (context, {payload, block}) => {
       if (scopedContextType.has(block.type)) {
         this.makeMachineSnapshot(context, block)
       }
@@ -185,7 +172,6 @@ export default class EditorSemanticContext {
               break
             }
           }
-``
           break
         }
 
@@ -204,80 +190,8 @@ export default class EditorSemanticContext {
       }
     })
 
-    analyzer.on("lang:identifier:register", (context, {text, type, position, kind, blockType}) => {
+    analyzer.on("identifier:register", (context, {text, type, position, kind, blockType}) => {
       this.pushScopeLayerIdent(text, type, position, kind, blockType, context.scopeLength)
     })
-
-    // analyzer.on("lang:component", (e, {path, context, position, data}) => {
-    //   console.log(path)
-    //   const lastPath = path[path.length - 1]
-    //   switch (lastPath) {
-    //     case SemanticContextType.StateDecl: {
-    //       const {identifier, attrs} = data
-    //       this.stateTable.set(identifier, {identifier, attrs, position, trans: 0, namedTrans: new Set(), exprList: []})
-    //       break
-    //     }
-    //
-    //     case SemanticContextType.TransDecl: {
-    //       const {targetStates} = data
-    //       const expr = context.start.getInputStream().getText(context.start.start, context.stop.stop)
-    //       const metadata = e.currentBlock.metadata
-    //       this.defineTransition(
-    //         metadata.identifier,
-    //         metadata.label,
-    //         metadata.whereExpr,
-    //         metadata.fromState,
-    //         metadata.operators,
-    //         targetStates,
-    //         position,
-    //         expr
-    //       )
-    //     }
-    //   }
-    // })
-
-    // analyzer.on("state", (context, {identifier, attributes}) => {
-    //   this.defineState(identifier, attributes)
-    // })
-
-    // analyzer.on("lang:transition", (context, {metadata, targetStates, position, expr}) => {
-    //   // const md = block.metadata
-    //   this.defineTransition(
-    //     metadata.identifier,
-    //     metadata.label,
-    //     metadata.whereExpr,
-    //     metadata.fromState,
-    //     metadata.operators,
-    //     targetStates,
-    //     position,
-    //     expr
-    //   )
-    // })
-
-    // analyzer.on("lang:assertion:states", (ctx, assertion) => {
-    //   this.assertions.push(assertion)
-    // })
-    //
-    // analyzer.on("lang:invariant:states", (ctx, invariant) => {
-    //   this.invariants.push(invariant)
-    // })
-
-    // analyzer.on("lang:goal", (ctx, block) => {
-    //   const md = block.metadata
-    //   if (md.invariants.size || md.states.size) {
-    //     this.goal = {
-    //       invariants: md.invariants,
-    //       states: md.states,
-    //       expr: md.expr,
-    //       // position: block.position,
-    //       finalPosition: md.finalPosition
-    //     }
-    //   }
-    // })
-
-    // analyzer.on("lang:state", (ctx, {identifier, attrs, position}) => {
-    //   this.stateTable.set(identifier, {identifier, attrs, position, trans: 0, namedTrans: new Set(), exprList: []})
-    // })
-
   }
 }

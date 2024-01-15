@@ -5,8 +5,7 @@ import {
   IdentifierType,
   SemanticContextType
 } from "@/core/definitions";
-import {CategorizedStackTable, StackedTable} from "@/lib/storage";
-import {posPair} from "@/lib/position";
+import {CategorizedStackTable} from "@/lib/storage";
 import {
   builtinActions,
   declarationContextType,
@@ -214,33 +213,12 @@ export default class SemanticAnalyzer {
   events
 
   constructor() {
-    // const blockContextStack = []
-    // this.context = {
-    //   blockContextStack,
-    //   scopedBlocks: [],
-    //   actionTable: new CategorizedStackTable(builtinActions),
-    //   typeStack: [],
-    //   definedOptions: new Set(),
-    //
-    //   get currentMachineBlock() {
-    //     return blockContextStack[1]
-    //   },
-    //
-    //   get currentBlockPath() {
-    //     return blockContextStack.map(it => it.type)
-    //   },
-    //
-    //   get currentBlock() {
-    //     return blockContextStack[blockContextStack.length - 1]
-    //   }
-    // }
-    
     this.context = new SemanticAnalyzerContext()
     this.events = new Map()
   }
 
   emitBlock(isEnter, payload, block) {
-    const e = `lang:block:${isEnter ? "enter" : "exit"}`
+    const e = `block:${isEnter ? "enter" : "exit"}`
     this.emit(e, {
       // listener should get the current path by event.currentPath
       // position = block.position
@@ -248,12 +226,6 @@ export default class SemanticAnalyzer {
       block
     })
   }
-
-  // ready(endPos) {
-  //   // this.pushBlock(SemanticContextType.ProgramScope, posPair(0, 0, endPos.line, endPos.column), null)
-  //   this.emit("ready")
-  //   // console.log(this.context)
-  // }
 
   emit(event, payload) {
     if (this.events.has(event)) {
@@ -297,84 +269,18 @@ export default class SemanticAnalyzer {
       // identifierTable: new Map(), // Map<Kind, Map<Ident, [definitions]>>
       metadata: table || metadata ? {...table, ...metadata} : null
     }
-
-    // this.context.blockContextStack.push(blockContent)
-    // if (isScope) {
-    //   this.context.scopedBlocks.push(blockContent)
-    //   // this.context.editorCtx.pushScopeLayerScope(this.context.scopedBlocks.length, type, position)
-    //   // this.emit("scope:enter", blockContent)
-    // }
     
     this.context.pushBlock(blockContent)
     this.emitBlock(true, payload, blockContent)
   }
 
-  // clearScope(block) {
-  //   // this.emit("scope:exit", block)
-  //   const machineCtx = this.context.currentMachineBlock?.metadata
-  //   if (block.metadata && machineCtx) {
-  //     machineCtx.identifierStack.subCountTable(block.metadata?.identifierCounts)
-  //     // this.context.identifierCounts.sub(block.metadata?.identifierCounts)
-  //     // this.context.recordCounts.sub(block.metadata?.recordCounts)
-  //     machineCtx.recordFieldStack.subCategorizedCountTable(block.metadata.recordCounts)
-  //   } else {
-  //     console.log("warn: no local identifier count table found")
-  //   }
-  // }
-
   popBlock(payload) {
     const block = this.context.peekBlock()
     this.emitBlock(false, payload, block)
     return this.context.popBlock()
-    // this.context.blockContextStack.pop()
-    // if (block) {
-    //   if (scopedContextType.has(block.type)) {
-    //     this.clearScope(block)
-    //     this.context.scopedBlocks.pop()
-    //   }
-    //   // if (block.type === SemanticContextType.RecordDecl) {
-    //   //   this.context.currentRecordIdent.pop()
-    //   // }
-    // } else {
-    //   console.log("warn: no block to pop")
-    // }
-    // return block
   }
-
-  // peekBlock(skip = 0) {
-  //   return this.context.blockContextStack[this.context.blockContextStack.length - 1 - skip]
-  // }
-
-  // peekScope(skip = 0) {
-  //   return this.context.scopedBlocks[this.context.scopedBlocks.length - 1 - skip]
-  // }
-
-  // findNearestBlock(type, stopAt = null) {
-  //   for (let i = this.context.blockContextStack.length - 1; i >= 0; i--) {
-  //     const block = this.context.blockContextStack[i]
-  //     if (block.type === type) {
-  //       return block
-  //     }
-  //     if (stopAt !== null && block.type === stopAt) {
-  //       return null
-  //     }
-  //   }
-  //
-  //   return null
-  // }
-
-  // findNearestScope(type) {
-  //   for (let i = this.context.scopedBlocks.length - 1; i >= 0; i--) {
-  //     const scope = this.context.scopedBlocks[i]
-  //     if (scope.type === type) {
-  //       return scope
-  //     }
-  //   }
-  //
-  //   return null
-  // }
-
   referenceEnum(identText, position) {
+    this.emit("identifier:reference", {references: [{text: identText, position, isEnum: true}]})
     this.pushTypeStack(IdentifierType.Enum)
     const machine = this.context.currentMachineBlock
     if (!machine.metadata.enumFields.has(identText)) {
@@ -432,11 +338,6 @@ export default class SemanticAnalyzer {
 
 
     switch (blockType) {
-      // case SemanticContextType.RecordDecl: {
-      //   this.context.currentRecordIdent.push(identText)
-      //   // block.metadata.identifier = identText
-      //   break
-      // }
       case SemanticContextType.FnDecl: {
         machineCtx.actionTable.push(ActionKind.Function, identText, {
           action: identText,
@@ -447,24 +348,6 @@ export default class SemanticAnalyzer {
         // block.metadata.identifier = identText
         break
       }
-
-      // case SemanticContextType.FnParamsDecl: {
-      //   block.metadata.currentIdentifier = identText
-      //   break
-      // }
-
-      // case SemanticContextType.LetDecl:
-      // case SemanticContextType.FnParamsDecl:
-      // case SemanticContextType.TransDecl:
-      // case SemanticContextType.StateDecl:
-      // case SemanticContextType.InvariantDecl:
-      // case SemanticContextType.LocalVariableGroup:
-      // case SemanticContextType.GlobalConstantGroup:
-      // case SemanticContextType.GlobalVariableGroup:
-      // case SemanticContextType.RecordVariableDeclGroup: {
-      //   block.metadata.identifier = identText
-      //   break
-      // }
 
       case SemanticContextType.EnumDecl: {
         machineCtx.enumFields.add(identText)
@@ -487,7 +370,7 @@ export default class SemanticAnalyzer {
       isEnum
     }
 
-    this.emit("lang:identifier:register", payload)
+    this.emit("identifier:register", payload)
     // this.emitLangComponent(context, payload)
 
     if (!isEnum) {
@@ -552,7 +435,7 @@ export default class SemanticAnalyzer {
 
   referenceIdentifier(blockType, identText, identPos) {
     // check existence
-    this.emit("lang:identifier:reference", [{position: identPos, text: identText}])
+    this.emit("identifier:reference", {references: [{position: identPos, text: identText, isEnum: false}]})
     let errParams = {
       desc: "identifier",
       ident: identText
@@ -663,7 +546,7 @@ export default class SemanticAnalyzer {
     const scope = this.context.peekScope()
     const es = []
     const machineCtx = this.context.currentMachineBlock.metadata
-    this.emit("lang:identifier:reference", [{position: parentPos, text: parentIdentText}, {position: identPos, text: identText}])
+    this.emit("identifier:reference", {references: [{position: parentPos, text: parentIdentText, isEnum: false}, {position: identPos, text: identText, isEnum: false}]})
 
     if (!scope) {
       console.log("warn: scope not found when reference record field", parentIdentText, identText, identPos)
@@ -781,15 +664,6 @@ export default class SemanticAnalyzer {
         }
 
         break
-
-        // if (singleTypedDeclarationContextType.has(block.type)) {
-        //   // case SemanticContextType.RecordVariableDeclGroup:
-        //   if (type === IdentifierType.Hole) {
-        //     console.log("warn: unknown type text", typeText)
-        //   }
-        //   block.metadata.fieldType = type
-        //   break
-        // }
 
       }
     }
@@ -1155,8 +1029,6 @@ export default class SemanticAnalyzer {
     if (es.length) {
       this.emit("errors", es)
     }
-
-    this.emit("finished")
   }
 
   handleReturn(position) {

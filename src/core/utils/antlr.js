@@ -27,3 +27,17 @@ export const getIdentifiersInList = ctx => ctx.children?.filter(c => c.construct
 
 export const getParentExpression = ctx => ctx.parentCtx.start.getInputStream().getText(ctx.parentCtx.start.start, ctx.parentCtx.stop.stop)
 
+export const firstSymbol = ctx => {
+  if (!ctx.children) {
+    return null
+  }
+
+  for (let child of ctx.children) {
+    const symbol = child.symbol
+    if (symbol) {
+      return symbol.text
+    }
+  }
+
+  return null
+}
