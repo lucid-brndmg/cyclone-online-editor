@@ -43,7 +43,7 @@ export default class GraphicalBlockBuilder {
   }
 
   attach(analyzer) {
-
+    analyzer.on("")
   }
 
 

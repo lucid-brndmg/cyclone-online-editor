@@ -111,17 +111,17 @@ export default class EditorSemanticContext {
   // execute this BEFORE ready
   attach(analyzer) {
 
-    const fmtContextType = {}
-    Object.entries(SemanticContextType).forEach(([key, value]) => {
-      fmtContextType[value] = key
-    })
+    // const fmtContextType = {}
+    // Object.entries(SemanticContextType).forEach(([key, value]) => {
+    //   fmtContextType[value] = key
+    // })
 
     analyzer.on("block:enter", (context, {block}) => {
       if (scopedContextType.has(block.type)) {
         this.pushScopeLayerScope(context.scopeLength, block.type, block.position)
       }
-      const path = context.currentBlockPath
-      console.log(path.map(it => fmtContextType[it]).join("."))
+      // const path = context.currentBlockPath
+      // console.log(path.map(it => fmtContextType[it]).join("."))
     })
 
     analyzer.on("block:exit", (context, {payload, block}) => {
@@ -177,7 +177,7 @@ export default class EditorSemanticContext {
 
         case SemanticContextType.GoalScope: {
           const md = block.metadata
-          if (md.invariants.size || md.states.size) {
+          if (md.invariants.length || md.states.length) {
             this.goal = {
               invariants: new Set(md.invariants),
               states: new Set(md.states),
