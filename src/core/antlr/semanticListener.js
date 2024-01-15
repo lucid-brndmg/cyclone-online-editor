@@ -44,7 +44,15 @@ class SemanticListener extends CycloneParserListener {
     this.analyzer.pushBlock(type, getBlockPositionPair(ctx), ctx)
   }
 
-  enterMachine(ctx) {
+  enterProgram(ctx) {
+    this.#pushBlock(SemanticContextType.ProgramScope, ctx)
+  }
+
+  exitProgram(ctx) {
+    this.analyzer.popBlock(ctx)
+  }
+
+  enterMachineDecl(ctx) {
     const token = ctx.children.find(child => {
       const kwd = child?.symbol?.text
       return kwd === "machine" || kwd === "graph"
@@ -61,7 +69,7 @@ class SemanticListener extends CycloneParserListener {
     this.analyzer.handleMachineDeclEnter(token, symbolPos)
   }
 
-  exitMachine(ctx) {
+  exitMachineDecl(ctx) {
     this.analyzer.handleMachineDeclExit()
     this.analyzer.popBlock(ctx)
   }
@@ -465,8 +473,6 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterEnumLiteral(ctx) {
-    const block = this.analyzer.peekBlock()
-    if (!block) {return}
     const text = ctx.start.text
     const identText = text.slice(1)
     this.analyzer.referenceEnum(identText, getBlockPositionPair(ctx))
@@ -501,12 +507,13 @@ class SemanticListener extends CycloneParserListener {
   }
 
   enterIntLiteral(ctx) {
-    const blockType = this.analyzer.peekBlock().type
+    // const blockType = this.analyzer.peekBlock().type
+    //
+    // if (blockType !== SemanticContextType.StateInc && blockType !== SemanticContextType.PathPrimary) {
+    //   this.analyzer.pushTypeStack(IdentifierType.Int)
+    // }
 
-    if (blockType !== SemanticContextType.StateInc && blockType !== SemanticContextType.PathPrimary) {
-      this.analyzer.pushTypeStack(IdentifierType.Int)
-
-    }
+    this.analyzer.handleIntLiteral()
   }
 
   enterRealLiteral(ctx) {

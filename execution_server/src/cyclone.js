@@ -44,7 +44,7 @@ export const checkProgram = program => {
   const parser = new CycloneParser(tokens)
   parser.removeErrorListeners()
 
-  const tree = parser.machine()
+  const tree = parser.program()
   if (parser.syntaxErrorsCount > 0) {
     return {syntaxError: true}
   }

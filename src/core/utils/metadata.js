@@ -58,17 +58,17 @@ const transDeclMetadata = () => ({
   label: null,
   whereExpr: null,
   fromState: null,
-  toStates: new Set(),
+  toStates: [], // new Set(),
   operators: new Set(),
-  excludedStates: new Set(),
+  excludedStates: [], // new Set(),
 
   involvedStates: null
   // exclusionFlag: false
 })
 
 const goalScopeMetadata = () => ({
-  invariants: new Set(),
-  states: new Set(),
+  invariants: [],
+  states: [],
   expr: "",
   finalPosition: null
 })

@@ -85,15 +85,15 @@ export const CycloneCodeEditor = ({
       return
     }
 
-    const maxLine = monacoCtx.model.getLineCount()
+    // const maxLine = monacoCtx.model.getLineCount()
     const editorCtx = new EditorSemanticContext()
     const analyzer = new SemanticAnalyzer() // semanticAnalyzerRef.current
-    const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
+    // const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
 
     errorsRef.current.clear()
     editorCtx.attach(analyzer)
     analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es))
-    analyzer.ready(endPos)
+    // analyzer.ready(endPos)
 
     if (debouncedCode.trim().length === 0) {
       editorSemanticContextRef.current = null

@@ -15,7 +15,7 @@ export const parseCycloneSyntax = ({input, onError}) => {
   parser.removeErrorListeners()
   parser.addErrorListener(new SyntaxErrorListener(onError, ErrorSource.Parser))
 
-  const tree = parser.machine()
+  const tree = parser.program()
 
   return {
     tree,

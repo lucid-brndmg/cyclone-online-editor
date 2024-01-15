@@ -41,12 +41,21 @@ export default class CycloneParserListener extends antlr4.tree.ParseTreeListener
 	}
 
 
-	// Enter a parse tree produced by CycloneParser#machine.
-	enterMachine(ctx) {
+	// Enter a parse tree produced by CycloneParser#program.
+	enterProgram(ctx) {
 	}
 
-	// Exit a parse tree produced by CycloneParser#machine.
-	exitMachine(ctx) {
+	// Exit a parse tree produced by CycloneParser#program.
+	exitProgram(ctx) {
+	}
+
+
+	// Enter a parse tree produced by CycloneParser#machineDecl.
+	enterMachineDecl(ctx) {
+	}
+
+	// Exit a parse tree produced by CycloneParser#machineDecl.
+	exitMachineDecl(ctx) {
 	}
 
 

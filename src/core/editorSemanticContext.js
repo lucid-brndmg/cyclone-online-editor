@@ -95,7 +95,10 @@ export default class EditorSemanticContext {
   }
 
   makeMachineSnapshot(context, block) {
-    const machineCtx = context.currentMachineBlock.metadata
+    const machineCtx = context.currentMachineBlock?.metadata
+    if (!machineCtx) {
+      return
+    }
     const enums = machineCtx.enumFields
     const identifiers = machineCtx.identifierStack
     this.setSortIdentifier(block.position, {
@@ -121,10 +124,17 @@ export default class EditorSemanticContext {
     //   })
     // })
 
+    const fmtContextType = {}
+    Object.entries(SemanticContextType).forEach(([key, value]) => {
+      fmtContextType[value] = key
+    })
+
     analyzer.on("lang:block:enter", (context, {block}) => {
       if (scopedContextType.has(block.type)) {
-        this.pushScopeLayerScope(context.scopedBlocks.length, block.type, block.position)
+        this.pushScopeLayerScope(context.scopeLength, block.type, block.position)
       }
+      const path = context.currentBlockPath
+      console.log(path.map(it => fmtContextType[it]).join("."))
     })
 
     analyzer.on("lang:block:exit", (context, {payload, block}) => {
@@ -141,7 +151,6 @@ export default class EditorSemanticContext {
         case SemanticContextType.TransDecl: {
           const {metadata, position} = block
           const expr = payload.start.getInputStream().getText(payload.start.start, payload.stop.stop)
-          console.log("expr is", expr)
           this.defineTransition(
             metadata.identifier,
             metadata.label,
@@ -162,7 +171,7 @@ export default class EditorSemanticContext {
             break
           }
 
-          const prev = context.blockContextStack[context.blockContextStack.length - 2]
+          const prev = context.peekBlock(1)
           switch (prev?.type) {
             case SemanticContextType.AssertExpr: {
               const expr = getParentExpression(payload)
@@ -176,7 +185,7 @@ export default class EditorSemanticContext {
               break
             }
           }
-
+``
           break
         }
 
@@ -184,8 +193,8 @@ export default class EditorSemanticContext {
           const md = block.metadata
           if (md.invariants.size || md.states.size) {
             this.goal = {
-              invariants: md.invariants,
-              states: md.states,
+              invariants: new Set(md.invariants),
+              states: new Set(md.states),
               expr: md.expr,
               // position: block.position,
               finalPosition: md.finalPosition
@@ -196,7 +205,7 @@ export default class EditorSemanticContext {
     })
 
     analyzer.on("lang:identifier:register", (context, {text, type, position, kind, blockType}) => {
-      this.pushScopeLayerIdent(text, type, position, kind, blockType, context.scopedBlocks.length)
+      this.pushScopeLayerIdent(text, type, position, kind, blockType, context.scopeLength)
     })
 
     // analyzer.on("lang:component", (e, {path, context, position, data}) => {

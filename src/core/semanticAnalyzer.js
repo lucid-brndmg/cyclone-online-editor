@@ -27,49 +27,220 @@ import {
 import {popMulti, popMultiStore} from "@/lib/list";
 import {checkSignature} from "@/core/utils/types";
 
+class SemanticAnalyzerContext {
+  #blockContextStack
+  #scopedBlocks
+  #actionTable
+  #typeStack
+  #definedOptions
+
+  constructor() {
+    this.#blockContextStack = []
+    this.#scopedBlocks = []
+    this.#actionTable = new CategorizedStackTable(builtinActions)
+    this.#typeStack = []
+    this.#definedOptions = new Set()
+  }
+
+  get currentMachineBlock() {
+    return this.#blockContextStack[1]
+  }
+
+  get currentBlockPath() {
+    return this.#blockContextStack.map(it => it.type)
+  }
+
+  get scopeLength() {
+    return this.#scopedBlocks.length
+  }
+
+  pushBlock(block) {
+    this.#blockContextStack.push(block)
+    if (scopedContextType.has(block.type)) {
+      this.#scopedBlocks.push(block)
+    }
+  }
+
+  peekBlock(skip = 0) {
+    return this.#blockContextStack[this.#blockContextStack.length - 1 - skip]
+  }
+
+  popBlock() {
+    const block = this.#blockContextStack.pop()
+    if (block) {
+      if (scopedContextType.has(block.type)) {
+        this.#clearScope(block)
+        this.#scopedBlocks.pop()
+      }
+      // if (block.type === SemanticContextType.RecordDecl) {
+      //   this.context.currentRecordIdent.pop()
+      // }
+    } else {
+      console.log("warn: no block to pop")
+    }
+    return block
+  }
+  #clearScope(block) {
+    // this.emit("scope:exit", block)
+    const machineCtx = this.currentMachineBlock?.metadata
+    if (block.metadata && machineCtx) {
+      machineCtx.identifierStack.subCountTable(block.metadata?.identifierCounts)
+      // this.context.identifierCounts.sub(block.metadata?.identifierCounts)
+      // this.context.recordCounts.sub(block.metadata?.recordCounts)
+      machineCtx.recordFieldStack.subCategorizedCountTable(block.metadata.recordCounts)
+    } else if (machineCtx) {
+      console.log("warn: no local identifier count table found")
+    }
+  }
+
+  peekScope(skip = 0) {
+    return this.#scopedBlocks[this.#scopedBlocks.length - 1 - skip]
+  }
+
+  searchNearestBlock(f, stopAtType = null, skip = 0) {
+    for (let i = this.#blockContextStack.length - 1 - skip; i >= 0; i--) {
+      const block = this.#blockContextStack[i]
+      if (f(block)) {
+        return block
+      }
+      if (block.type === stopAtType) {
+        return null
+      }
+    }
+
+    return null
+  }
+
+  findNearestBlock(type, stopAt = null) {
+    for (let i = this.#blockContextStack.length - 1; i >= 0; i--) {
+      const block = this.#blockContextStack[i]
+      if (block.type === type) {
+        return block
+      }
+      if (stopAt !== null && block.type === stopAt) {
+        return null
+      }
+    }
+
+    return null
+  }
+
+  findNearestBlockByTypes(types) {
+    for (let i = this.#blockContextStack.length - 1; i >= 0; i--) {
+      const block = this.#blockContextStack[i]
+      if (types.includes(block.type)) {
+        return block
+      }
+    }
+
+    return null
+  }
+
+  findNearestScope(type) {
+    for (let i = this.#scopedBlocks.length - 1; i >= 0; i--) {
+      const scope = this.#scopedBlocks[i]
+      if (scope.type === type) {
+        return scope
+      }
+    }
+
+    return null
+  }
+
+  resetTypeStack(types = null) {
+    if (types) {
+      this.#typeStack = types
+    } else if (this.#typeStack.length) {
+      this.#typeStack = []
+    }
+
+    // if (this.typeStack.length) {
+    //   this.typeStack = []
+    // }
+  }
+
+  pushTypeStack(type) {
+    this.#typeStack.push(type)
+  }
+
+  popTypeStack() {
+    return this.#typeStack.pop()
+  }
+
+  peekTypeStack() {
+    return this.#typeStack[this.#typeStack.length - 1]
+  }
+
+  sliceTypeStack(start, end) {
+    return this.#typeStack.slice(start, end)
+  }
+
+  removeMultiTypeStack(length) {
+    popMulti(this.#typeStack, length)
+  }
+
+  popMultiTypeStack(length) {
+    return popMultiStore(this.#typeStack, length)
+  }
+
+  getTypeStack() {
+    return this.#typeStack
+  }
+
+  getAction(actionKind, action) {
+    // TODO: optimize certain action kind
+
+    const machine = this.currentMachineBlock
+    let fn = machine.metadata.actionTable.peek(actionKind, action)
+    if (!fn) {
+      // public actions
+      fn = this.#actionTable.peek(actionKind, action)
+    }
+
+    return fn
+  }
+
+  addDefinedOption(option) {
+    this.#definedOptions.add(option)
+  }
+
+  isOptionDefined(option) {
+    return this.#definedOptions.has(option)
+  }
+}
+
 export default class SemanticAnalyzer {
   context
   events
 
   constructor() {
-    const blockContextStack = []
-
-    this.context = {
-      blockContextStack,
-      scopedBlocks: [],
-      actionTable: new CategorizedStackTable(builtinActions),
-      typeStack: [],
-      definedOptions: new Set(),
-
-      get currentMachineBlock() {
-        return blockContextStack[1]
-      },
-
-      get currentBlockPath() {
-        return blockContextStack.map(it => it.type)
-      },
-
-      get currentBlock() {
-        return blockContextStack[blockContextStack.length - 1]
-      }
-    }
-
+    // const blockContextStack = []
+    // this.context = {
+    //   blockContextStack,
+    //   scopedBlocks: [],
+    //   actionTable: new CategorizedStackTable(builtinActions),
+    //   typeStack: [],
+    //   definedOptions: new Set(),
+    //
+    //   get currentMachineBlock() {
+    //     return blockContextStack[1]
+    //   },
+    //
+    //   get currentBlockPath() {
+    //     return blockContextStack.map(it => it.type)
+    //   },
+    //
+    //   get currentBlock() {
+    //     return blockContextStack[blockContextStack.length - 1]
+    //   }
+    // }
+    
+    this.context = new SemanticAnalyzerContext()
     this.events = new Map()
   }
-  // emitLangComponent(context, data, position = null, pathOverride = null) {
-  //   // store context inside block??
-  //
-  //   this.emit("lang:component", {
-  //     path: pathOverride ?? this.context.currentBlockPath,
-  //     context,
-  //     data,
-  //     position: position ?? this.peekBlock().position,
-  //   })
-  // }
 
   emitBlock(isEnter, payload, block) {
     const e = `lang:block:${isEnter ? "enter" : "exit"}`
-    // TODO: emit if someone listening ...
     this.emit(e, {
       // listener should get the current path by event.currentPath
       // position = block.position
@@ -78,11 +249,11 @@ export default class SemanticAnalyzer {
     })
   }
 
-  ready(endPos) {
-    this.pushBlock(SemanticContextType.ProgramScope, posPair(0, 0, endPos.line, endPos.column), null)
-    this.emit("ready")
-    // console.log(this.context)
-  }
+  // ready(endPos) {
+  //   // this.pushBlock(SemanticContextType.ProgramScope, posPair(0, 0, endPos.line, endPos.column), null)
+  //   this.emit("ready")
+  //   // console.log(this.context)
+  // }
 
   emit(event, payload) {
     if (this.events.has(event)) {
@@ -127,106 +298,81 @@ export default class SemanticAnalyzer {
       metadata: table || metadata ? {...table, ...metadata} : null
     }
 
-    this.context.blockContextStack.push(blockContent)
+    // this.context.blockContextStack.push(blockContent)
+    // if (isScope) {
+    //   this.context.scopedBlocks.push(blockContent)
+    //   // this.context.editorCtx.pushScopeLayerScope(this.context.scopedBlocks.length, type, position)
+    //   // this.emit("scope:enter", blockContent)
+    // }
+    
+    this.context.pushBlock(blockContent)
     this.emitBlock(true, payload, blockContent)
-    if (isScope) {
-      this.context.scopedBlocks.push(blockContent)
-      // this.context.editorCtx.pushScopeLayerScope(this.context.scopedBlocks.length, type, position)
-      // this.emit("scope:enter", blockContent)
-    }
   }
 
-  clearScope(block) {
-    // this.emit("scope:exit", block)
-    const machineCtx = this.context.currentMachineBlock?.metadata
-    if (block.metadata && machineCtx) {
-      machineCtx.identifierStack.subCountTable(block.metadata?.identifierCounts)
-      // this.context.identifierCounts.sub(block.metadata?.identifierCounts)
-      // this.context.recordCounts.sub(block.metadata?.recordCounts)
-      machineCtx.recordFieldStack.subCategorizedCountTable(block.metadata.recordCounts)
-    } else {
-      console.log("warn: no local identifier count table found")
-    }
-  }
+  // clearScope(block) {
+  //   // this.emit("scope:exit", block)
+  //   const machineCtx = this.context.currentMachineBlock?.metadata
+  //   if (block.metadata && machineCtx) {
+  //     machineCtx.identifierStack.subCountTable(block.metadata?.identifierCounts)
+  //     // this.context.identifierCounts.sub(block.metadata?.identifierCounts)
+  //     // this.context.recordCounts.sub(block.metadata?.recordCounts)
+  //     machineCtx.recordFieldStack.subCategorizedCountTable(block.metadata.recordCounts)
+  //   } else {
+  //     console.log("warn: no local identifier count table found")
+  //   }
+  // }
 
   popBlock(payload) {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     this.emitBlock(false, payload, block)
-    this.context.blockContextStack.pop()
-    if (block) {
-      if (scopedContextType.has(block.type)) {
-        this.clearScope(block)
-        this.context.scopedBlocks.pop()
-      }
-      // if (block.type === SemanticContextType.RecordDecl) {
-      //   this.context.currentRecordIdent.pop()
-      // }
-    } else {
-      console.log("warn: no block to pop")
-    }
-    return block
+    return this.context.popBlock()
+    // this.context.blockContextStack.pop()
+    // if (block) {
+    //   if (scopedContextType.has(block.type)) {
+    //     this.clearScope(block)
+    //     this.context.scopedBlocks.pop()
+    //   }
+    //   // if (block.type === SemanticContextType.RecordDecl) {
+    //   //   this.context.currentRecordIdent.pop()
+    //   // }
+    // } else {
+    //   console.log("warn: no block to pop")
+    // }
+    // return block
   }
 
-  peekBlock(skip = 0) {
-    return this.context.blockContextStack[this.context.blockContextStack.length - 1 - skip]
-  }
+  // peekBlock(skip = 0) {
+  //   return this.context.blockContextStack[this.context.blockContextStack.length - 1 - skip]
+  // }
 
-  latestNthScope(skip = 0) {
-    return this.context.scopedBlocks[this.context.scopedBlocks.length - 1 - skip]
-  }
+  // peekScope(skip = 0) {
+  //   return this.context.scopedBlocks[this.context.scopedBlocks.length - 1 - skip]
+  // }
 
-  searchNearestBlock(f, stopAtType = null, skip = 0) {
-    for (let i = this.context.blockContextStack.length - 1 - skip; i >= 0; i--) {
-      // if (i <= before) {
-      //   return null
-      // }
-      const block = this.context.blockContextStack[i]
-      if (f(block)) {
-        return block
-      }
-      if (block.type === stopAtType) {
-        return null
-      }
-    }
+  // findNearestBlock(type, stopAt = null) {
+  //   for (let i = this.context.blockContextStack.length - 1; i >= 0; i--) {
+  //     const block = this.context.blockContextStack[i]
+  //     if (block.type === type) {
+  //       return block
+  //     }
+  //     if (stopAt !== null && block.type === stopAt) {
+  //       return null
+  //     }
+  //   }
+  //
+  //   return null
+  // }
 
-    return null
-  }
-
-  findNearestBlock(type, stopAt = null) {
-    for (let i = this.context.blockContextStack.length - 1; i >= 0; i--) {
-      const block = this.context.blockContextStack[i]
-      if (block.type === type) {
-        return block
-      }
-      if (stopAt !== null && block.type === stopAt) {
-        return null
-      }
-    }
-
-    return null
-  }
-
-  findNearestBlockByTypes(types) {
-    for (let i = this.context.blockContextStack.length - 1; i >= 0; i--) {
-      const block = this.context.blockContextStack[i]
-      if (types.includes(block.type)) {
-        return block
-      }
-    }
-
-    return null
-  }
-
-  findNearestScope(type) {
-    for (let i = this.context.scopedBlocks.length - 1; i >= 0; i--) {
-      const scope = this.context.scopedBlocks[i]
-      if (scope.type === type) {
-        return scope
-      }
-    }
-
-    return null
-  }
+  // findNearestScope(type) {
+  //   for (let i = this.context.scopedBlocks.length - 1; i >= 0; i--) {
+  //     const scope = this.context.scopedBlocks[i]
+  //     if (scope.type === type) {
+  //       return scope
+  //     }
+  //   }
+  //
+  //   return null
+  // }
 
   referenceEnum(identText, position) {
     this.pushTypeStack(IdentifierType.Enum)
@@ -246,7 +392,7 @@ export default class SemanticAnalyzer {
   registerIdentifier(block, identText, identPos) {
     // check duplication
     const blockType = block.type
-    const scope = this.latestNthScope()
+    const scope = this.context.peekScope()
     if (!scope) {
       console.log("warn: scope not found", blockType, identText, identPos)
     }
@@ -254,7 +400,7 @@ export default class SemanticAnalyzer {
     let identKind = declarationContextTypeToIdentifierKind[blockType]
       ?? IdentifierKind.Unknown
     if (identKind === IdentifierKind.Unknown) {
-      const prev = this.peekBlock(1)
+      const prev = this.context.peekBlock(1)
       identKind = declarationGroupContextTypeToIdentifierKind[prev.type] ?? IdentifierKind.Unknown
     }
     let isEnum = blockType === SemanticContextType.EnumDecl
@@ -358,17 +504,17 @@ export default class SemanticAnalyzer {
       const isRecordMemberDef = scope.type === SemanticContextType.RecordScope
         // current block is not enum decl
         // (since enum decl also involves identifiers)
-        && this.peekBlock().type !== SemanticContextType.EnumDecl
+        && this.context.peekBlock().type !== SemanticContextType.EnumDecl
 
 
-        // this.findNearestBlock(SemanticContextType.EnumDecl, SemanticContextType.RecordScope) === null
+        // this.context.findNearestBlock(SemanticContextType.EnumDecl, SemanticContextType.RecordScope) === null
         // && this.searchNearestBlock(
         //   block => block.metadata?.blockCurrentRecord === true,
         //   SemanticContextType.RecordScope,
         //   // this.context.blockContextStack.length - scope.index
         // ) === null
       if (isRecordMemberDef) {
-        const recordDecl = this.findNearestBlock(SemanticContextType.RecordDecl)
+        const recordDecl = this.context.findNearestBlock(SemanticContextType.RecordDecl)
         const recordIdent = recordDecl.metadata.identifier // this.context.currentRecordIdent[this.context.currentRecordIdent.length - 1]
         if (recordIdent) {
           // info.recordIdent = recordIdent
@@ -383,7 +529,7 @@ export default class SemanticAnalyzer {
           // cuz RecordScope is already a scope
 
           // scope?.metadata.recordCounts.incr(recordIdent, identText)
-          const prevScope = this.latestNthScope(1)
+          const prevScope = this.context.peekScope(1)
           if (prevScope) {
             prevScope?.metadata.recordCounts.incr(recordIdent, identText)
           } else {
@@ -456,7 +602,7 @@ export default class SemanticAnalyzer {
 
       case SemanticContextType.FnCall: {
         if (ident) {
-          const functionDecl = this.findNearestBlock(SemanticContextType.FnDecl)
+          const functionDecl = this.context.findNearestBlock(SemanticContextType.FnDecl)
           const fnName = functionDecl?.metadata.identifier
           if (fnName === identText && ident.kind === IdentifierKind.FnName) {
             es.push({
@@ -473,9 +619,9 @@ export default class SemanticAnalyzer {
       }
     }
 
-    const whereBlock = this.findNearestBlock(SemanticContextType.WhereExpr)
+    const whereBlock = this.context.findNearestBlock(SemanticContextType.WhereExpr)
     if (whereBlock) {
-      const variableDeclBlock = this.findNearestBlock(SemanticContextType.VariableDecl)
+      const variableDeclBlock = this.context.findNearestBlock(SemanticContextType.VariableDecl)
       if (variableDeclBlock) {
         const ident = variableDeclBlock.metadata.identifier
         if (ident !== identText && identifiers.peek(identText)?.kind !== IdentifierKind.GlobalConst) {
@@ -513,8 +659,8 @@ export default class SemanticAnalyzer {
 
   referenceRecordField(parentIdentText, parentPos, identText, identPos) {
     // pop the Record pushed before
-    this.context.typeStack.pop()
-    const scope = this.latestNthScope()
+    this.context.popTypeStack()
+    const scope = this.context.peekScope()
     const es = []
     const machineCtx = this.context.currentMachineBlock.metadata
     this.emit("lang:identifier:reference", [{position: parentPos, text: parentIdentText}, {position: identPos, text: identText}])
@@ -558,7 +704,7 @@ export default class SemanticAnalyzer {
   }
 
   handleIdentifier(identifierText, identifierPos) {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     if (!block) {
       console.log("warn: block type not found")
       return
@@ -587,7 +733,7 @@ export default class SemanticAnalyzer {
 
   // 'int', 'real', 'bool', etc
   handleTypeToken(typeText) {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     if (!block) {
       console.log("warn: block type not found")
       return
@@ -603,7 +749,7 @@ export default class SemanticAnalyzer {
       }
 
       case SemanticContextType.FnParamsDecl: {
-        const fnBlock = this.findNearestBlock(SemanticContextType.FnDecl)
+        const fnBlock = this.context.findNearestBlock(SemanticContextType.FnDecl)
         if (fnBlock) {
           fnBlock.metadata.signatures[0].input.push(type)
           const currentIdentText = block.metadata.identifier
@@ -650,9 +796,9 @@ export default class SemanticAnalyzer {
   }
 
   handleFunCall(actionKind) {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     const position = block.position
-    if (this.findNearestBlock(SemanticContextType.WhereExpr)) {
+    if (this.context.findNearestBlock(SemanticContextType.WhereExpr)) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
         ...position,
@@ -663,21 +809,8 @@ export default class SemanticAnalyzer {
     this.deduceActionCall(actionKind, block.metadata.fnName, block.metadata.gotParams, position)
   }
 
-  getAction(actionKind, action) {
-    // TODO: optimize certain action kind
-
-    const machine = this.context.currentMachineBlock
-    let fn = machine.metadata.actionTable.peek(actionKind, action)
-    if (!fn) {
-      // public actions
-      fn = this.context.actionTable.peek(actionKind, action)
-    }
-
-    return fn
-  }
-
   deduceActionCall(actionKind, action, inputActualLength, position) {
-    const fn = this.getAction(actionKind, action)
+    const fn = this.context.getAction(actionKind, action)
     if (!fn) {
       // This will happen when calling from an unregistered function
       // pushing a hole will save the integrity of the type stack
@@ -695,7 +828,7 @@ export default class SemanticAnalyzer {
         continue
       }
       if (inputActualLength > 0) {
-        const types = this.context.typeStack.slice(0 - inputActualLength)
+        const types = this.context.sliceTypeStack(0 - inputActualLength)
         const {passed, hole} = checkSignature(signature.input, types)
         if (passed) {
           pass = true
@@ -708,9 +841,10 @@ export default class SemanticAnalyzer {
     }
 
     if (pass) {
-      popMulti(this.context.typeStack, inputActualLength)
+      // popMulti(this.context.typeStack, inputActualLength)
+      this.context.removeMultiTypeStack(inputActualLength)
     } else {
-      const currentTypesOrdered = popMultiStore(this.context.typeStack, inputActualLength).reverse()
+      const currentTypesOrdered = this.context.popMultiTypeStack(inputActualLength).reverse() // popMultiStore(this.context.typeStack, inputActualLength).reverse()
       this.emit("errors", [{
         source: ErrorSource.Semantic,
         ...position,
@@ -725,17 +859,19 @@ export default class SemanticAnalyzer {
   }
 
   resetTypeStack() {
-    if (this.context.typeStack.length) {
-      this.context.typeStack = []
-    }
+    // if (this.context.typeStack.length) {
+    //   this.context.typeStack = []
+    // }
+
+    this.context.resetTypeStack()
   }
 
   pushTypeStack(type) {
-    this.context.typeStack.push(type)
+    this.context.pushTypeStack(type)
   }
 
   deduceVariableDecl() {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     const pos = block.position
     const ident = block.metadata.identifier
     const identInfo = this.context.currentMachineBlock.metadata.identifierStack.peek(ident)
@@ -745,7 +881,7 @@ export default class SemanticAnalyzer {
       return
     }
 
-    const type = this.context.typeStack.pop() // int a = 1;
+    const type = this.context.popTypeStack() // int a = 1;
       ?? block.metadata?.fieldType // int a;
     const isException = type === IdentifierType.Int && identInfo.type === IdentifierType.Real // that's dangerous ...
     if (type !== identInfo.type && type !== IdentifierType.Hole && !isException) {
@@ -765,7 +901,7 @@ export default class SemanticAnalyzer {
   }
 
   deduceToType(type, position = null, pushType = null, allowNull = false) {
-    const actualType = this.context.typeStack.pop()
+    const actualType = this.context.popTypeStack()
     const isCorrect = actualType === type
       || actualType === IdentifierType.Hole
       || (allowNull && actualType == null)
@@ -777,7 +913,7 @@ export default class SemanticAnalyzer {
     if (!isCorrect) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
-        ...(position ?? this.peekBlock().position),
+        ...(position ?? this.context.peekBlock().position),
 
         type: ErrorType.TypeMismatchExpr,
         params: {expected: [type], got: [actualType]}
@@ -786,7 +922,7 @@ export default class SemanticAnalyzer {
   }
 
   deduceToMultiTypes(types, position, pushType = null, pushSelf = false) {
-    const actualType = this.context.typeStack.pop()
+    const actualType = this.context.popTypeStack()
     const isCorrect = types.includes(actualType) || actualType === IdentifierType.Hole
 
     if (pushType != null || pushSelf) {
@@ -805,7 +941,7 @@ export default class SemanticAnalyzer {
   }
 
   deduceAllToType(type, position, pushType = null, atLeast = 1) {
-    const actualTypes = this.context.typeStack
+    const actualTypes = this.context.getTypeStack()
     const isCorrect = (atLeast === 0 && actualTypes.length === 0)
       || (
         actualTypes.length >= atLeast
@@ -816,7 +952,7 @@ export default class SemanticAnalyzer {
       )
 
     if (pushType != null) {
-      this.context.typeStack = [pushType]
+      this.context.resetTypeStack([pushType])
     }
 
     if (!isCorrect) {
@@ -831,7 +967,7 @@ export default class SemanticAnalyzer {
   }
 
   checkNamedExpr(position, allowedScopes = []) {
-    const scope = this.latestNthScope()
+    const scope = this.context.peekScope()
     if (!scope) {
       console.log("warn: use of initial without scope")
       return false
@@ -841,7 +977,7 @@ export default class SemanticAnalyzer {
   }
 
   checkOption(optName, lit) {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     block.metadata.name = optName
     block.metadata.value = lit
     const position = block.position
@@ -852,7 +988,7 @@ export default class SemanticAnalyzer {
       return
     }
 
-    if (this.context.definedOptions.has(optName)) {
+    if (this.context.isOptionDefined(optName)) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
         ...position,
@@ -886,7 +1022,7 @@ export default class SemanticAnalyzer {
       })
     }
 
-    this.context.definedOptions.add(optName)
+    this.context.addDefinedOption(optName)
 
     if (es.length) {
       this.emit("errors", es)
@@ -933,7 +1069,7 @@ export default class SemanticAnalyzer {
   }
 
   handleStateDecl(attrs) {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     const position = block.position
 
     block.metadata.attributes = attrs
@@ -974,24 +1110,24 @@ export default class SemanticAnalyzer {
   }
 
   handleStateScope(hasStatement) {
-    this.peekBlock().metadata.hasChildren = hasStatement
+    this.context.peekBlock().metadata.hasChildren = hasStatement
   }
 
   handleGoal() {
-    // const block = this.peekBlock()
+    // const block = this.context.peekBlock()
     this.context.currentMachineBlock.metadata.goalDefined = true
     // this.emit("lang:goal", block)
   }
 
   handleMachineDeclEnter(keyword, keywordPosition) {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     block.metadata.keywordPosition = keywordPosition
     block.metadata.keyword = keyword
     // this.emitLangComponent(context, {keyword})
   }
 
   handleMachineDeclExit() {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     const pos = block.metadata.keywordPosition
     if (!pos) {
       return
@@ -1024,7 +1160,7 @@ export default class SemanticAnalyzer {
   }
 
   handleReturn(position) {
-    const scope = this.findNearestScope(SemanticContextType.FnBodyScope)
+    const scope = this.context.findNearestScope(SemanticContextType.FnBodyScope)
 
     if (!scope) {
       this.emit("errors", [{
@@ -1043,13 +1179,13 @@ export default class SemanticAnalyzer {
 
     scope.metadata.isReturned = true
 
-    const decl = this.findNearestBlock(SemanticContextType.FnDecl)
+    const decl = this.context.findNearestBlock(SemanticContextType.FnDecl)
     if (!decl) {
       console.log("warn: unknown function declaration", position)
       return
     }
 
-    const type = this.context.typeStack.pop() ?? IdentifierType.Hole
+    const type = this.context.popTypeStack() ?? IdentifierType.Hole
     const expectedType = decl.metadata.signatures[0].output
     if (type !== expectedType) {
       this.emit("errors", [{
@@ -1065,7 +1201,7 @@ export default class SemanticAnalyzer {
   handleStatementEnter(position) {
     // this.emitLangComponent(context, null)
 
-    const scope = this.latestNthScope()
+    const scope = this.context.peekScope()
     if (scope && scope.type === SemanticContextType.FnBodyScope && scope.metadata.isReturned) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
@@ -1077,7 +1213,7 @@ export default class SemanticAnalyzer {
   }
 
   handleStatementExit(position) {
-    const type = this.context.typeStack[this.context.typeStack.length - 1]
+    const type = this.context.peekTypeStack()
     if (type != null && type !== IdentifierType.Hole && type !== IdentifierType.Bool) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
@@ -1090,32 +1226,32 @@ export default class SemanticAnalyzer {
   }
 
   handleTransExclusion(idents) {
-    const transDecl = this.findNearestBlock(SemanticContextType.TransDecl).metadata
+    const transDecl = this.context.findNearestBlock(SemanticContextType.TransDecl).metadata
     for (let id of idents) {
-      transDecl.excludedStates.add(id)
+      transDecl.excludedStates.push(id)
     }
 
     // block.metadata.exclusionFlag = isEnter
   }
 
   handleTransOp(op) {
-    this.findNearestBlock(SemanticContextType.TransDecl).metadata.operators.add(op)
+    this.context.findNearestBlock(SemanticContextType.TransDecl).metadata.operators.add(op)
   }
 
   handleTransToStates(idents) {
     for (let id of idents) {
-      this.findNearestBlock(SemanticContextType.TransDecl).metadata.toStates.add(id)
+      this.context.findNearestBlock(SemanticContextType.TransDecl).metadata.toStates.push(id)
     }
   }
 
   handleTransLabel(label) {
-    this.findNearestBlock(SemanticContextType.TransDecl).metadata.label = label.slice(1, label.length - 1).trim()
+    this.context.findNearestBlock(SemanticContextType.TransDecl).metadata.label = label.slice(1, label.length - 1).trim()
   }
 
   handleWhereExpr(expr) {
-    const transBlock = this.findNearestBlock(SemanticContextType.TransDecl)
+    const transBlock = this.context.findNearestBlock(SemanticContextType.TransDecl)
 
-    // const block = this.peekBlock(1)
+    // const block = this.context.peekBlock(1)
 
     if (transBlock) {
       transBlock.metadata.whereExpr = expr
@@ -1124,20 +1260,22 @@ export default class SemanticAnalyzer {
         .replace(/\s\s+/g, " ")
     }
 
-    this.peekBlock().metadata.expr = expr
+    this.context.peekBlock().metadata.expr = expr
 
     // this.emitLangComponent(ctx, null)
   }
 
   handleTrans() {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     const position = block.position
     const md = block.metadata
     const {fromState, toStates, operators, excludedStates} = md
     const es = []
+    const targetStates = new Set(toStates)
+    const excludedStatesSet = new Set(excludedStates)
 
     if (!md.whereExpr) {
-      const label = `${fromState ?? ""}|${[...toStates].sort().join(",")}|${[...operators].sort().join(",")}|${[...excludedStates].sort().join(",")}`
+      const label = `${fromState ?? ""}|${[...targetStates].sort().join(",")}|${[...operators].sort().join(",")}|${[...excludedStatesSet].sort().join(",")}`
       const machine = this.context.currentMachineBlock
       if (machine.metadata.transitionSet.has(label)) {
         es.push({
@@ -1150,12 +1288,11 @@ export default class SemanticAnalyzer {
       }
     }
 
-    const targetStates = new Set(toStates)
-    if (!toStates.size) {
+    if (targetStates.size === 0) {
       const isExcludeSelf = operators.has("+")
       const machine = this.context.currentMachineBlock
       for (let state of machine.metadata.stateSet) {
-        if (!(isExcludeSelf && state === fromState) && !excludedStates.has(state)) {
+        if (!(isExcludeSelf && state === fromState) && !excludedStatesSet.has(state)) {
           targetStates.add(state)
         }
       }
@@ -1181,7 +1318,7 @@ export default class SemanticAnalyzer {
 
   handleTransScope(ident) {
     if (ident) {
-      this.findNearestBlock(SemanticContextType.TransDecl).metadata.fromState = ident
+      this.context.findNearestBlock(SemanticContextType.TransDecl).metadata.fromState = ident
     } else {
       console.trace("warn: start state not found for trans")
     }
@@ -1189,49 +1326,49 @@ export default class SemanticAnalyzer {
 
   handleInExpr(identifiers) {
     if (identifiers?.length) {
-      // const assertionBlock = this.findNearestBlock(SemanticContextType.AssertExpr)
+      // const assertionBlock = this.context.findNearestBlock(SemanticContextType.AssertExpr)
       // if (assertionBlock) {
       //   this.emit("lang:assertion:states", {expr, position: parentExprPos, identifiers})
       // } else {
-      //   const invariantBlock = this.findNearestBlock(SemanticContextType.InvariantDecl)
+      //   const invariantBlock = this.context.findNearestBlock(SemanticContextType.InvariantDecl)
       //   if (invariantBlock) {
       //     const name = invariantBlock.metadata.identifier
       //     this.emit("lang:invariant:states", {name, identifiers})
       //   }
       // }
-      this.peekBlock().metadata.identifiers = identifiers
+      this.context.peekBlock().metadata.identifiers = identifiers
     }
   }
 
   handleStopExpr(identifiers) {
-    const def = this.latestNthScope()
+    const def = this.context.peekScope()
     if (identifiers?.length) {
       for (let id of identifiers) {
-        def.metadata.states.add(id)
+        def.metadata.states.push(id)
       }
     }
   }
 
   handleWithExpr(identifiers) {
-    const def = this.latestNthScope()
+    const def = this.context.peekScope()
     if (identifiers?.length) {
       for (let id of identifiers) {
-        def.metadata.invariants.add(id)
+        def.metadata.invariants.push(id)
       }
     }
   }
 
   handleCheckExpr(expr) {
-    // this.latestNthScope().metadata.keyword = keyword
-    const goal = this.latestNthScope()
+    // this.context.peekScope().metadata.keyword = keyword
+    const goal = this.context.peekScope()
     goal.metadata.expr = expr
-    goal.metadata.finalPosition = this.peekBlock().position
+    goal.metadata.finalPosition = this.context.peekBlock().position
 
     // this.emitLangComponent(context, null)
   }
 
   handleExpression() {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     if (block.type === SemanticContextType.FnCall) {
       block.metadata.gotParams += 1
     }
@@ -1239,14 +1376,14 @@ export default class SemanticAnalyzer {
 
   handlePathCondAssign(position) {
     this.deduceToType(IdentifierType.Bool, position)
-    const decl = this.findNearestBlock(SemanticContextType.LetDecl)
+    const decl = this.context.findNearestBlock(SemanticContextType.LetDecl)
     if (decl) {
       decl.metadata.hasBody = true
     }
   }
 
   handleLetExpr() {
-    const block = this.peekBlock()
+    const block = this.context.peekBlock()
     const position = block.position
     this.deduceToType(IdentifierType.Bool, position, null, true)
     if (block.type === SemanticContextType.LetDecl && !block.metadata.hasBody) {
@@ -1261,9 +1398,16 @@ export default class SemanticAnalyzer {
   }
 
   registerTypeForVariableDecl() {
-    const prevBlock = this.peekBlock(1)
+    const prevBlock = this.context.peekBlock(1)
     if (singleTypedDeclarationGroupContextType.has(prevBlock.type)) {
-      this.peekBlock().metadata.fieldType = prevBlock.metadata.fieldType
+      this.context.peekBlock().metadata.fieldType = prevBlock.metadata.fieldType
+    }
+  }
+
+  handleIntLiteral() {
+    const blockType = this.context.peekBlock().type
+    if (blockType !== SemanticContextType.StateInc && blockType !== SemanticContextType.PathPrimary) {
+      this.pushTypeStack(IdentifierType.Int)
     }
   }
 }

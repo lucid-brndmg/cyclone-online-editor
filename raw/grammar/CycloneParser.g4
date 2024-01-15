@@ -20,9 +20,13 @@ optionName:
   | DETECT
   ;
 
-machine:
+program:
   (compOptions)*
-  (MACHINE | GRAPH) identifier machineScope EOF
+  machineDecl
+  EOF;
+
+machineDecl:
+  (MACHINE | GRAPH) identifier machineScope
   ;
 
 machineScope:
