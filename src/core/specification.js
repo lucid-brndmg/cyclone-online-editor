@@ -64,7 +64,6 @@ export const declarationGroupContextTypeToIdentifierKind = {
   [SemanticContextType.LocalVariableGroup]: IdentifierKind.LocalVariable,
   [SemanticContextType.RecordVariableDeclGroup]: IdentifierKind.RecordField,
   [SemanticContextType.GlobalVariableGroup]: IdentifierKind.GlobalVariable,
-
 }
 
 export const identifierKindToType = {
@@ -86,7 +85,7 @@ export const identifierNoPushTypeStackBlocks = new Set([
   SemanticContextType.StateInc,
   SemanticContextType.PathPrimary,
   SemanticContextType.GoalScope,
-  SemanticContextType.FnCall
+  // SemanticContextType.FnCall
 ])
 
 // export const scopeRequiredIdentifierKind = new Map([
@@ -266,6 +265,7 @@ const errorTypeWarnings = new Set([
   ErrorType.DuplicatedEdge,
   ErrorType.CodeInsideAbstractNode,
   ErrorType.EmptyEdge,
+  ErrorType.DuplicatedEnumField
 ])
 
 export const isWarning = errorType => errorTypeWarnings.has(errorType)

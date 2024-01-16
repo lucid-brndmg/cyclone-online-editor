@@ -15,7 +15,8 @@ export const declareMetadata = () => ({
 })
 
 export const singleTypedDeclGroupMetadata = () => ({
-  fieldType: IdentifierType.Hole
+  fieldType: IdentifierType.Hole,
+  enums: []
 })
 
 /*
@@ -47,6 +48,7 @@ const functionDeclarationMetadata = () => ({
 const functionCallMetadata = () => ({
   fnName: null,
   gotParams: 0, // if gotParams != signature.length then pop(gotParams); setError() else ()
+  gotReference: 0
 })
 
 const stateDeclMetadata = () => ({

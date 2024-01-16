@@ -20,6 +20,7 @@ export const ErrorType = {
   InvalidNamedExprScope: 2010,
   InvalidStatement: 2011,
   LetBodyUndefined: 2012,
+  LocalVariableEnum: 2013,
 
   TypeMismatchFunction: 3001,
   TypeMismatchReturn: 3002,
@@ -33,9 +34,9 @@ export const ErrorType = {
   NoStartNodeDefined: 4003,
   DuplicatedEdge: 4004,
   EmptyEdge: 4005,
+  DuplicatedEnumField: 4006,
 
   RemoteError: 5001,
-
 }
 
 // enter: push block type
@@ -150,9 +151,9 @@ export const IdentifierKind = {
 }
 
 export const IdentifierType = {
-  Machine: 0,
-  State: 1,
-  Trans: 2,
+  Machine: 1,
+  State: 2,
+  Trans: 3,
   Record: 4,
   Enum: 5,
   Function: 6,

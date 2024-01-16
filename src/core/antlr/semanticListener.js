@@ -1,7 +1,13 @@
 import {ActionKind, IdentifierType, SemanticContextType} from "@/core/definitions";
 import CycloneParserListener from "@/generated/antlr/CycloneParserListener";
 import {pos, posPair} from "@/lib/position";
-import {getSymbolPosition, getBlockPositionPair, getIdentifiersInList, firstSymbol} from "@/core/utils/antlr";
+import {
+  getSymbolPosition,
+  getBlockPositionPair,
+  getIdentifiersInList,
+  firstSymbol,
+  getExpression
+} from "@/core/utils/antlr";
 
 
 
@@ -130,7 +136,6 @@ class SemanticListener extends CycloneParserListener {
 
   exitStatement(ctx) {
     this.analyzer.handleStatementExit(getBlockPositionPair(ctx))
-    this.analyzer.resetTypeStack()
     this.analyzer.popBlock(ctx)
   }
 
@@ -195,7 +200,7 @@ class SemanticListener extends CycloneParserListener {
 
   enterWhereExpr(ctx) {
     this.#pushBlock(SemanticContextType.WhereExpr, ctx)
-    const expr = ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop)
+    const expr = getExpression(ctx)
     this.analyzer.handleWhereExpr(expr)
   }
 
@@ -296,7 +301,7 @@ class SemanticListener extends CycloneParserListener {
 
   enterCheckExpr(ctx) {
     this.#pushBlock(SemanticContextType.GoalFinal, ctx)
-    this.analyzer.handleCheckExpr(ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop))
+    this.analyzer.handleCheckExpr(getExpression(ctx))
   }
 
   exitCheckExpr(ctx) {
@@ -352,6 +357,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   exitLocalVariableGroup(ctx) {
+    this.analyzer.handleLocalVariableDeclGroup()
     this.analyzer.popBlock(ctx)
   }
 
@@ -377,7 +383,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   exitGlobalConstantDecl(ctx) {
-    this.analyzer.deduceVariableDecl()
+    // this.analyzer.deduceVariableDecl()
     this.analyzer.popBlock(ctx)
   }
 
@@ -387,7 +393,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   exitVariableDeclarator(ctx) {
-    this.analyzer.deduceVariableDecl()
+    // this.analyzer.deduceVariableDecl()
     this.analyzer.popBlock(ctx)
   }
 
@@ -662,6 +668,7 @@ class SemanticListener extends CycloneParserListener {
   }
 
   exitVariableInitializer(ctx) {
+    this.analyzer.deduceVariableInit()
     this.analyzer.popBlock(ctx)
   }
 }

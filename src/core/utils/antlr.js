@@ -27,6 +27,8 @@ export const getIdentifiersInList = ctx => ctx.children?.filter(c => c.construct
 
 export const getParentExpression = ctx => ctx.parentCtx.start.getInputStream().getText(ctx.parentCtx.start.start, ctx.parentCtx.stop.stop)
 
+export const getExpression = ctx => ctx.start.getInputStream().getText(ctx.start.start, ctx.stop.stop)
+
 export const firstSymbol = ctx => {
   if (!ctx.children) {
     return null

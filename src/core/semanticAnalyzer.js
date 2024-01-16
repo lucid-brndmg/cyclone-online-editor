@@ -1,6 +1,7 @@
 import {
   ActionKind,
-  ErrorSource, ErrorType,
+  ErrorSource,
+  ErrorType,
   IdentifierKind,
   IdentifierType,
   SemanticContextType
@@ -9,12 +10,14 @@ import {CategorizedStackTable} from "@/lib/storage";
 import {
   builtinActions,
   declarationContextType,
-  declarationContextTypeToIdentifierKind, declarationGroupContextTypeToIdentifierKind,
+  declarationContextTypeToIdentifierKind,
+  declarationGroupContextTypeToIdentifierKind,
   identifierKindToType,
   identifierNoPushTypeStackBlocks,
   optionAcceptableValues,
   scopedContextType,
-  scopeSupportsShadowing, singleTypedDeclarationGroupContextType,
+  scopeSupportsShadowing,
+  singleTypedDeclarationGroupContextType,
   typeTokenToType
 } from "@/core/specification";
 import {
@@ -336,7 +339,6 @@ export default class SemanticAnalyzer {
 
     let fnSignature = null
 
-
     switch (blockType) {
       case SemanticContextType.FnDecl: {
         machineCtx.actionTable.push(ActionKind.Function, identText, {
@@ -351,6 +353,16 @@ export default class SemanticAnalyzer {
 
       case SemanticContextType.EnumDecl: {
         machineCtx.enumFields.add(identText)
+        const prev = this.context.peekBlock(1)
+        if (prev.metadata.enums.includes(identText)) {
+          this.emit("errors", [{
+            source: ErrorSource.Semantic,
+            type: ErrorType.DuplicatedEnumField,
+            params: {text: identText},
+            ...identPos
+          }])
+        }
+        prev.metadata.enums.push(identText)
         break
       }
     }
@@ -367,7 +379,7 @@ export default class SemanticAnalyzer {
       position: identPos,
       kind: identKind,
       blockType,
-      isEnum
+      // isEnum
     }
 
     this.emit("identifier:register", payload)
@@ -444,7 +456,7 @@ export default class SemanticAnalyzer {
     const identifiers = this.context.currentMachineBlock.metadata.identifierStack
 
     const ident = identifiers.peek(identText)
-    const shouldPushTypeStack = !identifierNoPushTypeStackBlocks.has(blockType)
+    let shouldNotPushTypeStackBlocks = identifierNoPushTypeStackBlocks.has(blockType)
     const es = []
 
     switch (blockType) {
@@ -498,6 +510,13 @@ export default class SemanticAnalyzer {
           }
         }
 
+        const block = this.context.peekBlock()
+        if (block.metadata.gotReference === 0) {
+          // the function itself can not be pushed to typeStack
+          shouldNotPushTypeStackBlocks = true
+        }
+        block.metadata.gotReference += 1
+
         break
       }
     }
@@ -531,7 +550,7 @@ export default class SemanticAnalyzer {
 
     // console.log("ref", identText, ident, shouldPushTypeStack, blockType)
 
-    if (shouldPushTypeStack) {
+    if (!shouldNotPushTypeStackBlocks) {
       this.pushTypeStack(ident?.type ?? IdentifierType.Hole)
     }
 
@@ -732,20 +751,20 @@ export default class SemanticAnalyzer {
     this.pushTypeStack(output)
   }
 
-  resetTypeStack() {
+  resetTypeStack(types) {
     // if (this.context.typeStack.length) {
     //   this.context.typeStack = []
     // }
 
-    this.context.resetTypeStack()
+    this.context.resetTypeStack(types)
   }
 
   pushTypeStack(type) {
     this.context.pushTypeStack(type)
   }
 
-  deduceVariableDecl() {
-    const block = this.context.peekBlock()
+  deduceVariableInit() {
+    const block = this.context.peekBlock(1)
     const pos = block.position
     const ident = block.metadata.identifier
     const identInfo = this.context.currentMachineBlock.metadata.identifierStack.peek(ident)
@@ -915,6 +934,7 @@ export default class SemanticAnalyzer {
     if (!valid) {
       this.emit("errors", [{
         type: ErrorType.InvalidNamedExprScope,
+        ...position,
         params: {
           ident: "initial",
           scopes
@@ -934,6 +954,7 @@ export default class SemanticAnalyzer {
     if (!valid) {
       this.emit("errors", [{
         type: ErrorType.InvalidNamedExprScope,
+        ...position,
         params: {
           ident: "fresh",
           scopes
@@ -1095,6 +1116,7 @@ export default class SemanticAnalyzer {
         type: ErrorType.InvalidStatement
       }])
     }
+    this.resetTypeStack()
   }
 
   handleTransExclusion(idents) {
@@ -1124,15 +1146,16 @@ export default class SemanticAnalyzer {
     const transBlock = this.context.findNearestBlock(SemanticContextType.TransDecl)
 
     // const block = this.context.peekBlock(1)
+    const sanitized = expr
+      .slice("where ".length)
+      .replace(/(?:\r\n|\r|\n)/g, " ")
+      .replace(/\s\s+/g, " ")
 
     if (transBlock) {
-      transBlock.metadata.whereExpr = expr
-        .slice("where ".length)
-        .replace(/(?:\r\n|\r|\n)/g, " ")
-        .replace(/\s\s+/g, " ")
+      transBlock.metadata.whereExpr = sanitized
     }
 
-    this.context.peekBlock().metadata.expr = expr
+    this.context.peekBlock().metadata.expr = sanitized
 
     // this.emitLangComponent(ctx, null)
   }
@@ -1280,6 +1303,17 @@ export default class SemanticAnalyzer {
     const blockType = this.context.peekBlock().type
     if (blockType !== SemanticContextType.StateInc && blockType !== SemanticContextType.PathPrimary) {
       this.pushTypeStack(IdentifierType.Int)
+    }
+  }
+
+  handleLocalVariableDeclGroup() {
+    const block = this.context.peekBlock()
+    if (block.metadata.fieldType === IdentifierType.Enum) {
+      this.emit("errors", [{
+        source: ErrorSource.Semantic,
+        type: ErrorType.LocalVariableEnum,
+        ...block.position
+      }])
     }
   }
 }

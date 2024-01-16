@@ -28,6 +28,7 @@ const errorTypeDescription = {
   [ErrorType.InvalidNamedExprScope]: "Invalid Expression",
   [ErrorType.InvalidStatement]: "Invalid Statement",
   [ErrorType.LetBodyUndefined]: "Path Condition Undefined",
+  [ErrorType.LocalVariableEnum]: "Enum Type In Local Variables",
 
   [ErrorType.TypeMismatchFunction]: "Type Mismatch",
   [ErrorType.TypeMismatchReturn]: "Type Mismatch",
@@ -41,6 +42,7 @@ const errorTypeDescription = {
   [ErrorType.NoStartNodeDefined]: "Ill-Formed Graph",
   [ErrorType.DuplicatedEdge]: "Redundant Edge",
   [ErrorType.EmptyEdge]: "Empty Edge",
+  [ErrorType.DuplicatedEnumField]: "Duplicated Enum",
 
   [ErrorType.RemoteError]: "Remote Execution Error"
 }
@@ -50,7 +52,7 @@ export const formatErrorDescription = (type) => {
 }
 
 const errorSourceToText = {
-  [ErrorSource.Semantic]: "Semantic Error",
+  [ErrorSource.Semantic]: "Semantic Problem",
   [ErrorSource.Remote]: "Execution Error",
   [ErrorSource.Lexer]: "Syntax Error",
   [ErrorSource.Parser]: "Syntax Error"
@@ -158,6 +160,14 @@ const eLetBodyUndefined = () => {
   return `path expression not defined in a path variable. Expecting a concrete definition. For example: let path_var = S0->S1;`
 }
 
+const eLocalVariableEnum = () => {
+  return `enum types are not allowed in local variables`
+}
+
+const eDuplicatedEnumField = ({text}) => {
+  return `duplicated enum definition: ${text}`
+}
+
 const errorMessageFormatter = {
   [ErrorType.RemoteError]: eMsgBased,
   [ErrorType.SyntaxError]: eMsgBased,
@@ -183,7 +193,9 @@ const errorMessageFormatter = {
   [ErrorType.DuplicatedEdge]: eDuplicatedEdge,
   [ErrorType.EmptyEdge]: eEmptyEdge,
   [ErrorType.InvalidStatement]: eInvalidStatement,
-  [ErrorType.LetBodyUndefined]: eLetBodyUndefined
+  [ErrorType.LetBodyUndefined]: eLetBodyUndefined,
+  [ErrorType.LocalVariableEnum]: eLocalVariableEnum,
+  [ErrorType.DuplicatedEnumField]: eDuplicatedEnumField
 }
 
 export const formatErrorMessage = (type, params, source) => {

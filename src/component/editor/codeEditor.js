@@ -22,6 +22,7 @@ import {getKeywordHoverDocument} from "@/core/resources/referenceDocs";
 import {getErrorLevel} from "@/core/monaco/error";
 import {pos} from "@/lib/position";
 import {LoadingOverlay} from "@mantine/core";
+import GraphicalBlockBuilder from "@/core/graphicalBlockBuilder";
 
 const MonacoSetup = ({children}) => {
   const [ready, setReady] = useState(false)
@@ -88,10 +89,12 @@ export const CycloneCodeEditor = ({
     // const maxLine = monacoCtx.model.getLineCount()
     const editorCtx = new EditorSemanticContext()
     const analyzer = new SemanticAnalyzer() // semanticAnalyzerRef.current
+    // const graphBuilder = new GraphicalBlockBuilder()
     // const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
 
     errorsRef.current.clear()
     editorCtx.attach(analyzer)
+    // graphBuilder.attach(analyzer)
     analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es))
     // analyzer.ready(endPos)
 
@@ -107,6 +110,7 @@ export const CycloneCodeEditor = ({
 
     if (result.syntaxErrorsCount === 0) {
       ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
+      // console.log(graphBuilder.context)
       editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
       onEditorContext && onEditorContext(editorSemanticContextRef.current)
     }
