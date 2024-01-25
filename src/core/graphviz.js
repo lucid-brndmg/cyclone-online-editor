@@ -40,14 +40,14 @@ export const animationSpeedOptions = [
 const genGraphvizStatesDef = (states, options, resultPaths = null) => {
   const codePieces = []
   for (let {identifier, attrs} of states) {
-    const {isAbstract, isNode, isFinal, isStart, isNormal} = attrs
-    const labels = []
-    if (isAbstract) {labels.push("abstract")}
-    if (isNormal) {labels.push("normal")}
-    if (isStart) {labels.push("start")}
-    if (isFinal) {labels.push("final")}
-    labels.push(isNode ? "node" : "state")
-    const props = labels.join(" ")
+    // const {isAbstract, isNode, isFinal, isStart, isNormal} = attrs
+    // const labels = []
+    // if (isAbstract) {labels.push("abstract")}
+    // if (isNormal) {labels.push("normal")}
+    // if (isStart) {labels.push("start")}
+    // if (isFinal) {labels.push("final")}
+    // labels.push(isNode ? "node" : "state")
+    const props = attrs.join(" ")
     const color = resultPaths?.states.has(identifier)
       ? ", color=darkgreen, fontcolor=darkgreen"
       : ""

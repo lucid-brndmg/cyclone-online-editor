@@ -972,7 +972,7 @@ export default class SemanticAnalyzer {
     const es = []
     const identifier = block.metadata.identifier
     const machine = this.context.currentMachineBlock
-    if (attrs.isStart) {
+    if (attrs.includes("start")) {
       const startIdent = machine.metadata.startNodeIdentifier
       if (startIdent != null) {
         es.push({
@@ -987,7 +987,7 @@ export default class SemanticAnalyzer {
       }
     }
 
-    if (attrs.isAbstract && block.metadata.hasChildren === true) {
+    if (attrs.includes("abstract") && block.metadata.hasChildren === true) {
       es.push({
         source: ErrorSource.Semantic,
         ...position,
@@ -1000,8 +1000,6 @@ export default class SemanticAnalyzer {
       this.emit("errors", es)
     }
     machine.metadata.stateSet.add(identifier)
-    // this.emit("lang:state", {identifier, attrs, position})
-    // this.emitLangComponent(ctx, {identifier, attrs})
   }
 
   handleStateScope(hasStatement) {
@@ -1269,11 +1267,12 @@ export default class SemanticAnalyzer {
     }
   }
 
-  handlePathCondAssign(position) {
-    this.deduceToType(IdentifierType.Bool, position)
+  handlePathCondAssign(expr) {
+    this.deduceToType(IdentifierType.Bool)
     const decl = this.context.findNearestBlock(SemanticContextType.LetDecl)
     if (decl) {
-      decl.metadata.hasBody = true
+      // decl.metadata.hasBody = true
+      decl.metadata.body = expr
     }
   }
 
@@ -1281,7 +1280,7 @@ export default class SemanticAnalyzer {
     const block = this.context.peekBlock()
     const position = block.position
     this.deduceToType(IdentifierType.Bool, position, null, true)
-    if (block.type === SemanticContextType.LetDecl && !block.metadata.hasBody) {
+    if (block.type === SemanticContextType.LetDecl && !block.metadata.body) {
       this.emit("errors", [{
         source: ErrorSource.Semantic,
         ...position,

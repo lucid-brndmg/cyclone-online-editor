@@ -97,25 +97,31 @@ class SemanticListener extends CycloneParserListener {
   }
 
   exitStateExpr(ctx) {
-    let isStart = false
-    let isAbstract = false
-    let isNormal = false
-    let isFinal = false
-    let isNode = false
+    // let isStart = false
+    // let isAbstract = false
+    // let isNormal = false
+    // let isFinal = false
+    // let isNode = false
+    const attrs = []
     for (let child of ctx.children) {
-      if (child?.symbol?.text === "node") {
-        isNode = true
+      const s = child?.symbol?.text
+      if (s === "node" || s === "state") {
+        attrs.push(s)
       } else {
-        switch (child.start?.text) {
-          case "start": isStart = true; break;
-          case "abstract": isAbstract = true; break;
-          case "normal": isNormal = true; break;
-          case "final": isFinal = true; break;
+        const t = child.start?.text
+        if (["start", "abstract", "normal", "final"].includes(t)) {
+          attrs.push(t)
         }
+        // switch (child.start?.text) {
+        //   case "start": attrs.push("start"); break;
+        //   case "abstract": attrs.push("abstract"); break;
+        //   case "normal": isNormal = true; break;
+        //   case "final": isFinal = true; break;
+        // }
       }
     }
 
-    this.analyzer.handleStateDecl({isAbstract, isStart, isNormal, isFinal, isNode})
+    this.analyzer.handleStateDecl(attrs)
     this.analyzer.popBlock(ctx)
   }
 
@@ -536,7 +542,7 @@ class SemanticListener extends CycloneParserListener {
 
   exitPathCondAssignExpr(ctx) {
     // this.analyzer.deduceToType(IdentifierType.Bool, getBlockPositionPair(ctx))
-    this.analyzer.handlePathCondAssign()
+    this.analyzer.handlePathCondAssign(getExpression(ctx))
   }
 
   exitPathExpr(ctx) {

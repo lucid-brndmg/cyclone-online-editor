@@ -89,12 +89,12 @@ export const CycloneCodeEditor = ({
     // const maxLine = monacoCtx.model.getLineCount()
     const editorCtx = new EditorSemanticContext()
     const analyzer = new SemanticAnalyzer() // semanticAnalyzerRef.current
-    // const graphBuilder = new GraphicalBlockBuilder()
+    const graphBuilder = new GraphicalBlockBuilder()
     // const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
 
     errorsRef.current.clear()
     editorCtx.attach(analyzer)
-    // graphBuilder.attach(analyzer)
+    graphBuilder.attach(analyzer)
     analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es))
     // analyzer.ready(endPos)
 
@@ -110,7 +110,7 @@ export const CycloneCodeEditor = ({
 
     if (result.syntaxErrorsCount === 0) {
       ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
-      // console.log(graphBuilder.context)
+      console.log(graphBuilder.context)
       editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
       onEditorContext && onEditorContext(editorSemanticContextRef.current)
     }

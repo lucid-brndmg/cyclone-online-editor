@@ -70,6 +70,7 @@ export default class GraphicalBlockBuilder {
       unsortedError: [],
       idBlocks: new Map(),
       childBlocks: new StackedTable(),
+      errorTable: new StackedTable(), // block_id, [error]
       // ids: {
       //   compilerOption: 0,
       //   machine: 0,
@@ -276,27 +277,70 @@ export default class GraphicalBlockBuilder {
           SemanticContextType.StateScope
         ])
 
+        const content = {
+          code: getExpression(payload)
+        }
+
         switch (semBlocks.type) {
           case SemanticContextType.FnBodyScope: {
-            this.getLatestBlock(GraphicalBlockKind.Func).data.statements.push(getExpression(payload))
+            this.createBlock(GraphicalBlockKind.Statement, position, this.getLatestBlockId(GraphicalBlockKind.Func), content)
             break
           }
-          // TODO: handle other scopes
+          case SemanticContextType.StateScope: {
+            this.createBlock(GraphicalBlockKind.Statement, position, this.getLatestBlockId(GraphicalBlockKind.State), content)
+            break
+          }
+          case SemanticContextType.InvariantScope: {
+            this.createBlock(GraphicalBlockKind.Statement, position, this.getLatestBlockId(GraphicalBlockKind.Invariant), content)
+            break
+          }
         }
         break
       }
       case SemanticContextType.LocalVariableGroup: {
-        // const semBlock = context.findNearestBlockByTypes([
-        //   SemanticContextType.FnBodyScope,
-        //
-        // ])
-
         // For now, local var can only exist in fn
-
         this.createBlock(GraphicalBlockKind.SingleTypedVariableGroup, position, this.getLatestBlockId(GraphicalBlockKind.Func), {
           varKind: IdentifierKind.LocalVariable
         })
 
+        break
+      }
+
+      case SemanticContextType.StateDecl: {
+        this.createBlock(GraphicalBlockKind.State, position, this.getLatestBlockId(GraphicalBlockKind.Machine))
+        break
+      }
+
+      case SemanticContextType.TransDecl: {
+        this.createBlock(GraphicalBlockKind.Transition, position, this.getLatestBlockId(GraphicalBlockKind.Machine))
+        break
+      }
+
+      case SemanticContextType.InvariantDecl: {
+        this.createBlock(GraphicalBlockKind.Invariant, position, this.getLatestBlockId(GraphicalBlockKind.Machine))
+        break
+      }
+
+      case SemanticContextType.GoalScope: {
+        this.createBlock(GraphicalBlockKind.Goal, position, this.getLatestBlockId(GraphicalBlockKind.Machine))
+        break
+      }
+
+      case SemanticContextType.AssertExpr: {
+        this.createBlock(GraphicalBlockKind.Assertion, position, this.getLatestBlockId(GraphicalBlockKind.Goal))
+        break
+      }
+
+      case SemanticContextType.PathAssignStatement: {
+        this.createBlock(GraphicalBlockKind.PathStatement, position, this.getLatestBlockId(GraphicalBlockKind.Goal), {
+          code: getExpression(payload)
+        })
+        break
+      }
+
+      case SemanticContextType.LetDecl: {
+        this.createBlock(GraphicalBlockKind.PathVariable, position, this.getLatestBlockId(GraphicalBlockKind.Goal))
+        // TODO: mark ident, get expr
         break
       }
     }
@@ -321,9 +365,8 @@ export default class GraphicalBlockBuilder {
       }
       case SemanticContextType.WhereExpr: {
         const trans = context.findNearestBlock(SemanticContextType.TransDecl)
-        if (trans) {
-          // TODO: mark trans
-        } else {
+        if (!trans) {
+          // trans is handled by trans's metadata
           this.markData(GraphicalBlockKind.Variable, {
             codeWhere: metadata.expr
           })
@@ -356,6 +399,87 @@ export default class GraphicalBlockBuilder {
         this.markData(GraphicalBlockKind.Func, {
           returnType: output,
           identifier: metadata.identifier
+        })
+        break
+      }
+
+      case SemanticContextType.StateDecl: {
+        const {identifier, attributes} = metadata
+        this.markData(GraphicalBlockKind.State, {
+          identifier, attributes
+        })
+        break
+      }
+
+      case SemanticContextType.TransDecl: {
+        const {
+          label,
+          whereExpr,
+          fromState,
+          toStates,
+          operators,
+          excludedStates,
+          involvedStates
+        } = metadata
+
+        // TODO: state identifier to (multiple, consider ill forms) block ids
+
+        this.markData(GraphicalBlockKind.Transition, {
+          label,
+          codeWhere: whereExpr,
+          fromState,
+          toStates,
+          operators,
+          excludedStates,
+          involvedStates
+        })
+
+        break
+      }
+
+      case SemanticContextType.InvariantDecl: {
+        this.markData(GraphicalBlockKind.Invariant, {
+          identifier: metadata.identifier
+        })
+        break
+      }
+
+      case SemanticContextType.InExpr: {
+        const {identifiers} = metadata
+        if (!identifiers?.length) {
+          return
+        }
+
+        const semBlocks = context.findNearestBlockByTypes([
+          SemanticContextType.InvariantDecl,
+          SemanticContextType.AssertExpr
+        ])
+
+        switch (semBlocks.type) {
+          case SemanticContextType.InvariantDecl: {
+            this.markData(GraphicalBlockKind.Invariant, {inIdentifiers: identifiers})
+            break
+          }
+          case SemanticContextType.AssertExpr: {
+            this.markData(GraphicalBlockKind.Assertion, {inIdentifiers: identifiers})
+            break
+          }
+        }
+        break
+      }
+
+      case SemanticContextType.GoalScope: {
+        this.markData(GraphicalBlockKind.Goal, {
+          codeFinal: metadata.expr,
+          invariants: metadata.invariants,
+          states: metadata.states
+        })
+        break
+      }
+
+      case SemanticContextType.LetDecl: {
+        this.markData(GraphicalBlockKind.PathVariable, {
+          codeInit: metadata.body
         })
         break
       }
