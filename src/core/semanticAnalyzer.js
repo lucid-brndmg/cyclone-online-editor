@@ -372,13 +372,19 @@ export default class SemanticAnalyzer {
     }
 
     // this.context.editorCtx.pushScopeLayerIdent(identText, type, identPos, identKind, blockType, this.context.scopedBlocks.length)
-
+    const isRecordMemberDef = !isEnum && scope.type === SemanticContextType.RecordScope
+      // current block is not enum decl
+      // (since enum decl also involves identifiers)
+      && this.context.peekBlock().type !== SemanticContextType.EnumDecl
+    const recordDecl = isRecordMemberDef ? this.context.findNearestBlock(SemanticContextType.RecordDecl) : null
+    const recordIdent = recordDecl?.metadata.identifier // this.context
     const payload = {
       text: identText,
       type,
       position: identPos,
       kind: identKind,
       blockType,
+      recordIdent
       // isEnum
     }
 
@@ -396,47 +402,39 @@ export default class SemanticAnalyzer {
         fnSignature,
         fnParams: []
       }
-      const isRecordMemberDef = scope.type === SemanticContextType.RecordScope
-        // current block is not enum decl
-        // (since enum decl also involves identifiers)
-        && this.context.peekBlock().type !== SemanticContextType.EnumDecl
-
-
         // this.context.findNearestBlock(SemanticContextType.EnumDecl, SemanticContextType.RecordScope) === null
         // && this.searchNearestBlock(
         //   block => block.metadata?.blockCurrentRecord === true,
         //   SemanticContextType.RecordScope,
         //   // this.context.blockContextStack.length - scope.index
         // ) === null
-      if (isRecordMemberDef) {
-        const recordDecl = this.context.findNearestBlock(SemanticContextType.RecordDecl)
-        const recordIdent = recordDecl.metadata.identifier // this.context.currentRecordIdent[this.context.currentRecordIdent.length - 1]
-        if (recordIdent) {
-          // info.recordIdent = recordIdent
+      if (recordIdent) {
+        // info.recordIdent = recordIdent
 
-          const recordInfo = machineCtx.identifierStack.peek(recordIdent)
-          recordInfo?.recordChild?.push({
-            text: identText,
-            type,
-            kind: identKind
-          })
-          // no need to check current counts here
-          // cuz RecordScope is already a scope
+        const recordInfo = machineCtx.identifierStack.peek(recordIdent)
+        recordInfo?.recordChild?.push({
+          text: identText,
+          type,
+          kind: identKind
+        })
+        // no need to check current counts here
+        // cuz RecordScope is already a scope
 
-          // scope?.metadata.recordCounts.incr(recordIdent, identText)
-          const prevScope = this.context.peekScope(1)
-          if (prevScope) {
-            prevScope?.metadata.recordCounts.incr(recordIdent, identText)
-          } else {
-            console.log("warn: no previous scope exists before current scope")
-          }
-          // this.context.recordCounts.incr(recordIdent, identText)
-          machineCtx.recordFieldStack.push(recordIdent, identText, info)
-          // maybe for scoped too ?
+        // scope?.metadata.recordCounts.incr(recordIdent, identText)
+        const prevScope = this.context.peekScope(1)
+        if (prevScope) {
+          prevScope?.metadata.recordCounts.incr(recordIdent, identText)
         } else {
-          console.log("warn: no record context exists when defining record field: ", identText)
+          console.log("warn: no previous scope exists before current scope")
         }
+        // this.context.recordCounts.incr(recordIdent, identText)
+        machineCtx.recordFieldStack.push(recordIdent, identText, info)
       }
+      // if (isRecordMemberDef) {
+      //   const recordDecl = this.context.findNearestBlock(SemanticContextType.RecordDecl)
+      //   const recordIdent = recordDecl.metadata.identifier // this.context.currentRecordIdent[this.context.currentRecordIdent.length - 1]
+      //
+      // }
 
       machineCtx.identifierStack.push(identText, info)
       scope.metadata.identifierCounts.incr(identText)

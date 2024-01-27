@@ -1,4 +1,11 @@
-import {ActionKind, ErrorType, IdentifierKind, IdentifierType, SemanticContextType} from "@/core/definitions";
+import {
+  ActionKind,
+  ErrorType,
+  IdentifierKind,
+  IdentifierType,
+  SemanticContextType,
+  SyntaxBlockKind
+} from "@/core/definitions";
 import spec from "../../resource/cyclone_spec.json"
 
 export const scopedContextType = new Set([
@@ -267,5 +274,24 @@ const errorTypeWarnings = new Set([
   ErrorType.EmptyEdge,
   ErrorType.DuplicatedEnumField
 ])
+
+export const syntaxBlockIdPrefix = {
+  [SyntaxBlockKind.CompilerOption]: "copt",
+  [SyntaxBlockKind.Machine]: "graph",
+  [SyntaxBlockKind.State]: "state",
+  [SyntaxBlockKind.Transition]: "trans",
+  [SyntaxBlockKind.Assertion]: "assert",
+  [SyntaxBlockKind.Variable]: "var",
+  [SyntaxBlockKind.Func]: "fn",
+  [SyntaxBlockKind.Goal]: "goal",
+  [SyntaxBlockKind.Invariant]: "inv",
+  [SyntaxBlockKind.Statement]: "stmt",
+  [SyntaxBlockKind.PathVariable]: "pvar",
+  [SyntaxBlockKind.PathStatement]: "pstmt",
+  [SyntaxBlockKind.Record]: "rec",
+  [SyntaxBlockKind.SingleTypedVariableGroup]: "stvargrp",
+  [SyntaxBlockKind.FnParamGroup]: "fnvargrp",
+  [SyntaxBlockKind.Error]: "err"
+}
 
 export const isWarning = errorType => errorTypeWarnings.has(errorType)

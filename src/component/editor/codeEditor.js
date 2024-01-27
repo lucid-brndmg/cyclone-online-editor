@@ -22,7 +22,7 @@ import {getKeywordHoverDocument} from "@/core/resources/referenceDocs";
 import {getErrorLevel} from "@/core/monaco/error";
 import {pos} from "@/lib/position";
 import {LoadingOverlay} from "@mantine/core";
-import GraphicalBlockBuilder from "@/core/graphicalBlockBuilder";
+import SyntaxBlockBuilder from "@/core/syntaxBlockBuilder";
 
 const MonacoSetup = ({children}) => {
   const [ready, setReady] = useState(false)
@@ -89,7 +89,7 @@ export const CycloneCodeEditor = ({
     // const maxLine = monacoCtx.model.getLineCount()
     const editorCtx = new EditorSemanticContext()
     const analyzer = new SemanticAnalyzer() // semanticAnalyzerRef.current
-    const graphBuilder = new GraphicalBlockBuilder()
+    const graphBuilder = new SyntaxBlockBuilder()
     // const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
 
     errorsRef.current.clear()

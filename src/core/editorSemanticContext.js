@@ -1,7 +1,47 @@
-import {PositionTable} from "@/lib/storage";
 import {OutlineKind, SemanticContextType} from "@/core/definitions";
-import {declarationContextType, scopedContextType} from "@/core/specification";
+import {scopedContextType} from "@/core/specification";
 import {getParentExpression} from "@/core/utils/antlr";
+import {posRangeIncludes} from "@/lib/position";
+
+class PositionTable {
+  context = []
+
+  set({startPosition, stopPosition}, value) {
+    this.context.push({
+      startPosition,
+      stopPosition,
+      value
+    })
+
+    // if (!this.context[x]) {
+    //   this.context[x] = {}
+    // }
+    //
+    // this.context[x][y] = value
+  }
+
+  find(line, column, filterFn = null) {
+    // TODO: optimize this using binary search
+
+    const candidates = this.context.filter(pair => posRangeIncludes({line, column}, pair) && (filterFn ? filterFn(pair.value) : true))
+    return candidates[candidates.length - 1]
+  }
+
+  sort() {
+    // SCOPES HAVE A SPECIAL FEATURE:
+    // LET SCOPE A, B
+    // IF A.START < B.START THEN A.STOP > B.STOP
+    // THEY CAN ONLY BE NESTED, NEVER INTERSECTED
+
+    this.context.sort((a, b) => {
+      if (a.startPosition.line === b.startPosition.line) {
+        return a.startPosition.column - b.startPosition.column
+      } else {
+        return a.startPosition.line - b.startPosition.line
+      }
+    })
+  }
+}
 
 export default class EditorSemanticContext {
   scopePosition = new PositionTable()

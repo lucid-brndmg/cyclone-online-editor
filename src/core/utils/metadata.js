@@ -78,7 +78,6 @@ const goalScopeMetadata = () => ({
 const letDeclMetadata = () => ({
   // hasBody: false,
   body: null,
-  // TODO: body
 })
 
 const machineDeclMetadata = () => ({

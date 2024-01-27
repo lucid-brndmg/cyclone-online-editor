@@ -180,3 +180,23 @@ export const OutlineKind = {
   Group: 1,
   Identifier: 2
 }
+
+export const SyntaxBlockKind = {
+  CompilerOption: 1,
+  Machine: 2,
+  State: 3,
+  Transition: 4,
+  Assertion: 5,
+  Variable: 6,
+  Func: 7,
+  Goal: 8,
+  Invariant: 9,
+  Statement: 10,
+  PathVariable: 11,
+  PathStatement: 12,
+  Record: 13,
+  SingleTypedVariableGroup: 14,
+  FnParamGroup: 15,
+
+  Error: 99
+}
