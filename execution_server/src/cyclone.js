@@ -1,14 +1,11 @@
 import path from "node:path"
 import fs from "node:fs"
-import antlr4, {ParseTreeWalker} from "antlr4";
 import config from "./config.js"
 import {execFileAsync, execShellCommand, spawnAsync} from "./lib/system.js"
-import CycloneLexer from "./generated/antlr/CycloneLexer.js";
-import CycloneParser from "./generated/antlr/CycloneParser.js";
-import CycloneParserListener from "./generated/antlr/CycloneParserListener.js";
 import {ResponseCode} from "./definitions.js";
 import {executionLogger, serviceLogger} from "./logger.js";
 import {customSlice} from "./lib/string.js";
+import cycloneAnalyzer from "cyclone-analyzer"
 
 // runs once at server start
 export const registerCycloneVersion = async () => {
@@ -25,7 +22,7 @@ export const getCycloneVersion = () => {
 
 // Regex would be not accurate here
 // Option syntax could also be appeared to in strings or labels
-class ValidationListener extends CycloneParserListener {
+class ValidationListener extends cycloneAnalyzer.generated.antlr.CycloneParserListener {
   options = new Set()
 
   enterCompOptions(ctx) {
@@ -37,19 +34,21 @@ class ValidationListener extends CycloneParserListener {
 }
 
 export const checkProgram = program => {
-  const stream = new antlr4.InputStream(program)
-  const lexer = new CycloneLexer(stream)
-  lexer.removeErrorListeners()
-  const tokens = new antlr4.CommonTokenStream(lexer)
-  const parser = new CycloneParser(tokens)
-  parser.removeErrorListeners()
-
-  const tree = parser.program()
-  if (parser.syntaxErrorsCount > 0) {
+  // const stream = new antlr4.InputStream(program)
+  // const lexer = new CycloneLexer(stream)
+  // lexer.removeErrorListeners()
+  // const tokens = new antlr4.CommonTokenStream(lexer)
+  // const parser = new CycloneParser(tokens)
+  // parser.removeErrorListeners()
+  //
+  // const tree = parser.program()
+  const parsed = cycloneAnalyzer.utils.antlr.parseCycloneSyntax({input: program})
+  if (parsed.syntaxErrorsCount > 0) {
     return {syntaxError: true}
   }
   const listener = new ValidationListener()
-  ParseTreeWalker.DEFAULT.walk(listener, tree)
+  cycloneAnalyzer.utils.antlr.listenerWalk(listener, parsed.tree)
+  // ParseTreeWalker.DEFAULT.walk(listener, tree)
 
   const invalidOptions = []
 

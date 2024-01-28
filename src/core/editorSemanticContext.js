@@ -1,7 +1,10 @@
-import {OutlineKind, SemanticContextType} from "@/core/definitions";
-import {scopedContextType} from "@/core/specification";
-import {getParentExpression} from "@/core/utils/antlr";
+import {OutlineKind} from "@/core/definitions";
 import {posRangeIncludes} from "@/lib/position";
+import cycloneAnalyzer from "cyclone-analyzer";
+
+const {SemanticContextType} = cycloneAnalyzer.language.definitions
+const {getParentExpression} = cycloneAnalyzer.utils.antlr
+const {scopedContextType} = cycloneAnalyzer.language.specifications
 
 class PositionTable {
   context = []

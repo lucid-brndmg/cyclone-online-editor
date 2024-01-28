@@ -1,5 +1,7 @@
-import {ErrorSource, ErrorType} from "@/core/definitions";
 import {posPair} from "@/lib/position";
+import {language} from "cyclone-analyzer";
+
+const {ErrorSource, ErrorType} = language.definitions
 
 const regexFindPathInResult = /\w+->\w+(->\w+)*/g
 const regexFindStateInTrace = /\[\d+\]\.@\w+/

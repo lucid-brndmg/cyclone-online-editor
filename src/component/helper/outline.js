@@ -36,7 +36,7 @@ import {memo, useCallback, useEffect, useMemo, useState} from "react";
 import {useEditorStore} from "@/state/editorStore";
 import {useEditorHelperStore} from "@/state/editorHelperStore";
 import {filterText, scopeLayersToOutline} from "@/core/utils/outline";
-import {IdentifierKind, IdentifierType, OutlineKind, SemanticContextType} from "@/core/definitions";
+import {OutlineKind} from "@/core/definitions";
 import {
   formatErrorDescription, formatErrorMessage,
   formatKindDescription,
@@ -44,8 +44,10 @@ import {
   formatType
 } from "@/core/utils/format";
 import {locateToCode} from "@/core/utils/monaco";
-import {useIdle} from "@mantine/hooks";
 import {isWarning} from "@/core/specification";
+import cycloneAnalyzer from "cyclone-analyzer";
+
+const {IdentifierKind, SemanticContextType} = cycloneAnalyzer.language.definitions
 
 const outlineBlockTypeIcons = {
   [SemanticContextType.MachineScope]: IconVector,

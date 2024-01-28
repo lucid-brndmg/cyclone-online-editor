@@ -1,11 +1,9 @@
 import {useEffect, useRef, useState} from "react";
 import {Editor, loader} from "@monaco-editor/react";
 import ErrorStorage from "@/core/utils/errorStorage";
-import SemanticListener from "@/core/antlr/semanticListener";
 import Config from "../../../resource/config.json";
-import SemanticAnalyzer from "@/core/semanticAnalyzer";
 import EditorSemanticContext from "@/core/editorSemanticContext";
-import {ParseTreeWalker} from "antlr4";
+import cycloneAnalyzer from "cyclone-analyzer";
 import {
   cycloneCodeMD,
   formatErrorMessage,
@@ -14,15 +12,15 @@ import {
   formatType
 } from "@/core/utils/format";
 import {cycloneFullKeywordsSet} from "@/core/specification";
-import {IdentifierKind, IdentifierType} from "@/core/definitions";
-import {parseCycloneSyntax} from "@/core/antlr/parse";
+import {parseCycloneSyntax} from "@/core/utils/parse";
 import {CycloneLanguageId, CycloneMonacoConfig, CycloneMonacoTokens} from "@/core/monaco/language";
 import {getDefaultCompletionItems} from "@/core/monaco/completion";
 import {getKeywordHoverDocument} from "@/core/resources/referenceDocs";
 import {getErrorLevel} from "@/core/monaco/error";
 import {pos} from "@/lib/position";
 import {LoadingOverlay} from "@mantine/core";
-import SyntaxBlockBuilder from "@/core/syntaxBlockBuilder";
+
+const {IdentifierKind, IdentifierType} = cycloneAnalyzer.language.definitions
 
 const MonacoSetup = ({children}) => {
   const [ready, setReady] = useState(false)
@@ -88,8 +86,8 @@ export const CycloneCodeEditor = ({
 
     // const maxLine = monacoCtx.model.getLineCount()
     const editorCtx = new EditorSemanticContext()
-    const analyzer = new SemanticAnalyzer() // semanticAnalyzerRef.current
-    const graphBuilder = new SyntaxBlockBuilder()
+    const analyzer = new cycloneAnalyzer.analyzer.SemanticAnalyzer() // semanticAnalyzerRef.current
+    const graphBuilder = new cycloneAnalyzer.blockBuilder.SyntaxBlockBuilder() // SyntaxBlockBuilder()
     // const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
 
     errorsRef.current.clear()
@@ -109,7 +107,11 @@ export const CycloneCodeEditor = ({
     })
 
     if (result.syntaxErrorsCount === 0) {
-      ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
+      // ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
+      cycloneAnalyzer.utils.antlr.listenerWalk(
+        new cycloneAnalyzer.analyzer.SemanticParserListener(analyzer),
+        result.tree
+      )
       console.log(graphBuilder.context)
       editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
       onEditorContext && onEditorContext(editorSemanticContextRef.current)

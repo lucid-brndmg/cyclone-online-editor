@@ -1,5 +1,8 @@
-import {IdentifierKind, IdentifierType, OutlineKind, SemanticContextType} from "@/core/definitions";
+import {OutlineKind} from "@/core/definitions";
 import {pairIncludes} from "@/lib/list";
+import cycloneAnalyzer from "cyclone-analyzer";
+
+const {IdentifierKind, SemanticContextType, IdentifierType} = cycloneAnalyzer.language.definitions
 
 const sanitizeScopeLayers = layers => {
   let result = []

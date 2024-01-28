@@ -1,5 +1,4 @@
 npm run gencodeexample
-# npm run genparser
 npm run genhl
 npm run genref
 npm run gentheme

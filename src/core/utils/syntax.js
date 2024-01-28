@@ -1,8 +1,7 @@
-import antlr4 from "antlr4";
-import {ErrorType} from "@/core/definitions";
 import {pos} from "@/lib/position";
+import cycloneAnalyzer from "cyclone-analyzer";
 
-export class SyntaxErrorListener extends antlr4.error.ErrorListener {
+export class SyntaxErrorListener extends cycloneAnalyzer.utils.antlr.ErrorListener {
   source
   onError
 
@@ -18,7 +17,7 @@ export class SyntaxErrorListener extends antlr4.error.ErrorListener {
       startPosition: pos(line, column),
       // msg,
 
-      type: ErrorType.SyntaxError,
+      type: cycloneAnalyzer.language.definitions.ErrorType.SyntaxError,
       params: {msg}
     })
   }

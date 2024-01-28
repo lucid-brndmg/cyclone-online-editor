@@ -4,6 +4,8 @@ Cyclone online editor is an online development environment for the [Cyclone Spec
 
 The website includes an interactive online editor, a tutorial page and a playground designed for learning the cyclone language & developing cyclone source code online.
 
+This project uses [cyclone analyzer](https://github.com/lucid-brndmg/cyclone-analyzer) for parsing and analyzing cyclone's source code. See its readme file for details.
+
 *This project is a final year project (CS440[A]) at Maynooth University.*
 
 ## TODO
@@ -43,7 +45,6 @@ Development Features:
 - Easily managing code snippets, code examples and editor themes.
 - Add additional tutorial chapters & reference documentation to the website **using only markdown**. No need to manually writing JSON manifest.
 - Uses static-site generation technique to generate static pages automatically
-- Using [ANTLR4](https://www.antlr.org/) as the parser generator. Upcoming language features could be added easily
 - No large JSONs are imported, all static resources are dynamically requested to get a better user experience
 
 ## Screenshots
@@ -120,7 +121,6 @@ Here is a basic structure for the project:
 │   └── vs
 ├── raw
 │   ├── code_example
-│   ├── grammar
 │   ├── reference
 │   └── tutorial
 ├── resource
@@ -140,16 +140,16 @@ Here is a basic structure for the project:
 
 There are several directories that worth noticing:
 
-| path              | description                                                                                                                                                                                                                                                                                           |
-|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| /execution_server | The execution server that executes cyclone code. Consider this the 'backend' of the editor.                                                                                                                                                                                                           |
-| /public           | Static files for Next.js. Some of the generated files are included.                                                                                                                                                                                                                                   |
-| /public/dynamic   | Stores generated code example, reference document and editor theme definitions. Please do not edit them directly                                                                                                                                                                                      |
-| /public/vs        | Stores resource files that are required by the editor component (monaco editor)                                                                                                                                                                                                                       |
-| /raw              | Stores raw resources for code examples, ANTLR4 parser & lexer rules, reference documents and tutorial pages (both in Markdown)                                                                                                                                                                        |
-| /resource         | Stores generated tutorial HTMLs, images, resource manifests and some configurations in JSON.                                                                                                                                                                                                          |
-| /scripts          | Stores code generation scripts in JS and Shell. Execute these scripts only at repo's root directory and DO NOT execute them anywhere else.                                                                                                                                                            |
-| /src              | Source code directory. Component structures are equivalent to Next.js page router's structure and `core` contains the core logic for the semantic checker and other modules of cyclone. Please do not touch `generated` directory since these codes are generated automatically by scripts and ANTLR4 |
+| path              | description                                                                                                                                                                                                                                                                                |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| /execution_server | The execution server that executes cyclone code. Consider this the 'backend' of the editor.                                                                                                                                                                                                |
+| /public           | Static files for Next.js. Some of the generated files are included.                                                                                                                                                                                                                        |
+| /public/dynamic   | Stores generated code example, reference document and editor theme definitions. Please do not edit them directly                                                                                                                                                                           |
+| /public/vs        | Stores resource files that are required by the editor component (monaco editor)                                                                                                                                                                                                            |
+| /raw              | Stores raw resources for code examples, reference documents and tutorial pages (both in Markdown)                                                                                                                                                                                          |
+| /resource         | Stores generated tutorial HTMLs, images, resource manifests and some configurations in JSON.                                                                                                                                                                                               |
+| /scripts          | Stores code generation scripts in JS and Shell. Execute these scripts only at repo's root directory and DO NOT execute them anywhere else.                                                                                                                                                 |
+| /src              | Source code directory. Component structures are equivalent to Next.js page router's structure and `core` contains the core logic for the semantic checker and other modules of cyclone. Please do not touch `generated` directory since these codes are generated automatically by scripts |
 
 ### Managing Resources
 
@@ -614,16 +614,9 @@ To change the rules for highlight.js, please visit `scripts/utils/highlight_spec
 
 Doing this complicated code generation is because it's the only way to make both Node.js and Next.js happy... The actual reason is written in that file as comments.
 
-#### ANTLR4 Parser & Lexer
-The ANTLR4 parser and lexer is inside `raw/grammar` directory. The parser is specially designed for listening to some blocks via ANTLR listeners.
+#### Parser & Semantic Analyzer
 
-If these files are changed, please make sure to run this:
-```shell
-# MAKE SURE TO RUN THIS AT REPO'S ROOT (Where package.json lies)
-npm run genparser
-```
-
-Please notice that [the ANTLR4 development environment must be installed](https://github.com/antlr/antlr4/blob/master/doc/getting-started.md) in order to execute the above command.
+This repository contains the online editor only. For Cyclone's parser and semantic analyzer, please see [cyclone-analyzer](https://github.com/lucid-brndmg/cyclone-analyzer). 
 
 #### Monaco Editor
 The website uses monaco editor to provide code editing features. The basic definitions for the editor, including syntax highlighting and other patterns, are inside `src/core/monaco/language.js`.
@@ -636,7 +629,6 @@ This project mainly uses these third party dependencies:
 - *React, Next.js:* For the fundamental of this application
 - *Mantine UI:* For UI components
 - *Monaco Editor:* The editor framework underlying the online editor
-- *ANTLR4:* Parser generator for generating parser for cyclone.
 - *D3.js, D3-graphviz:* Provides visual component for graphviz code used in visualization module.
 - *Highlight.js:* For highlighting code elements inside raw html
 - *Zustand:* State managing library for React

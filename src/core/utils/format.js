@@ -1,10 +1,12 @@
-import {
+import cycloneAnalyzer from "cyclone-analyzer";
+
+const {
   ErrorSource,
   ErrorType,
   IdentifierKind,
   IdentifierType,
   SemanticContextType
-} from "@/core/definitions";
+} = cycloneAnalyzer.language.definitions
 
 const errorTypeDescription = {
   // [ErrorKind.SyntaxError]: "Syntax Error",
