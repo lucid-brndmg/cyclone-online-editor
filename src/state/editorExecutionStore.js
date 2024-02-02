@@ -29,6 +29,12 @@ export const useEditorExecutionStore = create((set, get) => ({
   parsedPaths: null,
   setParsedPaths: parsedPaths => set({parsedPaths}),
 
+  parsedTraces: null,
+  setParsedTraces: parsedTraces => set({parsedTraces}),
+
+  traceIsGraphviz: false,
+  setTraceIsGraphviz: traceIsGraphviz => set({traceIsGraphviz}),
+
   errorMessage: "",
   setErrorMessage: errorMessage => set({errorMessage})
 }))

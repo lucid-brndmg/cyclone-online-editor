@@ -147,7 +147,7 @@ const ExecPanel = () => {
 }
 
 const TracePanel = () => {
-  const {executionResult} = useEditorExecutionStore()
+  const {executionResult, traceIsGraphviz, parsedTraces} = useEditorExecutionStore()
   const {graphviz} = useEditorSettingsStore()
   const [incPath, setIncPath] = useState([])
   const [selectedPath, setSelectedPath] = useState([])
@@ -160,8 +160,7 @@ const TracePanel = () => {
     }
 
     // const isGraphviz = /^digraph\s+\w*\s+\{\s*/gm
-    if (isGraphviz(trace)) {
-      console.log("isGraphviz")
+    if (traceIsGraphviz) {
       return {
         isRemote: true,
         traces: [{
@@ -173,8 +172,7 @@ const TracePanel = () => {
         }]
       }
     } else {
-      const parsed = parseTrace(trace)
-      const codes = genGraphvizTrace(parsed, graphviz)
+      const codes = genGraphvizTrace(parsedTraces, graphviz)
       return {
         isRemote: false,
         traces: codes.map((code, i) => ({
@@ -253,8 +251,11 @@ export const VisualizationPanel = () => {
   const [panel, onPanel] = useState("preview")
   const {executionResult, parsedPaths} = useEditorExecutionStore()
   const Component = panels[panel]
-  const edgeLength = parsedPaths?.edges.length
+  const edgeLength = parsedPaths?.total
   const hasTrace = executionResult?.trace
+  useEffect(() => {
+    console.log(edgeLength)
+  }, [edgeLength]);
   return (
     <Stack>
       <SegmentedControl value={panel} onChange={onPanel} data={[
@@ -274,7 +275,7 @@ export const VisualizationPanel = () => {
               <IconPlayerPlay style={{ width: rem(16), height: rem(16) }} />
               <Group ml={10} gap={"xs"}>
                 <Box>Execution</Box>
-                <Badge style={{display: edgeLength ? "" : "none"}} size="sm" variant="filled" color="red" p={4} h={16} w={16}>
+                <Badge style={{display: edgeLength ? "" : "none"}} size="sm" variant="filled" color="red" p={4} h={16}>
                   {edgeLength}
                 </Badge>
               </Group>

@@ -2,7 +2,7 @@ import {useEditorStore} from "@/state/editorStore";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import Config from "../../../resource/config.json";
 import {
-  parseExecutionResultPaths,
+  parseExecutionResultPaths, parseTrace,
   ResponseCode,
   sanitizeResult,
   translateErrorResponse
@@ -10,6 +10,7 @@ import {
 import {useEffect, useMemo, useRef, useState} from "react";
 import {IconArrowsMaximize, IconCopy, IconTerminal2} from "@tabler/icons-react";
 import {
+  Box,
   Button,
   Code,
   CopyButton,
@@ -24,10 +25,11 @@ import {
   TypographyStylesProvider
 } from "@mantine/core";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
+import {isGraphviz} from "@/core/utils/language";
 
 export const CodeExecutionButton = ({...props}) => {
   const {code, setCode, editorCtx} = useEditorStore()
-  const {setIsLoading, setIsError, setVisualDataCopy, setExecutionResult, isLoading, executionResult, setParsedPaths, setErrorMessage, setIsPolling, isPolling} = useEditorExecutionStore()
+  const {setIsLoading, setIsError, setVisualDataCopy, setExecutionResult, isLoading, executionResult, setParsedPaths, setErrorMessage, setIsPolling, isPolling, setParsedTraces, setTraceIsGraphviz} = useEditorExecutionStore()
   const isPollingRef = useRef(isPolling)
   const invalidCode = useMemo(() => code.trim().length === 0, [code])
   const {executionServer, execPollWait} = useEditorSettingsStore()
@@ -130,8 +132,23 @@ export const CodeExecutionButton = ({...props}) => {
       } else {
         setParsedPaths(null)
       }
+
+      if (executionResult.trace) {
+        const graphviz = isGraphviz(executionResult.trace)
+        setTraceIsGraphviz(graphviz)
+        if (graphviz) {
+          setParsedTraces(null)
+        } else {
+          setParsedTraces(parseTrace(executionResult.trace))
+        }
+      } else {
+        setParsedTraces(null)
+        setTraceIsGraphviz(false)
+      }
     } else {
       setParsedPaths(null)
+      setParsedTraces(null)
+      setTraceIsGraphviz(false)
     }
   }, [executionResult])
 
@@ -150,7 +167,7 @@ export const CodeExecutionButton = ({...props}) => {
 export const CodeConsoleResultSection = () => {
   // const placeholder = `Code execution result will be presented here ...`
   const [resultMode, setResultMode] = useState("Result")
-  const { executionResult, isError, isLoading , errorMessage, isPolling, setIsPolling} = useEditorExecutionStore()
+  const { executionResult, isError, isLoading , errorMessage, isPolling, setIsPolling, parsedPaths, parsedTraces, traceIsGraphviz} = useEditorExecutionStore()
   const {resultHeight, executionServer} = useEditorSettingsStore()
   const {setErrors} = useEditorStore()
   const viewport = useRef(null)
@@ -223,14 +240,32 @@ export const CodeConsoleResultSection = () => {
 
       {
         executionResult
-          ? <ScrollArea.Autosize viewportRef={viewport} mah={`${resultHeight - 9}svh`} p={0} type="auto" mt={"sm"}>
-            {resultMode === "Result"
-              ? <TypographyStylesProvider fz={"sm"} p={0}>
-                <div dangerouslySetInnerHTML={{__html: sanitized.sanitized}} />
-              </TypographyStylesProvider>
-              : <Code block={true}>{executionResult.trace}</Code>
+          ? <Box>
+            {parsedPaths
+              ? parsedPaths.total > 0
+                ? <Text fw={500} size={"sm"}>Found {parsedPaths.total} paths</Text>
+                : <Text fw={500} size={"sm"}>Execution completed, no path found</Text>
+              : <Text fw={500} size={"sm"}>Execution completed, no path found</Text>
             }
-          </ScrollArea.Autosize>
+
+            {parsedTraces
+              ? parsedTraces.length
+                ? <Text fw={500} size={"sm"}>Generated {parsedTraces.length} traces</Text>
+                : <Text fw={500} size={"sm"}>No trace generated</Text>
+              : traceIsGraphviz
+                ? <Text fw={500} size={"sm"}>Trace generated in Graphviz format</Text>
+                : <Text fw={500} size={"sm"}>No trace generated</Text>
+            }
+
+            <ScrollArea.Autosize viewportRef={viewport} mah={`${resultHeight - 12}svh`} p={0} type="auto" mt={"sm"}>
+              {resultMode === "Result"
+                ? <TypographyStylesProvider fz={"sm"} p={0}>
+                  <div dangerouslySetInnerHTML={{__html: sanitized.sanitized}} />
+                </TypographyStylesProvider>
+                : <Code block={true}>{executionResult.trace}</Code>
+              }
+            </ScrollArea.Autosize>
+          </Box>
           : isError
             ? <Text c={"red"} size={"sm"} fw={500}>
               {errorMessage}

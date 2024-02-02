@@ -104,7 +104,8 @@ export const parseExecutionResultPaths = result => {
   }
   return {
     states: stateSet,
-    edges
+    edges,
+    total: edges.length
   }
 }
 

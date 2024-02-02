@@ -5,7 +5,7 @@ import {AnimationSpeed, DisplayDirection, graphvizForEditorOptions} from "@/core
 export const MIN_W = 10
 export const MIN_H = 10
 
-export const MIN_RESULT_H = 15
+export const MIN_RESULT_H = 27
 
 export const MIN_POLL_WAIT = 5
 export const MAX_POLL_WAIT = 60
@@ -16,7 +16,7 @@ export const useEditorSettingsStore = create((set, get) => ({
   init: false,
   setInit: init => set({init}),
 
-  height: 68,
+  height: 45,
   setHeight: height => {
     set({height: Math.max(MIN_H, height)})
   },
