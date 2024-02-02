@@ -99,7 +99,10 @@ export const execCycloneProgram = async (program, id) => {
   try {
     const args = ["-jar", path.join(config.cyclone.path, config.cyclone.executable), tmpPath]
     const opts = {cwd: srcPath, timeout: config.cyclone.mandatoryTimeoutMs}
-    let result = await execFileAsync("java", args, opts) // cwd: config.cyclone.path,
+
+    let result = (await execFileAsync("java", args, opts))
+      // clear colors
+      .replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '')
 
     if (!result) {
       // failed to execute, NOT failed to solve
@@ -146,7 +149,7 @@ export const execCycloneProgram = async (program, id) => {
       garbage: tmpFiles
     }
   } catch (e) {
-    if (e?.killed && e?.signal === "SIGTERM") {
+    if (e?.killed) {
       return {code: ResponseCode.ExecutionTimeout, data: config.cyclone.mandatoryTimeoutMs}
     }
 
