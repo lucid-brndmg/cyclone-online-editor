@@ -241,20 +241,28 @@ export const CodeConsoleResultSection = () => {
       {
         executionResult
           ? <Box>
-            {parsedPaths
-              ? parsedPaths.total > 0
-                ? <Text fw={500} size={"sm"}>Found {parsedPaths.total} paths</Text>
+            {resultMode === "Result"
+              // Result panel
+              ? parsedPaths
+                ? parsedPaths.total > 0
+                  ? <Text fw={500} size={"sm"}>
+                    Found {parsedPaths.total} paths
+                    {parsedPaths.lengths.length
+                      ? ", with lengths of: " + parsedPaths.lengths.join(", ")
+                      : ""
+                    }
+                  </Text>
+                  : <Text fw={500} size={"sm"}>Execution completed, no path found</Text>
                 : <Text fw={500} size={"sm"}>Execution completed, no path found</Text>
-              : <Text fw={500} size={"sm"}>Execution completed, no path found</Text>
-            }
 
-            {parsedTraces
-              ? parsedTraces.length
-                ? <Text fw={500} size={"sm"}>Generated {parsedTraces.length} traces</Text>
-                : <Text fw={500} size={"sm"}>No trace generated</Text>
-              : traceIsGraphviz
-                ? <Text fw={500} size={"sm"}>Trace generated in Graphviz format</Text>
-                : <Text fw={500} size={"sm"}>No trace generated</Text>
+              // Trace panel
+              : parsedTraces
+                ? parsedTraces.length
+                  ? <Text fw={500} size={"sm"}>Generated {parsedTraces.length} traces</Text>
+                  : <Text fw={500} size={"sm"}>No trace generated</Text>
+                : traceIsGraphviz
+                  ? <Text fw={500} size={"sm"}>Trace generated in Graphviz format</Text>
+                  : <Text fw={500} size={"sm"}>No trace generated</Text>
             }
 
             <ScrollArea.Autosize viewportRef={viewport} mah={`${resultHeight - 12}svh`} p={0} type="auto" mt={"sm"}>

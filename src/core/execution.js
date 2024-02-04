@@ -3,9 +3,11 @@ import {language} from "cyclone-analyzer";
 
 const {ErrorSource, ErrorType} = language.definitions
 
+const regexFindPathInResultNG = /\w+->\w+(->\w+)*/
 const regexFindPathInResult = /\w+->\w+(->\w+)*/g
 const regexFindStateInTrace = /\[\d+\]\.@\w+/
 const regexFindErrorInResult = /(line\s*:\s*\d+)|(position\s*:\d+)/g
+const regexFindLengthInResult = /<\d+>\s*\w+->/g
 
 export const ResponseCode = {
   InvalidParams: 0,
@@ -89,6 +91,12 @@ export const parseTrace = traceContent => {
 export const parseExecutionResultPaths = result => {
   const stateSet = new Set()
   const edges = []
+  const lengths = new Set(
+    result
+      .match(regexFindLengthInResult)
+      ?.map(it => it.match(/\d+/)[0])
+      .filter(it => it != null)
+  )
   const matched = result.match(regexFindPathInResult)
   if (matched?.length) {
     for (let path of matched) {
@@ -105,6 +113,7 @@ export const parseExecutionResultPaths = result => {
   return {
     states: stateSet,
     edges,
+    lengths: [...lengths].sort(),
     total: edges.length
   }
 }
@@ -115,14 +124,12 @@ export const sanitizeResult = result => {
   const errors = []
   for (let line of lines) {
     const trimmed = line.trim()
-    const lineCol = trimmed
+    const errLineCol = trimmed
       .match(regexFindErrorInResult)
       ?.map(s => parseInt(s.match(/\d+/g)[0]))
       ?.filter(n => !isNaN(n))
-    if (!lineCol) {
-      sanitized.push(trimmed)
-    } else {
-      const [line, col] = lineCol
+    if (errLineCol) {
+      const [line, col] = errLineCol
       errors.push({
         source: ErrorSource.Remote,
         ...posPair(
@@ -136,6 +143,12 @@ export const sanitizeResult = result => {
       })
 
       sanitized.push(`<span style='color: red'>${trimmed}</span>`)
+    } else {
+      if (regexFindPathInResultNG.test(trimmed)) {
+        sanitized.push(`<b style="color: #61aeee">${trimmed}</b>`)
+      } else {
+        sanitized.push(trimmed)
+      }
     }
   }
   return {errors, sanitized: sanitized.join("<br>")}
