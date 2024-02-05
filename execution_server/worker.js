@@ -28,7 +28,7 @@ const processor = async job => {
   }
 
   const {code, data, garbage} = await execCycloneProgram(program, id)
-  if (garbage.length && !deleteAfterExec) {
+  if (garbage?.length && !deleteAfterExec) {
     garbageFiles.push(...garbage)
   }
 

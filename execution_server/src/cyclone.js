@@ -91,7 +91,7 @@ export const execCycloneProgram = async (program, id) => {
   const tmpPath = path.join(srcPath, tmpFilename)
   await fs.promises.writeFile(tmpPath, program, "utf-8")
   // const command = `java -jar ${config.cycloneExecutable} ${tmpPath}`
-  const tmpFiles = [tmpPath]
+  const tmpFiles = [tmpPath, path.join(srcPath, tmpFilename + ".smt2")]
   
   let traceContent = null
   // let result = await execShellCommand(command, {cwd: config.cyclonePath, timeout: config.cycloneMandatoryTimeoutMs})
@@ -149,11 +149,15 @@ export const execCycloneProgram = async (program, id) => {
       garbage: tmpFiles
     }
   } catch (e) {
+    if (config.cyclone.deleteAfterExec && tmpFiles.length) {
+      await Promise.all(tmpFiles.map(p => fs.promises.rm(p, {force: true})))
+    }
+
     if (e?.killed) {
-      return {code: ResponseCode.ExecutionTimeout, data: config.cyclone.mandatoryTimeoutMs}
+      return {code: ResponseCode.ExecutionTimeout, data: config.cyclone.mandatoryTimeoutMs, garbage: tmpFiles}
     }
 
     serviceLogger.error("cyclone execution error", {error: e})
-    return {code: ResponseCode.InternalError}
+    return {code: ResponseCode.InternalError, garbage: tmpFiles}
   }
 }
