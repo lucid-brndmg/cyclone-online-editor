@@ -87,12 +87,12 @@ export const CycloneCodeEditor = ({
     // const maxLine = monacoCtx.model.getLineCount()
     const editorCtx = new EditorSemanticContext()
     const analyzer = new cycloneAnalyzer.analyzer.SemanticAnalyzer() // semanticAnalyzerRef.current
-    const graphBuilder = new cycloneAnalyzer.blockBuilder.SyntaxBlockBuilder() // SyntaxBlockBuilder()
+    // const graphBuilder = new cycloneAnalyzer.blockBuilder.SyntaxBlockBuilder() // SyntaxBlockBuilder()
     // const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
 
     errorsRef.current.clear()
     editorCtx.attach(analyzer)
-    graphBuilder.attach(analyzer)
+    // graphBuilder.attach(analyzer)
     analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es))
     // analyzer.ready(endPos)
 
@@ -112,7 +112,7 @@ export const CycloneCodeEditor = ({
         new cycloneAnalyzer.analyzer.SemanticParserListener(analyzer),
         result.tree
       )
-      console.log(graphBuilder.context)
+      // console.log(graphBuilder.context)
       editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
       onEditorContext && onEditorContext(editorSemanticContextRef.current)
     }

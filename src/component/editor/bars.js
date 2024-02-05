@@ -73,22 +73,24 @@ export const Toolbar = ({
         }
       </Group>
 
-      <Button.Group>
-        {
-          light ? null : <NewFileButton />
-        }
-        <FileButton onChange={onUpload} accept=".cyclone,.txt">
-          {(props) => <Button {...props} leftSection={<IconFolderOpen />} variant={"default"}>Upload</Button>}
-        </FileButton>
-        {light
-          ? null
-          : <FileSaveButton />
-        }
-        <Button leftSection={<IconDownload />} variant={"default"} disabled={code === ""} onClick={onDownload}>Download</Button>
-        {/* <SettingsPopover> */}
-        {/*   <Button leftSection={<IconSettings />} variant={"default"}>Settings</Button> */}
-        {/* </SettingsPopover> */}
-      </Button.Group>
+      <Group>
+        <Button.Group>
+          {
+            light ? null : <NewFileButton />
+          }
+          <FileButton onChange={onUpload} accept=".cyclone,.txt">
+            {(props) => <Button {...props} leftSection={<IconFolderOpen />} variant={"default"}>Upload</Button>}
+          </FileButton>
+        </Button.Group>
+
+        <Button.Group>
+          {light
+            ? null
+            : <FileSaveButton />
+          }
+          <Button leftSection={<IconDownload />} variant={"default"} disabled={code === ""} onClick={onDownload}>Download</Button>
+        </Button.Group>
+      </Group>
 
       <Button.Group>
         {

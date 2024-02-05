@@ -62,6 +62,8 @@ export const useEditorSettingsStore = create((set, get) => ({
     const settings = await localforage.getItem("editor_settings")
     if (settings) {
       set({...settings, init: true})
+    } else {
+      set({init: true})
     }
   },
 
@@ -94,7 +96,6 @@ export const useEditorSettingsStore = create((set, get) => ({
       executionServer,
       execPollWait
     }
-
 
     await localforage.setItem("editor_settings", save)
   },
