@@ -31,6 +31,7 @@ const errorTypeDescription = {
   [ErrorType.InvalidStatement]: "Invalid Statement",
   [ErrorType.LetBodyUndefined]: "Path Condition Undefined",
   [ErrorType.LocalVariableEnum]: "Enum Type In Local Variables",
+  [ErrorType.InvalidNodeModifier]: "Invalid Node Modifier",
 
   [ErrorType.TypeMismatchFunction]: "Type Mismatch",
   [ErrorType.TypeMismatchReturn]: "Type Mismatch",
@@ -45,6 +46,7 @@ const errorTypeDescription = {
   [ErrorType.DuplicatedEdge]: "Redundant Edge",
   [ErrorType.EmptyEdge]: "Empty Edge",
   [ErrorType.DuplicatedEnumField]: "Duplicated Enum",
+  [ErrorType.DuplicatedEdgeTarget]: "Duplicated Edge Target",
 
   [ErrorType.RemoteError]: "Remote Execution Error"
 }
@@ -170,6 +172,14 @@ const eDuplicatedEnumField = ({text}) => {
   return `duplicated enum definition: ${text}`
 }
 
+const eDuplicatedEdgeTarget = ({identifier}) => {
+  return `duplicated edge target: ${identifier}`
+}
+
+const eInvalidNodeModifier = ({combination}) => {
+  return `invalid node / state modifier combination: "${combination.join(" + ")}"`
+}
+
 const errorMessageFormatter = {
   [ErrorType.RemoteError]: eMsgBased,
   [ErrorType.SyntaxError]: eMsgBased,
@@ -197,7 +207,9 @@ const errorMessageFormatter = {
   [ErrorType.InvalidStatement]: eInvalidStatement,
   [ErrorType.LetBodyUndefined]: eLetBodyUndefined,
   [ErrorType.LocalVariableEnum]: eLocalVariableEnum,
-  [ErrorType.DuplicatedEnumField]: eDuplicatedEnumField
+  [ErrorType.DuplicatedEnumField]: eDuplicatedEnumField,
+  [ErrorType.DuplicatedEdgeTarget]: eDuplicatedEdgeTarget,
+  [ErrorType.InvalidNodeModifier]: eInvalidNodeModifier
 }
 
 export const formatErrorMessage = (type, params, source) => {
