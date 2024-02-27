@@ -30,8 +30,10 @@ const errorTypeDescription = {
   [ErrorType.InvalidNamedExprScope]: "Invalid Expression",
   [ErrorType.InvalidStatement]: "Invalid Statement",
   [ErrorType.LetBodyUndefined]: "Path Condition Undefined",
-  [ErrorType.LocalVariableEnum]: "Enum Type In Local Variables",
+  // [ErrorType.LocalVariableEnum]: "Enum Type In Local Variables",
   [ErrorType.InvalidNodeModifier]: "Invalid Node Modifier",
+  [ErrorType.EnumNotAllowedInVariable]: "Enum Not Allowed Here",
+  [ErrorType.WhereInlineVariable]: "Where Clause In Local Variables",
 
   [ErrorType.TypeMismatchFunction]: "Type Mismatch",
   [ErrorType.TypeMismatchReturn]: "Type Mismatch",
@@ -164,9 +166,9 @@ const eLetBodyUndefined = () => {
   return `path expression not defined in a path variable. Expecting a concrete definition. For example: let path_var = S0->S1;`
 }
 
-const eLocalVariableEnum = () => {
-  return `enum types are not allowed in local variables`
-}
+// const eLocalVariableEnum = () => {
+//   return `enum types are not allowed in local variables`
+// }
 
 const eDuplicatedEnumField = ({text}) => {
   return `duplicated enum definition: ${text}`
@@ -178,6 +180,14 @@ const eDuplicatedEdgeTarget = ({identifier}) => {
 
 const eInvalidNodeModifier = ({combination}) => {
   return `invalid node / state modifier combination: "${combination.join(" + ")}"`
+}
+
+const eEnumNotAllowedInVariable = () => {
+  return `enums can not be defined inside constants / functions`
+}
+
+const eWhereInlineVariable = () => {
+  return `where clause can not be applied to local variables`
 }
 
 const errorMessageFormatter = {
@@ -206,10 +216,12 @@ const errorMessageFormatter = {
   [ErrorType.EmptyEdge]: eEmptyEdge,
   [ErrorType.InvalidStatement]: eInvalidStatement,
   [ErrorType.LetBodyUndefined]: eLetBodyUndefined,
-  [ErrorType.LocalVariableEnum]: eLocalVariableEnum,
+  // [ErrorType.LocalVariableEnum]: eLocalVariableEnum,
   [ErrorType.DuplicatedEnumField]: eDuplicatedEnumField,
   [ErrorType.DuplicatedEdgeTarget]: eDuplicatedEdgeTarget,
-  [ErrorType.InvalidNodeModifier]: eInvalidNodeModifier
+  [ErrorType.InvalidNodeModifier]: eInvalidNodeModifier,
+  [ErrorType.EnumNotAllowedInVariable]: eEnumNotAllowedInVariable,
+  [ErrorType.WhereInlineVariable]: eWhereInlineVariable
 }
 
 export const formatErrorMessage = (type, params, source) => {
