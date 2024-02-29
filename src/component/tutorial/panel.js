@@ -11,7 +11,7 @@ import {
   Space, Select, Button
 } from "@mantine/core";
 import classes from "@/styles/modules/TutorialBody.module.css";
-import {CycloneEditorForm, CycloneEditorMainSection} from "@/component/editor/editorSection";
+import {CycloneEditorMainSection} from "@/component/editor/editorSection";
 import tutorialManifest from "../../../resource/tutorial_manifest.json";
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";

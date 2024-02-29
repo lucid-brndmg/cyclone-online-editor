@@ -6,7 +6,6 @@ export const useEditorHelperStore = create((set, get) => ({
   helperTab: Config.editor.playgroundDefaultTab,
   setHelperTab: helperTab => set({helperTab}),
 
-  structureOutline: null,
-  setStructureOutline: structureOutline => set(() => ({structureOutline}))
-
+  outlineTab: "structure",
+  setOutlineTab: outlineTab => set({outlineTab})
 }))

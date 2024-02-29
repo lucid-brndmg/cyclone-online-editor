@@ -22,12 +22,12 @@ import {LoadingOverlay} from "@mantine/core";
 
 const {IdentifierKind, IdentifierType} = cycloneAnalyzer.language.definitions
 
-const MonacoSetup = ({children}) => {
-  const [ready, setReady] = useState(false)
+const MonacoSetup = ({children, ready, onReady}) => {
+  // const [ready, setReady] = useState(false)
   useEffect(() => {
     loader.config({paths: {vs: "/vs"}})
     loader.init().then((monaco) => {
-      setReady(true)
+      onReady(true)
     })
   }, []);
   return ready
@@ -47,6 +47,9 @@ export const CycloneCodeEditor = ({
   onMonacoReady = null,
   onEditorContext = null,
   externalCommands = {},
+  buildSyntaxBlockTree = false,
+  ready,
+  onReady,
   ...props
 }) => {
   const [monacoCtx, setMonacoCtx] = useState(null)
@@ -85,7 +88,7 @@ export const CycloneCodeEditor = ({
     }
 
     // const maxLine = monacoCtx.model.getLineCount()
-    const editorCtx = new EditorSemanticContext()
+    const editorCtx = new EditorSemanticContext(buildSyntaxBlockTree)
     const analyzer = new cycloneAnalyzer.analyzer.SemanticAnalyzer() // semanticAnalyzerRef.current
     // const graphBuilder = new cycloneAnalyzer.blockBuilder.SyntaxBlockBuilder() // SyntaxBlockBuilder()
     // const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
@@ -398,10 +401,6 @@ export const CycloneCodeEditor = ({
       const startColumn = startPosition.column
       const stopColumn = stopPosition?.column ?? startPosition.column
 
-      // const noPosition = (stopColumn === startColumn && startLine === stopLine)
-      // const startColumn = startPosition.column + (noPosition ? 1 : 0)
-      // const stopColumn = (stopPosition ? stopPosition.column : startColumn) + 1
-
       return {
         message: formatErrorMessage(type, params, source),
         severity: getErrorLevel(monaco, type), // monaco.MarkerSeverity.Error,
@@ -418,7 +417,7 @@ export const CycloneCodeEditor = ({
   }, [errors])
 
   return (
-    <MonacoSetup>
+    <MonacoSetup ready={ready} onReady={onReady}>
       <Editor
         defaultLanguage={CycloneLanguageId}
         value={code}

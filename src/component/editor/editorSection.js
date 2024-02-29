@@ -10,8 +10,9 @@ import {StatusBar, Toolbar} from "@/component/editor/bars";
 export const CycloneEditorForm = ({
   light = false,
   commands,
+  onClickErrorDisplay
 }) => {
-  const {code, setCode, errors, setErrors, setPosition, setEditorCtx, setMonacoCtx} = useEditorStore()
+  const {code, setCode, errors, setErrors, setPosition, setEditorCtx, setMonacoCtx, editorReady, setEditorReady} = useEditorStore()
   const [debouncedCode] = useDebouncedValue(code, 200)
 
   const {height, width, monacoOptions, setWidth, setHeight, editorCodeOptions} = useEditorSettingsStore()
@@ -51,7 +52,7 @@ export const CycloneEditorForm = ({
       withBorder={true}
       w={"100%"}
       radius={"md"}
-      p="xs"
+      p={8}
       pos={"relative"}
     >
       <div
@@ -66,10 +67,11 @@ export const CycloneEditorForm = ({
         }}
         onMouseDown={onMouseDown}
       />
-      <Stack gap={"xs"} style={{position: "relative", zIndex: 120}}>
+      <Stack gap={8} style={{position: "relative", zIndex: 120}}>
         <Toolbar light={light} />
-        <Divider />
         <CycloneCodeEditor
+          ready={editorReady}
+          onReady={setEditorReady}
           debouncedCode={debouncedCode}
           monacoOptions={monacoOptions}
           codeOptions={editorCodeOptions}
@@ -82,9 +84,9 @@ export const CycloneEditorForm = ({
           onEditorContext={setEditorCtx}
           height={`${height}svh`}
           externalCommands={commands}
+          buildSyntaxBlockTree={!light}
         />
-        <Divider />
-        <StatusBar/>
+        <StatusBar onClickErrors={onClickErrorDisplay}/>
       </Stack>
     </Paper>
   )
@@ -146,7 +148,7 @@ export const CycloneExecutionResultForm = () => {
         height: `${resultHeight}svh`,
         width: "100%"
       }}
-      p={"xs"}
+      p={8}
       radius={"md"}
       withBorder={true}
       shadow="none"
@@ -163,10 +165,15 @@ export const CycloneExecutionResultForm = () => {
   )
 }
 
-export const CycloneEditorMainSection = ({light = false, commands, ...props}) => {
+export const CycloneEditorMainSection = ({
+  light = false,
+  commands,
+  onClickErrorDisplay,
+  ...props
+}) => {
   return (
-    <Stack {...props}>
-      <CycloneEditorForm light={light} commands={commands} />
+    <Stack gap={12} {...props}>
+      <CycloneEditorForm light={light} commands={commands} onClickErrorDisplay={onClickErrorDisplay} />
       <CycloneExecutionResultForm />
     </Stack>
   )

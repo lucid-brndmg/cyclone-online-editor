@@ -253,9 +253,6 @@ export const VisualizationPanel = () => {
   const Component = panels[panel]
   const edgeLength = parsedPaths?.total
   const hasTrace = executionResult?.trace
-  useEffect(() => {
-    console.log(edgeLength)
-  }, [edgeLength]);
   return (
     <Stack>
       <SegmentedControl value={panel} onChange={onPanel} data={[

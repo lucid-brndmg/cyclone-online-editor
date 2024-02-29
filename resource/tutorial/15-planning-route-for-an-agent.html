@@ -1,0 +1,37 @@
+<h3>1.5 Planning Route for an Agent</h3>
+<p>In previous Section, we have learned how to use Cyclone to solve Hamiltonian path problems. The specification showed in previous section is not a unique solution, there are many ways of writing a Cyclone specification to a specific solution.</p>
+<p>In this Section, we will show you another interesting problem that can be solved by Cyclone. This problem is known as route planning for an agent. Suppose we have an agent that is waiting to be programmed to pick a package at a specific location and deliver it to a customer's house. In order to successfully deliver a package to a destination, an agent must obey the following rule</p>
+<pre><code>Condition: An agent must avoid walls on it's way to its destination.
+</code></pre>
+<p>This problem can be visualized using following diagram.</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter1/planning.png" alt="img"></p>
+<p>Given a grid, an agent (marked as orange color) must pick up a package (green color) and deliver it to a destination (blue color). The gray areas in the grid are walls an agent must avoid.</p>
+<p>To make this problem much simpler, we say an agent can only move forward and downward. To solve this problem, we could turn a grid into a graph and specify the correct condition for Cyclone.</p>
+<p>We convert each cell in a grid into a node, and use edges to connect adjacent cells. So eventually we have the following graph:</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter1/planning_graph.png" alt="img"></p>
+<p>In the graph above, <strong>S0</strong> is a starting point of our agent, <strong>S24</strong> is the destination, and <strong>S13</strong> is the package to be picked up by our agent. Nodes with gray background are walls. Since we only allow agent to travel either forward or downward, we do not include edges for agent to move backward or upward. But in the real world, you could create these edges. Here, we exclude these edges just for simplicity purpose.</p>
+<p>This graph can be easily turned into a Cyclone specification. To capture the condition for our agent to avoid walls, pick up a package and deliver it to the destination, we create a goal section in our Cyclone specification. In this case, we know that the path length cannot exceed <strong>8</strong>, since our agent can only move forward and downward and the destination is located at node <strong>S24</strong> . For the condition, we just need to exclude nodes marked as walls and must include a subpath to node <strong>S13</strong> where our package is. Eventually, it should reach our destination node <strong>S24</strong> .</p>
+<p>Hence, our goal section is as follows:</p>
+<pre><code>goal{ 
+  check for 8 condition ( 
+    (!S7 &#x26;&#x26; !S11 &#x26;&#x26; !S12), 
+    (!S18 &#x26;&#x26; !S23), 
+    (_->S13->_) ) 
+    reach (S24)
+}
+</code></pre>
+<p>Compile this specification along with our path conditions, Cyclone successfully finds a path for our agent.</p>
+<p><strong>S0->S1->S2->S3->S8->S13->S14->S19->S24</strong></p>
+<h3>Tips:</h3>
+<p>Do you know you can use check to check multiple path lengths? You just separate each path using a comma. See the following example:</p>
+<pre><code> check for 8, 9, 10 condition ( ... ) ...
+</code></pre>
+<p>This allows Cyclone to check whether path length 8, 9, or 10 will have a solution (to the condition) or not.</p>
+<p>See <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/check-expr.html">here</a> for more details about multiple path lengths</p>
+<h3>1.5.1 Practice.</h3>
+<ul>
+<li>Expand our grid to a 8x8 grid and add a second agent anywhere on the grid</li>
+<li>Make our agents can move backward and upward.</li>
+<li>Add a second package, and a second destination for our second agent</li>
+<li>Make sure two agents deliver packages to their destination without crossing each other.</li>
+</ul>

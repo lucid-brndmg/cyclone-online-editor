@@ -197,7 +197,7 @@ export const CodeConsoleResultSection = () => {
   }
 
   return (
-    <Stack gap={12} pos={"relative"} h={"100%"}>
+    <Stack gap={4} pos={"relative"} h={"100%"}>
       <ExamineModal opened={examineOpened} onOpened={setExamineOpened} />
       <LoadingOverlay
         visible={isLoading}

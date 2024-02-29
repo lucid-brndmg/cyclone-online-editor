@@ -1,6 +1,7 @@
 ---
 title: "1.1 Understanding Cyclone"
 prev: "02-installation"
+next: "12-finding-strings"
 order: 3
 ---
 

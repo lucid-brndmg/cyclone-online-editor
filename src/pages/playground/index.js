@@ -29,7 +29,10 @@ const PlaygroundMainContent = () => {
         // align={{base: "center", md: "flex-start"}}
       >
         <EditorHelperPanel miw={"280px"} />
-        <CycloneEditorMainSection style={{flexGrow: 1}} miw={`${width}vw`} commands={commands} />
+        <CycloneEditorMainSection style={{flexGrow: 1}} miw={`${width}vw`} commands={commands} onClickErrorDisplay={() => {
+          setHelperTab("outline")
+
+        }} light={false} />
       </Flex>
     </Stack>
   )

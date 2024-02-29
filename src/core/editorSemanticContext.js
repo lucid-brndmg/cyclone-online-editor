@@ -1,4 +1,3 @@
-import {OutlineKind} from "@/core/definitions";
 import {posRangeIncludes} from "@/lib/position";
 import cycloneAnalyzer from "cyclone-analyzer";
 
@@ -48,13 +47,19 @@ class PositionTable {
 
 export default class EditorSemanticContext {
   scopePosition = new PositionTable()
-  scopeLayers = []
+  // scopeLayers = []
   stateTable = new Map()
   transitions = []
   assertions = []
   invariants = []
   namedTransitions = new Map()
   goal
+  isBuildSyntaxBlocks = false
+  syntaxBlockBuilder = null
+
+  constructor(isBuildSyntaxBlocks = false) {
+    this.isBuildSyntaxBlocks = isBuildSyntaxBlocks
+  }
 
   // identifierCoordsTable = new FixedCoordinateTable()
 
@@ -67,17 +72,17 @@ export default class EditorSemanticContext {
     this.scopePosition.sort()
   }
 
-  pushScopeLayerScope(layer, type, position) {
-    this.scopeLayers.push({layer, outlineKind: OutlineKind.Group, type, position})
-  }
+  // pushScopeLayerScope(layer, type, position) {
+  //   this.scopeLayers.push({layer, outlineKind: OutlineKind.Group, type, position})
+  // }
+  //
+  // pushScopeLayerIdent(text, type, position, kind, blockType, currentLayer) {
+  //   this.scopeLayers.push({text, type, position, kind, blockType, outlineKind: OutlineKind.Identifier, currentLayer})
+  // }
 
-  pushScopeLayerIdent(text, type, position, kind, blockType, currentLayer) {
-    this.scopeLayers.push({text, type, position, kind, blockType, outlineKind: OutlineKind.Identifier, currentLayer})
-  }
-
-  getScopeLayers() {
-    return this.scopeLayers
-  }
+  // getScopeLayers() {
+  //   return this.scopeLayers
+  // }
 
   // defineState(identifier, attrs) {
   //   this.stateTable.set(identifier, {
@@ -98,7 +103,7 @@ export default class EditorSemanticContext {
   }
 
   // operator: -> | <-> | * | +
-  defineTransition(identifier, label, whereExpr, fromState, operators, targetStates, position, expr) {
+  defineTransition(identifier, label, whereExpr, fromState, operators, targetStates, position, expr, labelKeyword) {
     this.transitions.push({
       identifier,
       label,
@@ -106,7 +111,8 @@ export default class EditorSemanticContext {
       isBiWay: operators.has("<->"),
       targetStates,
       fromState,
-      position
+      position,
+      labelKeyword
     })
     if (identifier) {
       this.namedTransitions.set(identifier, targetStates)
@@ -151,21 +157,30 @@ export default class EditorSemanticContext {
     })
   }
 
+  getProgramBlock() {
+    return this.syntaxBlockBuilder?.getProgramBlock()
+  }
+
   // execute this BEFORE ready
   attach(analyzer) {
+
+    if (this.isBuildSyntaxBlocks) {
+      this.syntaxBlockBuilder = new cycloneAnalyzer.blockBuilder.SyntaxBlockBuilder()
+      this.syntaxBlockBuilder.attach(analyzer)
+    }
 
     // const fmtContextType = {}
     // Object.entries(SemanticContextType).forEach(([key, value]) => {
     //   fmtContextType[value] = key
     // })
 
-    analyzer.on("block:enter", (context, {block}) => {
-      if (scopedContextType.has(block.type)) {
-        this.pushScopeLayerScope(context.scopeLength, block.type, block.position)
-      }
-      // const path = context.currentBlockPath
-      // console.log(path.map(it => fmtContextType[it]).join("."))
-    })
+    // analyzer.on("block:enter", (context, {block}) => {
+    //   if (scopedContextType.has(block.type)) {
+    //     this.pushScopeLayerScope(context.scopeLength, block.type, block.position)
+    //   }
+    //   // const path = context.currentBlockPath
+    //   // console.log(path.map(it => fmtContextType[it]).join("."))
+    // })
 
     analyzer.on("block:exit", (context, {payload, block}) => {
       if (scopedContextType.has(block.type)) {
@@ -189,7 +204,8 @@ export default class EditorSemanticContext {
             metadata.operators,
             metadata.involvedStates,
             position,
-            expr
+            expr,
+            metadata.labelKeyword
           )
           break
         }
@@ -233,8 +249,8 @@ export default class EditorSemanticContext {
       }
     })
 
-    analyzer.on("identifier:register", (context, {text, type, position, kind, blockType}) => {
-      this.pushScopeLayerIdent(text, type, position, kind, blockType, context.scopeLength)
-    })
+    // analyzer.on("identifier:register", (context, {text, type, position, kind, blockType}) => {
+    //   this.pushScopeLayerIdent(text, type, position, kind, blockType, context.scopeLength)
+    // })
   }
 }

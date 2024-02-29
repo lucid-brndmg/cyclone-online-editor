@@ -99,7 +99,8 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
     whereExpr,
     fromState,
     targetStates,
-    isBiWay
+    isBiWay,
+    labelKeyword
   } of trans) {
     if (!definedStates.has(fromState)) {
       statesDef.push(genUndefinedState(fromState, previewOptions))
@@ -128,7 +129,7 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
       const showWhere = !!whereExpr // && previewOptions.showWhereExpr
       const showLabel = previewOptions.showLabelLiteral
       if (showWhere && label) {
-        const content = `where ${whereExpr}, ${showLabel ? "label: " : ""}${label}`
+        const content = `where ${whereExpr}, ${showLabel ? `${labelKeyword ?? "label"}: ` : ""}${label}`
         descriptions.push(identifier
           ? `(${content})`
           : content
@@ -140,7 +141,7 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
           : content
         )
       } else if (label) {
-        const content = `${showLabel ? "label: " : ""}${label}`
+        const content = `${showLabel ? `${labelKeyword ?? "label"}: ` : ""}${label}`
         descriptions.push(identifier
           ? `(${content})`
           : content

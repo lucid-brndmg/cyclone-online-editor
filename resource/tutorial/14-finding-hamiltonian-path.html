@@ -1,0 +1,91 @@
+<h3>1.4 Finding Hamiltonian Path</h3>
+<p>In previous Section, we learned some of the path operators and path conditions. With a combination of path operators and compound path conditions, we are able to solve many interesting problems from graph theory. For example, Hamiltonian path problem from <a href="https://classicwuhao.github.io/cyclone_tutorial/introduction/introduction.html">Introduction </a>. In this Section, we will show you how to write a Cyclone specification to solve this problem.</p>
+<p>The graph from Chapter 0 is shown below:</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter1/hamilton.png" alt="img"></p>
+<p>Remember the condition for finding a Hamiltonian path is that:</p>
+<pre><code>   covers all the nodes of a graph exactly once 
+</code></pre>
+<p>Since the condition says that first we need to cover <strong>all</strong> the nodes, we know we have a total of <strong>7</strong> nodes ( <strong>S0 - S6</strong> ) in our graph. Therefore, a valid Hamiltonian path for this graph must have a length of <strong>6</strong> . The length of a path is defined by the number of edges.</p>
+<p>Next, we need to cover each of node exactly once. We can easily use <strong>^{i..j}</strong> path operator to construct a path condition for each node. Finally, we do not know which node this path will reach, but what we know is it eventually will reach any of these 7 nodes (except for our starting node). So we can specify these nodes in our <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/reach-expr.html">reach </a>statement.</p>
+<p>Say we define node <strong>S0</strong> as a starting point. Hence, we now can define our goal of finding Hamiltonian path for the graph above as follows:</p>
+<pre><code>   check for 6 condition ( 
+       S0^{1} &#x26;&#x26; S1^{1} &#x26;&#x26; 
+       S2^{1} &#x26;&#x26; S3^{1} &#x26;&#x26; 
+       S4^{1} &#x26;&#x26; S5^{1} &#x26;&#x26; 
+       S6^{1} ) 
+ reach (S0,S1,S2,S3,S4,S5,S6)
+</code></pre>
+<p>The full specification for this problem is shown below:</p>
+<pre><code>  graph HamiltonianPathExample { 
+
+       // define starting node S0.
+
+      abstract start node  S0 {} 
+
+      abstract node  S1 {} 
+
+      abstract node  S2 {} 
+
+      abstract node  S3 {} 
+
+      abstract node  S4 {} 
+
+      abstract node  S5 {} 
+
+      abstract node  S6 {} 
+
+      edge  t1 { S0 -> S1 } 
+
+      edge  t2 { S0 -> S3 } 
+
+      edge  t3 { S0 -> S6 } 
+
+      edge  t4 { S1 -> S2 } 
+
+      edge  t5 { S1 -> S3 } 
+
+      edge  t6 { S2 -> S3 } 
+
+      edge  t7 { S2 -> S1 } 
+
+      edge  t8 { S3 -> S2 } 
+
+      edge  t9 { S3 -> S4 } 
+
+      edge  t10 { S4 -> S5 } 
+
+      edge  t11 { S4 -> S1 } 
+
+      edge  t12 { S5 -> S1 } 
+
+      edge  t13 { S5 -> S1 } 
+
+      edge  t14 { S5 -> S6 } 
+
+      edge  t15 { S6 -> S1 } 
+
+      edge  t16 { S6 -> S3 } 
+
+      /* 
+
+       * Goal: Find a Hamiltonian Path, starting from node S0.
+
+       */  
+
+     goal{ 
+
+       check for 6 condition ( 
+               S0^{1} &#x26;&#x26; S1^{1} &#x26;&#x26; 
+               S2^{1} &#x26;&#x26; S3^{1} &#x26;&#x26; 
+               S4^{1} &#x26;&#x26; S5^{1} &#x26;&#x26; 
+               S6^{1} ) 
+               reach (S0,S1,S2,S3,S4,S5,S6)
+       }
+ }
+</code></pre>
+<p>Compile this specification, and Cyclone successfully finds a Hamiltonian path for this graph:</p>
+<p><strong>S0->S6->S3->S4->S5->S2->S1</strong></p>
+<h3>1.4.1 Practice.</h3>
+<p>Can you use Cyclone to find all possible Hamiltonian paths in this graph?</p>
+<p>Can you use Cyclone to find all possible Hamiltonian cycles in this graph?</p>
+<p>A Hamiltonian cycle is a Hamiltonian path that starts and ends with the same node.</p>

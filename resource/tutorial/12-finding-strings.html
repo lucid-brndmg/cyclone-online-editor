@@ -1,0 +1,65 @@
+<h3>1.2 Finding Strings</h3>
+<p>In this section, you will learn how to use Cyclone to find all possible strings with a particular length from a given DFA (deterministic finite automaton). DFA is a state machine and essentially is a graph. So it can be described by Cyclone.</p>
+<p>For example, the following DFA describes a machine <strong>M</strong> that accepts strings that start and end with the same symbol.</p>
+<p>This example is taken from Introduction to the Theory of Computation (3rd Edition), Page 38, Example 1.11</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter1/tutorial_example_1_2.png" alt="img"></p>
+<p>The states (<strong>q1</strong> and <strong>r1</strong>) with double circles indicate they are accepting states or final states of <strong>M</strong>.</p>
+<p>Suppose we wish to find all possible strings with a length of <strong>5</strong>. We now can write a Cyclone specification for this machine <strong>M</strong>.</p>
+<p>The specification is shown below:</p>
+<pre><code>  machine M {
+      abstract start state  S{} 
+      abstract final state  q1{} 
+      abstract state q2{} 
+      abstract final state  r1{} 
+      abstract state r2{} 
+      transition  t1 { S->q1  on "a" } 
+      transition  t2 { S->r1  on "b" } 
+      transition  t3 { q1->q1  on "a" } 
+      transition  t4 { q1->q2  on "b" } 
+      transition  t5 { q2->q1  on "a" } 
+      transition  t6 { q2->q2  on "b" } 
+      transition  t7 { r1->r1  on "b" } 
+      transition  t8 { r1->r2  on "a" } 
+      transition  t9 { r2->r1  on "b" } 
+
+      transition  t10 { r2->r2  on "a" } 
+
+      /* 
+
+       * Goal: find all strings with length of 5.
+
+       */  
+
+     goal{ 
+
+         enumerate for 5 
+
+         }
+
+    }
+</code></pre>
+<p>You must notice that some of the keywords for creating nodes and edges are different from the ones we used in previous Section. This is because some of the keywords are interchangeable in Cyclone specification language. Since we are talking about a DFA machine here, it will make much more sense to consider a node in a graph as a state. Hence, we use keywords <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/state-expr.html">state</a> and <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/transition-expr.html">transition</a> instead of <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/node-expr.html">node</a> and <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/edge-expr.html">edge</a> used in previous Section. The keywords state and node here are interchangeable. So are edge and transition. In this context, they have the same semantics that is creating nodes and edges in a graph. Similarly, we also change <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/graph-expr.html">graph</a> to <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/machine-expr.html">machine</a>. By using these keywords, it makes a specification more meaningful in a specific context, particularly when we share it with others. Here is a list of <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html">keywords</a> are interchangeable in Cyclone.</p>
+<p>The keyword <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/final-key.html">final</a> here defines a state (node) to be a stopping state or terminating point. In a Cyclone specification, one can define multiple final states but with exactly one <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/start-key.html">start</a> state. The keyword <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/on-expr.html">on</a> allows us to label a transition (edge) with a string.</p>
+<p>The <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/enumerate-expr.html">enumerate</a> in goal section asks Cyclone to find all possible paths from a defined starting state (node) to one of the final states (nodes). In previous Section, we used <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/reach-expr.html">reach</a> statement to check if a node is reachable. Here, we didn't use it since the states <strong>q1</strong> and <strong>r1</strong> are already defined as final states. Both <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/condition-expr.html">condition</a> (introduced in previous Section) and reach statements are optional for a goal. However, if you have no final states in your machine (graph), then you must supply a reach statement in your goal.</p>
+<p>Say, you use a reach statement here to include some states (nodes), Cyclone then will also find path(s) to these states. In this example, our goal is pretty simple just to find all possible strings with a length of 5. We compile this specification, and Cyclone automatically returns the following paths.</p>
+<ul>
+<li>S->r1->r2->r2->r2->r1</li>
+<li>S->r1->r1->r2->r2->r1</li>
+<li>S->r1->r1->r1->r2->r1</li>
+<li>S->r1->r2->r1->r2->r1</li>
+<li>S->r1->r1->r2->r1->r1</li>
+<li>S->q1->q1->q1->q1->q1</li>
+<li>S->q1->q1->q2->q1->q1</li>
+<li>S->q1->q2->q1->q1->q1</li>
+<li>S->q1->q2->q2->q1->q1</li>
+<li>S->q1->q2->q1->q2->q1</li>
+<li>S->q1->q2->q2->q2->q1</li>
+<li>S->q1->q1->q1->q2->q1</li>
+<li>S->q1->q1->q2->q2->q1</li>
+<li>S->r1->r1->r1->r1->r1</li>
+<li>S->r1->r2->r1->r1->r1</li>
+<li>S->r1->r2->r2->r1->r1</li>
+</ul>
+<p>For example, the first path is translated to a string "baaab". Here is an exercise, can you use Cyclone to find all possible strings with a length of 5 but only those begin with an <strong>a</strong> ?</p>
+<h4>Tips:</h4>
+<p>They are multiple ways of doing it. One of the ways is to use the <strong>!</strong> introduced from previous Section.</p>

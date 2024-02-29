@@ -149,22 +149,28 @@ const PositionLocator = () => {
   )
 }
 
-export const StatusBar = () => {
+const ErrorsDisplay = ({onClick}) => {
   const {errors} = useEditorStore()
   const [errorCount, warningCount] = useMemo(() => sieveCount(errors, e => !isWarning(e.type)), [errors])
 
   return (
-    <Group justify={"space-between"}>
-      <Group style={{userSelect: "none"}}>
-        <Group fz={"sm"} style={{display: errorCount > 0 ? "" : "none"}} gap={"4px"} c={"red"}>
-          <IconAlertCircleFilled size={16}/>
-          {errorCount} Errors
-        </Group>
-        <Group fz={"sm"} style={{display: warningCount > 0 ? "" : "none"}} gap={"4px"} c={"orange"}>
-          <IconAlertTriangleFilled size={16}/>
-          {warningCount} Warnings
-        </Group>
+    <Group style={{userSelect: "none", cursor: onClick ? "pointer" : undefined, display: errorCount > 0 || warningCount > 0 ? "" : "none"}} onClick={onClick}>
+      <Group fz={"sm"} style={{display: errorCount > 0 ? "" : "none"}} gap={"4px"} c={"red"}>
+        <IconAlertCircleFilled size={16}/>
+        {errorCount} Errors
       </Group>
+      <Group fz={"sm"} style={{display: warningCount > 0 ? "" : "none"}} gap={"4px"} c={"orange"}>
+        <IconAlertTriangleFilled size={16}/>
+        {warningCount} Warnings
+      </Group>
+    </Group>
+  )
+}
+
+export const StatusBar = ({onClickErrors}) => {
+  return (
+    <Group justify={"space-between"}>
+      <ErrorsDisplay onClick={onClickErrors} />
       <PositionLocator />
     </Group>
   )

@@ -12,22 +12,22 @@ import {
 } from "@mantine/core";
 import {
   IconAlertCircleFilled,
-  IconAlertTriangleFilled,
-  IconArrowRightCircle,
+  IconAlertTriangleFilled, IconArrowNarrowRight,
+  IconArrowRightCircle, IconArrowsHorizontal,
   IconBook2,
   IconBraces,
   IconBug,
-  IconChartCircles,
+  IconChartCircles, IconCheckbox,
   IconChevronRight,
   IconCircleDot, IconCircleLetterC, IconCircleLetterE, IconCircleLetterG,
   IconCircleLetterI, IconCircleLetterP, IconCircleLetterR, IconCircleLetterV,
   IconCircleX,
-  IconFolder, IconLetterC, IconLetterE, IconLetterG, IconLetterI, IconLetterP, IconLetterR, IconLetterV,
+  IconFolder, IconGolf, IconLetterC, IconLetterE, IconLetterG, IconLetterI, IconLetterP, IconLetterR, IconLetterV,
   IconListTree,
   IconMathFunction,
-  IconPlaystationCircle, IconRoute2,
-  IconSearch,
-  IconTopologyRing3,
+  IconPlaystationCircle, IconRoute2, IconRouteX,
+  IconSearch, IconSettings,
+  IconTopologyRing3, IconVariable,
   IconVariableMinus,
   IconVector,
   IconViewfinder
@@ -35,8 +35,7 @@ import {
 import {memo, useCallback, useEffect, useMemo, useState} from "react";
 import {useEditorStore} from "@/state/editorStore";
 import {useEditorHelperStore} from "@/state/editorHelperStore";
-import {filterText, scopeLayersToOutline} from "@/core/utils/outline";
-import {OutlineKind} from "@/core/definitions";
+import {eliminateVarGroup, filterText} from "@/core/utils/outline";
 import {
   formatErrorDescription, formatErrorMessage,
   formatKindDescription,
@@ -46,100 +45,327 @@ import {
 import {locateToCode} from "@/core/utils/monaco";
 import {isWarning} from "@/core/specification";
 import cycloneAnalyzer from "cyclone-analyzer";
+import {useDebouncedValue} from "@mantine/hooks";
 
-const {IdentifierKind, SemanticContextType} = cycloneAnalyzer.language.definitions
+const {IdentifierKind, SemanticContextType, SyntaxBlockKind} = cycloneAnalyzer.language.definitions
 
-const outlineBlockTypeIcons = {
-  [SemanticContextType.MachineScope]: IconVector,
-  [SemanticContextType.StateScope]: IconPlaystationCircle,
-  [SemanticContextType.TransScope]: IconArrowRightCircle,
-  [SemanticContextType.GoalScope]: IconViewfinder,
-  [SemanticContextType.RecordScope]: IconBraces,
-  [SemanticContextType.EnumDecl]: IconBraces,
-  [SemanticContextType.FnBodyScope]: IconMathFunction,
-  [SemanticContextType.InvariantScope]: IconVariableMinus,
+// const outlineBlockTypeIcons = {
+//   [SemanticContextType.MachineScope]: IconVector,
+//   [SemanticContextType.StateScope]: IconPlaystationCircle,
+//   [SemanticContextType.TransScope]: IconArrowRightCircle,
+//   [SemanticContextType.GoalScope]: IconViewfinder,
+//   [SemanticContextType.RecordScope]: IconBraces,
+//   [SemanticContextType.EnumDecl]: IconBraces,
+//   [SemanticContextType.FnBodyScope]: IconMathFunction,
+//   [SemanticContextType.InvariantScope]: IconVariableMinus,
+// }
+//
+// const outlineIdentKindIcons = {
+//   [IdentifierKind.FnParam]: IconLetterP,
+//   [IdentifierKind.Let]: IconRoute2,
+//   [IdentifierKind.EnumField]: IconLetterE,
+//   [IdentifierKind.GlobalVariable]: IconLetterG,
+//   [IdentifierKind.GlobalConst]: IconLetterC,
+//   [IdentifierKind.RecordField]: IconLetterR,
+//   [IdentifierKind.LocalVariable]: IconLetterV,
+// }
+
+const syntaxBlockIcons = {
+  [SyntaxBlockKind.CompilerOption]: IconSettings,
+  [SyntaxBlockKind.Machine]: IconVector,
+  [SyntaxBlockKind.State]: IconPlaystationCircle,
+  [SyntaxBlockKind.Assertion]: IconCheckbox,
+  [SyntaxBlockKind.Variable]: null,
+  [SyntaxBlockKind.Func]: IconMathFunction,
+  [SyntaxBlockKind.Goal]: IconViewfinder,
+  [SyntaxBlockKind.Invariant]: IconVariableMinus,
+  [SyntaxBlockKind.PathVariable]: IconLetterP,
+  [SyntaxBlockKind.PathStatement]: IconRouteX,
+  [SyntaxBlockKind.Record]: IconBraces,
+  [SyntaxBlockKind.GoalFinal]: IconGolf
 }
 
-const outlineIdentKindIcons = {
-  [IdentifierKind.FnParam]: IconLetterP,
-  [IdentifierKind.Let]: IconRoute2,
-  [IdentifierKind.EnumField]: IconLetterE,
-  [IdentifierKind.GlobalVariable]: IconLetterG,
-  [IdentifierKind.GlobalConst]: IconLetterC,
-  [IdentifierKind.RecordField]: IconLetterR,
-  [IdentifierKind.LocalVariable]: IconLetterV,
+const SmallGroup = ({children, ...props}) => {
+  return <Group gap={8} {...props}>
+    {children}
+  </Group>
 }
 
-const getOutlineNodeStyle = node => {
-  switch (node.outlineKind) {
-    case OutlineKind.Group: {
-      const Icon = outlineBlockTypeIcons[node.type] ?? IconBraces
+const IdentifierText = ({identifier, fallback, isSearched}) => {
+  return <Text c={isSearched ? "red" : identifier ? undefined : "dimmed"}>{identifier ?? fallback}</Text>
+}
 
-      return {
-        text: <Group justify={"space-between"}>
-          <Text>
-            <Text c={"blue"} span>{formatScopeBlockType(node.type)}</Text>
-            {' '}
-            <Text span>{node.text || ""}</Text>
-          </Text>
-          <Text size={"xs"} c={"dimmed"} px={"sm"}>{node.position.startPosition.line} :{node.position.startPosition.column + 1}</Text>
-        </Group>, // `${formatScopeBlockType(node.type)} ${node.text || ""}`,
-        icon: <Icon size={12} />
-      }
+const getSyntaxBlockStyle = block => {
+  let children = null, text = null, Icon = null// , displayPosition = true
+
+  switch (block.kind) {
+    case SyntaxBlockKind.CompilerOption: {
+      text = (
+        <SmallGroup>
+          <Text fs={"italic"} c={"purple"}>option-</Text>
+          <IdentifierText identifier={block.data.name} isSearched={block.isSearched} />
+        </SmallGroup>
+      )
+      break
+    }
+    case SyntaxBlockKind.Machine: {
+      children = block.children
+      text = (
+        <SmallGroup>
+          <Text fs={"italic"} c={"purple"}>{block.data.keyword}</Text>
+          {/* <Text>{}</Text> */}
+          <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
+        </SmallGroup>
+      )
+      break
+    }
+    case SyntaxBlockKind.State: {
+      text = (
+        <SmallGroup>
+          <Text fs={"italic"} c={"purple"}>{block.data.attributes?.join(" ") ?? "state"}</Text>
+          <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
+
+        </SmallGroup>
+      )
+      break
+    }
+    case SyntaxBlockKind.Transition: {
+      const {identifier, operators} = block.data
+      text = (
+        <SmallGroup>
+          <Text fs={"italic"} c={"purple"}>{block.data.keyword}</Text>
+          {/* <Text c={identifier ? undefined : "dimmed"}>{identifier ?? "anonymous"}</Text> */}
+          <IdentifierText identifier={identifier} fallback={"anonymous"} isSearched={block.isSearched} />
+
+        </SmallGroup>
+      )
+      Icon = operators.has("->")
+        ? IconArrowNarrowRight
+        : IconArrowsHorizontal
+      break
+    }
+    case SyntaxBlockKind.Assertion: {
+      text = (
+        <Text fs={"italic"} c={"purple"}>assert</Text>
+      )
+      break
     }
 
-    case OutlineKind.Identifier: {
-      const Icon = outlineIdentKindIcons[node.kind] ?? IconLetterI
+    case SyntaxBlockKind.Variable: {
+      const {
+        identifier, type, kind
+      } = block.data
 
-      return {
-        text: <Group justify={"space-between"}>
-          <Text>
-            <Text c={"purple"} span>{node.kind === IdentifierKind.FnParam ? "param" : formatType(node.type)}</Text>
-            {' '}
-            {node.text}
-          </Text>
-
-          <Group>
-            <Text size={"xs"} c={"dimmed"}>{formatKindDescription(node.kind)}</Text>
-            <Text size={"xs"} c={"dimmed"} px={"sm"}>{node.position.startPosition.line}:{node.position.startPosition.column + 1}</Text>
-          </Group>
-
-        </Group>,
-        icon: <Icon size={12} />
+      switch (kind) {
+        case IdentifierKind.GlobalConst:
+          text = (
+            <SmallGroup>
+              <Text fs={"italic"} c={"purple"}>const {formatType(type)}</Text>
+              <IdentifierText identifier={`${identifier}`} isSearched={block.isSearched} />
+            </SmallGroup>
+          )
+          Icon = IconLetterC
+          break
+        case IdentifierKind.FnParam:
+          text = (
+            <SmallGroup>
+              <IdentifierText identifier={`${identifier}:`} isSearched={block.isSearched} />
+              <Text fs={"italic"} c={"purple"}>{formatType(type)}</Text>
+            </SmallGroup>
+          )
+          Icon = IconVariable // IconLetterP
+          break
+        case IdentifierKind.RecordField:
+          Icon = IconLetterR
+          break
+        case IdentifierKind.GlobalVariable:
+          Icon = IconLetterG
+          break
+        case IdentifierKind.LocalVariable:
+          Icon = IconLetterV
+          break
       }
+      if (!text) {
+        text = (
+          <SmallGroup>
+            <Text fs={"italic"} c={"purple"}>{formatType(type)}</Text>
+            <IdentifierText identifier={identifier} isSearched={block.isSearched} />
+          </SmallGroup>
+        )
+      }
+      break
+    }
+
+    case SyntaxBlockKind.Func: {
+      children = block.children.filter(ch => ch.kind === SyntaxBlockKind.Variable)
+      text = (
+        <SmallGroup>
+          <Text fs={"italic"} c={"purple"}>function</Text>
+          <IdentifierText identifier={`${block.data.identifier}:`} isSearched={block.isSearched} />
+          <Text fs={"italic"} c={"purple"}>{formatType(block.data.returnType)}</Text>
+        </SmallGroup>
+      )
+      break
+    }
+    case SyntaxBlockKind.Goal: {
+      children = block.children
+      text = (
+        <Text fs={"italic"} c={"purple"}>
+          goal
+        </Text>
+      )
+      break
+    }
+
+    case SyntaxBlockKind.Invariant: {
+      text = (
+        <SmallGroup>
+          <Text fs={"italic"} c={"purple"}>invariant</Text>
+          <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
+        </SmallGroup>
+      )
+      break
+    }
+
+    case SyntaxBlockKind.PathVariable: {
+      text = (
+        <SmallGroup>
+          <Text fs={"italic"} c={"purple"}>let</Text>
+          <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
+        </SmallGroup>
+      )
+      break
+    }
+    case SyntaxBlockKind.PathStatement: {
+      const {code} = block.data
+
+      text = (
+        <Text>{code.split("=", 1)}= ...</Text>
+      )
+      break
+    }
+    case SyntaxBlockKind.Record: {
+      children = block.children
+      text = (
+        <SmallGroup>
+          <Text fs={"italic"} c={"purple"}>record</Text>
+          <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
+        </SmallGroup>
+      )
+      break
+    }
+    case SyntaxBlockKind.GoalFinal: {
+      const {checkKeyword, forKeyword} = block.data
+
+      text = (
+        <SmallGroup>
+          <Text fs={"italic"} c={"purple"}>{checkKeyword}</Text>
+          <Text fs={"italic"} c={"purple"}>{forKeyword}</Text>
+        </SmallGroup>
+      )
+      break
+    }
+
+    case SyntaxBlockKind.Program: {
+      children = block.children
+      break
     }
   }
+
+  if (!Icon) {
+    Icon = syntaxBlockIcons[block.kind]
+  }
+
+  return {
+    children,
+    text,
+    Icon
+  }
+  // switch (node.outlineKind) {
+  //   case OutlineKind.Group: {
+  //     const Icon = outlineBlockTypeIcons[node.type] ?? IconBraces
+  //
+  //     return {
+  //       text: <Group justify={"space-between"}>
+  //         <Text>
+  //           <Text c={"blue"} span>{formatScopeBlockType(node.type)}</Text>
+  //           {' '}
+  //           <Text span>{node.text || ""}</Text>
+  //         </Text>
+  //         <Text size={"xs"} c={"dimmed"} px={"sm"}>{node.position.startPosition.line} :{node.position.startPosition.column + 1}</Text>
+  //       </Group>, // `${formatScopeBlockType(node.type)} ${node.text || ""}`,
+  //       icon: <Icon size={12} />
+  //     }
+  //   }
+  //
+  //   case OutlineKind.Identifier: {
+  //     const Icon = outlineIdentKindIcons[node.kind] ?? IconLetterI
+  //
+  //     return {
+  //       text: <Group justify={"space-between"}>
+  //         <Text>
+  //           <Text c={"purple"} span>{node.kind === IdentifierKind.FnParam ? "param" : formatType(node.type)}</Text>
+  //           {' '}
+  //           {node.text}
+  //         </Text>
+  //
+  //         <Group>
+  //           <Text size={"xs"} c={"dimmed"}>{formatKindDescription(node.kind)}</Text>
+  //           <Text size={"xs"} c={"dimmed"} px={"sm"}>{node.position.startPosition.line}:{node.position.startPosition.column + 1}</Text>
+  //         </Group>
+  //
+  //       </Group>,
+  //       icon: <Icon size={12} />
+  //     }
+  //   }
+  // }
 }
 
 const StructureNode = ({node, depth = 1, onJump}) => {
-  const {text, icon} = getOutlineNodeStyle(node)
-  const hasChildren = !!node?.children?.length
+  const {text, Icon, children} = getSyntaxBlockStyle(node)
+  const hasChildren = !!children?.length
   const [opened, setOpened] = useState(true)
-  const onClick = () => {
+  const jump = () => {
     if (node.position) {
       onJump(node.position.startPosition)
     }
   }
-  return (
-    <NavLink
-      // style={{height: "36px"}}
-      label={text}
-      childrenOffset={16 * depth}
-      leftSection={icon}
-      onClick={onClick}
-      rightSection={hasChildren ? <ActionIcon onClick={e => {
-        e.stopPropagation()
-        setOpened(!opened)
-      }} variant={"subtle"} color={"dark"} radius={"xl"}><IconChevronRight size={16} stroke={1.5} /></ActionIcon> : null}
-      opened={opened}
-    >
-      {
-        hasChildren
-          ? node.children.map((layer, i) => <StructureNode key={i} node={layer} depth={depth + 1} onJump={onJump} />)
-          : null
-      }
-    </NavLink>
-  )
+  const childrenMapper = (block) => (<StructureNode key={block.id} node={block} depth={depth + 1} onJump={onJump} />)
+  return text
+    ? (
+      <NavLink
+        // style={{height: "36px"}}
+        label={
+          <Group justify={"space-between"}>
+            {text}
+            {/* <Group> */}
+            {/*   /!* <Text size={"xs"} c={"dimmed"}>{formatKindDescription(node.kind)}</Text> *!/ */}
+            {/*   <Text size={"xs"} c={"dimmed"} px={"sm"}>{node.position.startPosition.line}:{node.position.startPosition.column + 1}</Text> */}
+            {/* </Group> */}
+            <Text size={"xs"} c={"dimmed"} px={"sm"}>{node.position.startPosition.line}:{node.position.startPosition.column + 1}</Text>
+          </Group>
+        }
+        childrenOffset={8 * depth}
+        leftSection={<Icon size={14} />}
+        onClick={jump}
+        rightSection={hasChildren ? <ActionIcon onClick={e => {
+          e.stopPropagation()
+          setOpened(!opened)
+        }} variant={"subtle"} color={"dark"} radius={"xl"}><IconChevronRight size={16} stroke={1.5} /></ActionIcon> : null}
+        opened={opened}
+      >
+        {
+          hasChildren
+            ? children.map(childrenMapper)
+            : null
+        }
+      </NavLink>
+    )
+    : children ? (
+      <>
+        {children.map(childrenMapper)}
+      </>
+    ) : null
 }
 
 const MemoStructureNode = memo(function MemoStructureNode({node, onJump}) {
@@ -152,8 +378,8 @@ function arePropsEqual(oldProps, newProps) {
 }
 
 const StructureOutlineTree = () => {
-  const {structureOutline} = useEditorHelperStore()
-  const {monacoCtx} = useEditorStore()
+  // const {structureOutline} = useEditorHelperStore()
+  const {monacoCtx, editorCtx} = useEditorStore()
   // const idle = useIdle(2000, { events: ['keypress'] });
   const onJump = useCallback(({line, column}) => {
     // monacoCtx?.editor.setPosition({lineNumber: line, column: column + 1})
@@ -165,18 +391,49 @@ const StructureOutlineTree = () => {
     }
   }, [monacoCtx])
 
-  const [prefix, setPrefix] = useState("")
-  const tree = useMemo(() => {
+  const [keyword, setKeyword] = useState("")
+  const [debouncedKeyword] = useDebouncedValue(keyword, 200)
 
-    return structureOutline
-      ? prefix
-        ? filterText(structureOutline.children[0], prefix)
-        : structureOutline.children[0]
-      : null
-  }, [structureOutline, prefix])
-  const searchResult = tree?.count
-    ? `Found ${tree.count} identifiers. `
-    : prefix
+  const [count, tree, searched] = useMemo(() => {
+    const program = editorCtx?.getProgramBlock()
+    const trimmedKeyword = debouncedKeyword.trim().toLowerCase()
+
+    if (program) {
+      const programOutline = eliminateVarGroup(program, null)
+      if (trimmedKeyword) {
+        const blockFinder = (block) => {
+          const data = block.data
+          if (!data) {
+            return false
+          }
+          const {
+            identifier, name,
+            // fromState, toStates, excludedStates
+          } = data
+          return (identifier && identifier.toLowerCase().includes(trimmedKeyword))
+            || (name && name.includes(trimmedKeyword))
+            // || (enums?.length && enums.some(enumVal => enumVal.toLowerCase().includes(trimmedKeyword)))
+          // || (fromState && fromState.toLowerCase().includes(debouncedKeyword))
+          // || (toStates?.length && toStates.some(s => s.toLowerCase().includes(debouncedKeyword)))
+          // || excludedStates?.length && excludedStates.some(s => s.toLowerCase().includes(debouncedKeyword))
+        }
+        const {count, result} = filterText(programOutline, blockFinder)
+        return [count, result, true]
+      } else {
+        return [0, programOutline, false]
+      }
+    }
+    return [0, null, false]
+
+    // return program
+    //   ? prefix
+    //     ? filterText(structureOutline.children[0], prefix)
+    //     : structureOutline.children[0]
+    //   : null
+  }, [editorCtx, debouncedKeyword])
+  const searchResult = searched && count
+    ? `Found ${count} identifiers. `
+    : searched
       ? "No results found. "
       : ""
 
@@ -184,10 +441,10 @@ const StructureOutlineTree = () => {
     tree
       ? <>
         <TextInput
-          label={"Search identifier by prefix"}
+          label={"Search identifier"}
           placeholder={"Enter Keyword ..."}
-          value={prefix}
-          onChange={e => setPrefix(e.currentTarget.value)}
+          value={keyword}
+          onChange={e => setKeyword(e.currentTarget.value)}
           leftSection={<IconSearch size={16} />}
         />
         <Text c={"dimmed"} size={"xs"}>{searchResult}Click to jump</Text>
@@ -260,25 +517,25 @@ const panels = {
 }
 
 export const OutlinePanel = () => {
-  const {editorCtx, errors} = useEditorStore()
-  const {setStructureOutline} = useEditorHelperStore()
+  const {errors} = useEditorStore()
 
-  const [panel, onPanel] = useState("structure")
-  const Component = panels[panel]
+  // const [panel, onPanel] = useState("structure")
+  const {outlineTab, setOutlineTab} = useEditorHelperStore()
+  const Component = panels[outlineTab]
   const errorSize = errors.length
 
-  useEffect(() => {
-    if (editorCtx) {
-      // console.log(scopeLayersToOutline(editorCtx.getScopeLayers()))
-      setStructureOutline(scopeLayersToOutline(editorCtx.getScopeLayers()))
-    } else {
-      setStructureOutline(null)
-    }
-  }, [editorCtx])
+  // useEffect(() => {
+  //   // if (editorCtx) {
+  //   //   // console.log(scopeLayersToOutline(editorCtx.getScopeLayers()))
+  //   //   setStructureOutline(scopeLayersToOutline(editorCtx.getScopeLayers()))
+  //   // } else {
+  //   //   setStructureOutline(null)
+  //   // }
+  // }, [editorCtx])
 
   return (
     <Stack>
-      <SegmentedControl value={panel} onChange={onPanel} data={[
+      <SegmentedControl value={outlineTab} onChange={setOutlineTab} data={[
         {
           value: 'structure',
           label: (

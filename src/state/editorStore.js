@@ -16,4 +16,7 @@ export const useEditorStore = create((set, get) => ({
 
   monacoCtx: null,
   setMonacoCtx: monacoCtx => set(() => ({monacoCtx})),
+
+  editorReady: false,
+  setEditorReady: editorReady => set({editorReady})
 }))

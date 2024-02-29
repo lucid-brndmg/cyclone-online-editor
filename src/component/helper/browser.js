@@ -98,6 +98,8 @@ export const BrowserPanel = () => {
     setSwitchFileId,
   } = useEditorPersistentStore()
 
+  const {editorReady} = useEditorStore()
+
   const now = Date.now()
 
   const fileList = useMemo(() => Object.entries(fileTable ?? {}).map(([id, value]) => ({
@@ -180,6 +182,7 @@ export const BrowserPanel = () => {
   const files = fileList.map(({id, title, time}) => {
     return (
       <NavLink
+        disabled={!editorReady}
         key={id}
         label={
           <div>
@@ -220,6 +223,7 @@ export const BrowserPanel = () => {
                 examples.map(({id, title}) => {
                   return (
                     <NavLink
+                      disabled={!editorReady}
                       key={id}
                       label={<Text size={"sm"}>{title}</Text>}
                       leftSection={<IconBulb />}

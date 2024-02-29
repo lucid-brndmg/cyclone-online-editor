@@ -1,4 +1,4 @@
-export const OutlineKind = {
-  Group: 1,
-  Identifier: 2
-}
+// export const OutlineKind = {
+//   Group: 1,
+//   Identifier: 2
+// }
