@@ -8,7 +8,7 @@ import {useEditorHelperStore} from "@/state/editorHelperStore";
 
 const PlaygroundMainContent = () => {
   const {width} = useEditorSettingsStore()
-  const {setHelperTab} = useEditorHelperStore()
+  const {setHelperTab, setOutlineTab} = useEditorHelperStore()
   const commands = {
     onTransLens: () => {
       setHelperTab("visual")
@@ -31,7 +31,7 @@ const PlaygroundMainContent = () => {
         <EditorHelperPanel miw={"280px"} />
         <CycloneEditorMainSection style={{flexGrow: 1}} miw={`${width}vw`} commands={commands} onClickErrorDisplay={() => {
           setHelperTab("outline")
-
+          setOutlineTab("problems")
         }} light={false} />
       </Flex>
     </Stack>

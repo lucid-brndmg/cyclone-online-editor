@@ -1,7 +1,7 @@
 import {useEditorStore} from "@/state/editorStore";
 import {useRouter} from "next/router";
 import localforage from "localforage";
-import {Button, FileButton, Group, NumberInput, Popover, Stack} from "@mantine/core";
+import {Button, FileButton, Group, NumberInput, Popover, Space, Stack} from "@mantine/core";
 import {
   IconAlertCircleFilled,
   IconAlertTriangleFilled,
@@ -153,18 +153,20 @@ const ErrorsDisplay = ({onClick}) => {
   const {errors} = useEditorStore()
   const [errorCount, warningCount] = useMemo(() => sieveCount(errors, e => !isWarning(e.type)), [errors])
 
-  return (
-    <Group style={{userSelect: "none", cursor: onClick ? "pointer" : undefined, display: errorCount > 0 || warningCount > 0 ? "" : "none"}} onClick={onClick}>
-      <Group fz={"sm"} style={{display: errorCount > 0 ? "" : "none"}} gap={"4px"} c={"red"}>
-        <IconAlertCircleFilled size={16}/>
-        {errorCount} Errors
+  return errorCount || warningCount
+    ? (
+      <Group style={{userSelect: "none", cursor: onClick ? "pointer" : undefined}} onClick={onClick}>
+        <Group fz={"sm"} style={{display: errorCount > 0 ? "" : "none"}} gap={"4px"} c={"red"}>
+          <IconAlertCircleFilled size={16}/>
+          {errorCount} Errors
+        </Group>
+        <Group fz={"sm"} style={{display: warningCount > 0 ? "" : "none"}} gap={"4px"} c={"orange"}>
+          <IconAlertTriangleFilled size={16}/>
+          {warningCount} Warnings
+        </Group>
       </Group>
-      <Group fz={"sm"} style={{display: warningCount > 0 ? "" : "none"}} gap={"4px"} c={"orange"}>
-        <IconAlertTriangleFilled size={16}/>
-        {warningCount} Warnings
-      </Group>
-    </Group>
-  )
+    )
+    : <Space />
 }
 
 export const StatusBar = ({onClickErrors}) => {

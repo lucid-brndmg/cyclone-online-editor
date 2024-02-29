@@ -362,9 +362,9 @@ const StructureNode = ({node, depth = 1, onJump}) => {
       </NavLink>
     )
     : children ? (
-      <>
+      <Box>
         {children.map(childrenMapper)}
-      </>
+      </Box>
     ) : null
 }
 
