@@ -11,12 +11,10 @@ import {
 } from "@mantine/core";
 import {IconChevronRight, IconCircleFilled} from "@tabler/icons-react";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import hljs from "highlight.js";
-import hljsCyclone from "../../generated/hljs/cyclone"
 import {getDocumentById, getGroupDocument} from "@/core/resources/referenceDocs";
-import {CycloneLanguageId} from "@/core/monaco/language";
 import {useDebouncedValue} from "@mantine/hooks";
-import {Input} from "postcss";
+import parse from "html-react-parser";
+import {getHtmlCodeHighlightOptions} from "@/component/utils/code";
 
 const DocItem = ({group, doc}) => {
   const [docContent, setDocContent] = useState(null)
@@ -27,17 +25,19 @@ const DocItem = ({group, doc}) => {
     })
   }, [])
 
-  useEffect(() => {
+  const parsed = useMemo(() => {
     if (docContent) {
-      hljs.highlightAll()
+      return parse(docContent, getHtmlCodeHighlightOptions())
     }
-  }, [docContent]);
 
+    return null
+  }, [docContent])
 
   return (
     <TypographyStylesProvider p={0} fz={"sm"} pos={"relative"}>
-      <LoadingOverlay visible={docContent == null} />
-      <div dangerouslySetInnerHTML={{ __html: docContent || "" }} />
+      <LoadingOverlay visible={parsed == null} />
+      {/* <div dangerouslySetInnerHTML={{ __html: docContent || "" }} /> */}
+      {parsed}
     </TypographyStylesProvider>
   )
 }
@@ -54,15 +54,13 @@ const GroupItem = ({group}) => {
     }
   }, [])
 
-  useEffect(() => {
+  const parsed = useMemo(() => {
     if (groupDoc) {
-      hljs.highlightAll()
+      return parse(groupDoc, getHtmlCodeHighlightOptions())
     }
-  }, [groupDoc]);
 
-  // const filterSearchDoc = useCallback(doc => {
-  //   return doc.title.toLowerCase().includes(debouncedSearch.toLowerCase().trim())
-  // }, [debouncedSearch])
+    return null
+  }, [groupDoc])
 
   const onOpen = (open, id) => {
     if (open) {
@@ -77,11 +75,11 @@ const GroupItem = ({group}) => {
     <>
       {
         group.html
-          ? groupDoc
-            ? <TypographyStylesProvider p={0} fz={"sm"}>
-              <div dangerouslySetInnerHTML={{ __html: groupDoc }} />
-            </TypographyStylesProvider>
-            : <LoadingOverlay visible={true} /> // loading
+          ? <TypographyStylesProvider p={0} fz={"sm"}>
+            <LoadingOverlay visible={parsed == null} />
+            {parsed}
+            {/* <div dangerouslySetInnerHTML={{ __html: groupDoc }} /> */}
+          </TypographyStylesProvider>
           : null
       }
 
@@ -148,10 +146,6 @@ const ReferenceDocs = () => {
 }
 
 export const ReferencePanel = () => {
-  useEffect(() => {
-    hljs.registerLanguage(CycloneLanguageId, hljsCyclone)
-  }, []);
-
   return (
     <Stack>
       <Text c={"dimmed"} size={"sm"}>Here are some quick reference of the language's builtin features. For full documents, please see <Anchor href={"https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"} target={"_blank"}>language documentation.</Anchor></Text>

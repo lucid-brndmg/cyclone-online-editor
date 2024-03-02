@@ -12,7 +12,7 @@
 <p>In the graph above, <strong>S0</strong> is a starting point of our agent, <strong>S24</strong> is the destination, and <strong>S13</strong> is the package to be picked up by our agent. Nodes with gray background are walls. Since we only allow agent to travel either forward or downward, we do not include edges for agent to move backward or upward. But in the real world, you could create these edges. Here, we exclude these edges just for simplicity purpose.</p>
 <p>This graph can be easily turned into a Cyclone specification. To capture the condition for our agent to avoid walls, pick up a package and deliver it to the destination, we create a goal section in our Cyclone specification. In this case, we know that the path length cannot exceed <strong>8</strong>, since our agent can only move forward and downward and the destination is located at node <strong>S24</strong> . For the condition, we just need to exclude nodes marked as walls and must include a subpath to node <strong>S13</strong> where our package is. Eventually, it should reach our destination node <strong>S24</strong> .</p>
 <p>Hence, our goal section is as follows:</p>
-<pre><code>goal{ 
+<pre><code class="language-cyclone">goal{ 
   check for 8 condition ( 
     (!S7 &#x26;&#x26; !S11 &#x26;&#x26; !S12), 
     (!S18 &#x26;&#x26; !S23), 

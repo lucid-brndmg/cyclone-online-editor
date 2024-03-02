@@ -9,16 +9,14 @@ import yaml from "js-yaml";
 import fs from "node:fs"
 import path from "node:path"
 import {fileURLToPath} from "url"
-import highlight from 'rehype-highlight'
-import cycloneSpecCode from "./utils/highlight_spec.mjs"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const specFile = path.join(__dirname, "../resource/cyclone_spec.json")
-const spec = JSON.parse(fs.readFileSync(specFile, "utf8"))
+// const specFile = path.join(__dirname, "../resource/cyclone_spec.json")
+// const spec = JSON.parse(fs.readFileSync(specFile, "utf8"))
 
-const highlightFn = eval(cycloneSpecCode(spec))
+// const highlightFn = eval(cycloneSpecCode(spec))
 
 const parseMarkdown = async md => {
   let tree = null
@@ -32,7 +30,7 @@ const parseMarkdown = async md => {
     })
     .use(remarkRehype)
     .use(remarkGfm)
-    .use(highlight, { languages: {cyclone: highlightFn} })
+    // .use(highlight, { languages: {cyclone: highlightFn} })
     .use(rehypeStringify)
     .process(md)
 

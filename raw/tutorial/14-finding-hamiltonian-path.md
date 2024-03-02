@@ -24,7 +24,7 @@ Next, we need to cover each of node exactly once. We can easily use **^{i..j}** 
 
 Say we define node **S0** as a starting point. Hence, we now can define our goal of finding Hamiltonian path for the graph above as follows:
 
-```
+```cyclone
    check for 6 condition ( 
        S0^{1} && S1^{1} && 
        S2^{1} && S3^{1} && 
@@ -37,7 +37,7 @@ The full specification for this problem is shown below:
 
 
 
-```
+```cyclone
   graph HamiltonianPathExample { 
 
        // define starting node S0.

@@ -1,8 +1,53 @@
-import {Box, Button, Code, CopyButton, Group} from "@mantine/core";
-import {IconCopy, IconDownload} from "@tabler/icons-react";
+import {Box, Button, Code, CopyButton, Group, Tooltip, useComputedColorScheme} from "@mantine/core";
+import {IconCopy, IconDownload, IconPlayerPlayFilled} from "@tabler/icons-react";
+import {useEffect, useState} from "react";
+import hljs from "highlight.js";
+import {CycloneLanguageId} from "@/core/monaco/language";
+import hljsCyclone from "@/core/utils/highlight";
 import {downloadTextFile} from "@/lib/dom";
+import {isCycloneExecutableCode} from "@/core/utils/language";
 
-export const CopyableCodeBlock = ({code, wrap = false, filename, ...props}) => {
+export const HighlightedCycloneCode = ({code}) => {
+  const [hlResult, setHlResult] = useState("")
+
+  useEffect(() => {
+    if (!hljs.listLanguages().includes(CycloneLanguageId)) {
+      hljs.registerLanguage(CycloneLanguageId, hljsCyclone)
+    }
+    const highlightedCode = hljs.highlight(
+      code,
+      { language: CycloneLanguageId }
+    ).value
+    setHlResult(highlightedCode)
+  }, [])
+
+  return (
+    <pre style={{whiteSpace: "pre-wrap"}} dangerouslySetInnerHTML={{__html: hlResult}} />
+  )
+}
+
+export const ExecutableCycloneCode = ({code, onTry}) => {
+
+  return (
+    <Box pos={"relative"}>
+      <Group justify={"right"} mb={"sm"} pos={"absolute"} style={{top: 4, right: 4}}>
+        <CopyButton value={code}>
+          {({ copied, copy }) => (
+            <Button size={"compact-sm"} variant={"default"} leftSection={<IconCopy size={14} />} onClick={copy}>
+              {copied ? 'Copied' : 'Copy'}
+            </Button>
+          )}
+        </CopyButton>
+        <Tooltip label={"Click 'run' to see results"}>
+          <Button size={"compact-sm"} rightSection={<IconPlayerPlayFilled size={14} />} onClick={onTry}>Try</Button>
+        </Tooltip>
+      </Group>
+      <HighlightedCycloneCode code={code} />
+    </Box>
+  )
+}
+
+export const CopyableCode = ({code, wrap = false, filename, ...props}) => {
   return (
     <Box pos={"relative"} {...props}>
       <Group justify={"right"} mb={"sm"} pos={"absolute"} style={{top: 8, right: 4}}>
@@ -21,3 +66,38 @@ export const CopyableCodeBlock = ({code, wrap = false, filename, ...props}) => {
     </Box>
   )
 }
+
+const extractTextFromElement = domNode => {
+  switch (domNode.constructor.name) {
+    case "Text": {
+      return domNode.data
+    }
+
+    default: {
+      let s = ""
+      if (domNode.children) {
+        for (let child of domNode.children) {
+          s += extractTextFromElement(child)
+        }
+      }
+
+      return s
+    }
+  }
+}
+
+export const getHtmlCodeHighlightOptions = onTry => ({
+  replace(domNode) {
+    if (domNode.tagName === "pre") {
+      const codeNode = domNode?.children[0]
+      const code = extractTextFromElement(domNode)
+      if (codeNode?.tagName === "code" && codeNode?.attribs?.class === "language-cyclone") {
+        return onTry && isCycloneExecutableCode(code)
+          ? <ExecutableCycloneCode code={code} onTry={() => onTry(code)} />
+          : <HighlightedCycloneCode code={code} />
+      } else {
+        return (<pre>{code}</pre>)
+      }
+    }
+  },
+})

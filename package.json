@@ -17,7 +17,6 @@
     "lint": "next lint",
     "prep": "bash ./scripts/prepare_all.sh",
     "gencodeexample": "node ./scripts/generate_code_example.js",
-    "genhl": "node scripts/generate_highlight.mjs",
     "genref": "node ./scripts/generate_reference.mjs",
     "gentheme": "node ./scripts/generate_theme.js",
     "gentutorial": "node ./scripts/generate_tutorial.mjs",
@@ -40,6 +39,7 @@
     "next": "^13.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "sharp": "^0.33.2",
     "zustand": "^4.4.4"
   },
   "devDependencies": {
@@ -51,7 +51,6 @@
     "postcss-preset-mantine": "^1.13.0",
     "postcss-simple-vars": "^7.0.1",
     "rehype-external-links": "^3.0.0",
-    "rehype-highlight": "^7.0.0",
     "rehype-stringify": "^10.0.0",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.0",

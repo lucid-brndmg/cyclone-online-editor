@@ -1,4 +1,4 @@
-<pre><code class="hljs language-cyclone">fresh(global_variable)
+<pre><code class="language-cyclone">fresh(global_variable)
 </code></pre>
 <p>The fresh expression introduces a new copy of a graph/machine scope variable when a node/state is visited.</p>
 <p>The fresh expression introduces a new copy of a graph-scope variable. The type and conditions specified with a where clause are retained. Expressions after the fresh expression that are referring to this new copy of graph-scope variable. This can ensure every time a node is visited a different value may be assigned to the fresh variable (depending on the conditions).</p>

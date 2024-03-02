@@ -34,7 +34,7 @@ Hence, our goal section is as follows:
 
 
 
-```
+```cyclone
 goal{ 
   check for 8 condition ( 
     (!S7 && !S11 && !S12), 

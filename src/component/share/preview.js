@@ -9,33 +9,16 @@ import {
   Tooltip,
   TypographyStylesProvider
 } from "@mantine/core";
-import {useEffect, useState} from "react";
-import hljs from "highlight.js";
 import {IconCopy, IconPencil, IconPlayerPlayFilled} from "@tabler/icons-react";
-import {CycloneLanguageId} from "@/core/monaco/language";
-import hljsCyclone from "@/generated/hljs/cyclone";
 import localforage from "localforage";
-import Config from "../../../resource/config.json";
 import {useRouter} from "next/router";
+import {HighlightedCycloneCode} from "@/component/utils/code";
 
 export const SharedCodePreview = ({shared}) => {
   const {date, title, author, code} = shared
   const router = useRouter()
-  const [displayCode, setDisplayCode] = useState()
-  useEffect(() => {
-    hljs.registerLanguage(CycloneLanguageId, hljsCyclone)
-  }, []);
-
-  useEffect(() => {
-    // hljs.highlightAll()
-    const highlightedCode = hljs.highlight(
-      code,
-      { language: CycloneLanguageId }
-    ).value
-    setDisplayCode(highlightedCode)
-  }, [code]);
   const onTry = async () => {
-    await localforage.setItem("tmp_code", Config.home.exampleCode)
+    await localforage.setItem("tmp_code", code)
     await router.push("/playground")
   }
   return (
@@ -57,7 +40,7 @@ export const SharedCodePreview = ({shared}) => {
       </Group>
       <ScrollArea.Autosize h={`70svh`}>
         <TypographyStylesProvider fz={"sm"} p={0}>
-          <pre style={{whiteSpace: "pre-wrap"}} dangerouslySetInnerHTML={{__html: displayCode}} />
+          <HighlightedCycloneCode code={code} />
         </TypographyStylesProvider>
       </ScrollArea.Autosize>
     </Stack>

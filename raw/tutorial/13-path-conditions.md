@@ -23,7 +23,7 @@ Here, we show you the following three types of path operators. For more operator
 
 To specify a particular node or subpath to be included in a path to be found, we can just use the name of a node or path operator (->). For example, the following condition statement specifies two path conditions on a path to be discovered. That is the path (to be discovered by Cyclone) must go through a node **S3** and must not include a subpath **S2->S3**.
 
-```
+```cyclone
 condition (S3, !(S2->S3)) 
 ```
 
@@ -39,13 +39,13 @@ Condition 1: a set of path(s) that has a length of **5** and begins and ends at 
 
 In Cyclone's language specification, we can use a path operator named [any one](https://classicwuhao.github.io/cyclone_tutorial/expr/anyone-op.html). The any one operator is denoted as **_** (underscore). It essentially means that any node in a graph as long as it can form a valid path. With **_**(any one) operator, we now are able to describe Condition 1 as follows:
 
-```
+```cyclone
 condition  (S1->_->_->_->_->S1) 
 ```
 
 Similarly, the following condition describes a set of path(s) that has length of **4** with node **S1** in the middle.
 
-```
+```cyclone
 condition  (_->_->S1->_->_) 
 ```
 
@@ -53,7 +53,7 @@ condition  (_->_->S1->_->_)
 
 The third type of path operator allows us to specify [the number of occurrence](https://classicwuhao.github.io/cyclone_tutorial/expr/occur-op.html) of a node or path. For example, Finding Hamiltonian path problem in [Chapter 0](https://classicwuhao.github.io/cyclone_tutorial/chapter1/tutorial.html) requires all nodes in a graph to be visited exactly once. When this kind of scenarios come up, we can use **^{i:j}** path operator to limit the number of occurrence of a particular node or path. For example,
 
-```
+```cyclone
 condition  (S1^{1:3}) 
 ```
 
@@ -61,7 +61,7 @@ this condition means that the node **S1** can only appear in a path between **1*
 
 **^{i:j}** specifies a lower bound **i** and an upper bound **j**. This operator can be applied to both a node and a path. If only a lower bound **i** is specified, then this means exactly **i** times. For example, the following condition specifies a path **S1->S2** can only occur exactly twice.
 
-```
+```cyclone
 condition  ( (S1->S2)^{2} ) 
 ```
 
@@ -76,7 +76,7 @@ Multiple path conditions can be joined as a compound path condition by using sta
 
 For example, the following condition is a compound path condition:
 
-```
+```cyclone
 condition  ( !(S1->S3) && ( _->S4->_ || S5^{1:3}) ) 
 ```
 

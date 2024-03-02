@@ -7,9 +7,8 @@ import {disableSelect, downloadBlobFile, downloadTextFile, serializeSvg} from "@
 import * as d3 from "d3";
 import {useGraphvizStore} from "@/state/editorGraphvizStore";
 import {AnimationDuration, AnimationSpeed} from "@/core/graphviz";
-import {CopyableCodeBlock} from "@/component/utils/code";
 import JSZip from "jszip";
-import { graphviz } from 'd3-graphviz';
+import {CopyableCode} from "@/component/utils/code";
 
 const Graphviz = forwardRef(({dot, options, animationSpeed, className}, ref) => {
   const {assignGraphvizId} = useGraphvizStore()
@@ -227,7 +226,7 @@ export const GraphvizMultiPreview = ({
             return (
               <Box key={i}>
                 {title}
-                <CopyableCodeBlock wrap={true} code={code} filename={`${filename || "graph"}.dot`} />
+                <CopyableCode wrap={true} code={code} filename={`${filename || "graph"}.dot`} />
               </Box>
             )
           })}

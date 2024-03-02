@@ -6,37 +6,36 @@
 <p>The states (<strong>q1</strong> and <strong>r1</strong>) with double circles indicate they are accepting states or final states of <strong>M</strong>.</p>
 <p>Suppose we wish to find all possible strings with a length of <strong>5</strong>. We now can write a Cyclone specification for this machine <strong>M</strong>.</p>
 <p>The specification is shown below:</p>
-<pre><code>  machine M {
-      abstract start state  S{} 
-      abstract final state  q1{} 
-      abstract state q2{} 
-      abstract final state  r1{} 
-      abstract state r2{} 
-      transition  t1 { S->q1  on "a" } 
-      transition  t2 { S->r1  on "b" } 
-      transition  t3 { q1->q1  on "a" } 
-      transition  t4 { q1->q2  on "b" } 
-      transition  t5 { q2->q1  on "a" } 
-      transition  t6 { q2->q2  on "b" } 
-      transition  t7 { r1->r1  on "b" } 
-      transition  t8 { r1->r2  on "a" } 
-      transition  t9 { r2->r1  on "b" } 
+<pre><code class="language-cyclone">machine M {
+  abstract start state  S{} 
+  abstract final state  q1{} 
+  abstract state q2{} 
+  abstract final state  r1{} 
+  abstract state r2{} 
+  transition  t1 { S->q1  on "a" } 
+  transition  t2 { S->r1  on "b" } 
+  transition  t3 { q1->q1  on "a" } 
+  transition  t4 { q1->q2  on "b" } 
+  transition  t5 { q2->q1  on "a" } 
+  transition  t6 { q2->q2  on "b" } 
+  transition  t7 { r1->r1  on "b" } 
+  transition  t8 { r1->r2  on "a" } 
+  transition  t9 { r2->r1  on "b" } 
 
-      transition  t10 { r2->r2  on "a" } 
+  transition  t10 { r2->r2  on "a" } 
 
-      /* 
+  /* 
 
-       * Goal: find all strings with length of 5.
+   * Goal: find all strings with length of 5.
 
-       */  
+   */  
 
-     goal{ 
+  goal {
+    
+    enumerate for 5 
+  }
 
-         enumerate for 5 
-
-         }
-
-    }
+}
 </code></pre>
 <p>You must notice that some of the keywords for creating nodes and edges are different from the ones we used in previous Section. This is because some of the keywords are interchangeable in Cyclone specification language. Since we are talking about a DFA machine here, it will make much more sense to consider a node in a graph as a state. Hence, we use keywords <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/state-expr.html">state</a> and <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/transition-expr.html">transition</a> instead of <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/node-expr.html">node</a> and <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/edge-expr.html">edge</a> used in previous Section. The keywords state and node here are interchangeable. So are edge and transition. In this context, they have the same semantics that is creating nodes and edges in a graph. Similarly, we also change <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/graph-expr.html">graph</a> to <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/machine-expr.html">machine</a>. By using these keywords, it makes a specification more meaningful in a specific context, particularly when we share it with others. Here is a list of <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html">keywords</a> are interchangeable in Cyclone.</p>
 <p>The keyword <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/final-key.html">final</a> here defines a state (node) to be a stopping state or terminating point. In a Cyclone specification, one can define multiple final states but with exactly one <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/start-key.html">start</a> state. The keyword <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/on-expr.html">on</a> allows us to label a transition (edge) with a string.</p>

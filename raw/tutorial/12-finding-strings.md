@@ -22,38 +22,37 @@ The specification is shown below:
 
 
 
-```
-  machine M {
-      abstract start state  S{} 
-      abstract final state  q1{} 
-      abstract state q2{} 
-      abstract final state  r1{} 
-      abstract state r2{} 
-      transition  t1 { S->q1  on "a" } 
-      transition  t2 { S->r1  on "b" } 
-      transition  t3 { q1->q1  on "a" } 
-      transition  t4 { q1->q2  on "b" } 
-      transition  t5 { q2->q1  on "a" } 
-      transition  t6 { q2->q2  on "b" } 
-      transition  t7 { r1->r1  on "b" } 
-      transition  t8 { r1->r2  on "a" } 
-      transition  t9 { r2->r1  on "b" } 
+```cyclone
+machine M {
+  abstract start state  S{} 
+  abstract final state  q1{} 
+  abstract state q2{} 
+  abstract final state  r1{} 
+  abstract state r2{} 
+  transition  t1 { S->q1  on "a" } 
+  transition  t2 { S->r1  on "b" } 
+  transition  t3 { q1->q1  on "a" } 
+  transition  t4 { q1->q2  on "b" } 
+  transition  t5 { q2->q1  on "a" } 
+  transition  t6 { q2->q2  on "b" } 
+  transition  t7 { r1->r1  on "b" } 
+  transition  t8 { r1->r2  on "a" } 
+  transition  t9 { r2->r1  on "b" } 
 
-      transition  t10 { r2->r2  on "a" } 
+  transition  t10 { r2->r2  on "a" } 
 
-      /* 
+  /* 
 
-       * Goal: find all strings with length of 5.
+   * Goal: find all strings with length of 5.
 
-       */  
+   */  
 
-     goal{ 
+  goal {
+    
+    enumerate for 5 
+  }
 
-         enumerate for 5 
-
-         }
-
-    }
+}
 ```
 
 

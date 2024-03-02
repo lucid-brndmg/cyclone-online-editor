@@ -22,37 +22,34 @@ import {
   IconArrowBigRight,
   IconArrowBigRightFilled, IconArrowNarrowLeft, IconArrowNarrowRight, IconBook
 } from "@tabler/icons-react";
-import hljs from "highlight.js";
-import hljsCyclone from "@/generated/hljs/cyclone";
-import parse, {domToReact} from 'html-react-parser';
-import {ExecutableCode} from "@/component/tutorial/code";
+import parse from 'html-react-parser';
+import {ExecutableCycloneCode, getHtmlCodeHighlightOptions, HighlightedCycloneCode} from "@/component/utils/code";
 import {isCycloneExecutableCode} from "@/core/utils/language";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
-import {CycloneLanguageId} from "@/core/monaco/language";
 import {tutorialTable} from "@/core/resources/tutorial";
 import {useEditorStore} from "@/state/editorStore";
 import {formatStateTransRelation} from "@/core/utils/format";
 
 const manifestSelectionData = tutorialManifest.map(t => ({label: t.title, value: t.id}))
 
-const extractTextFromElement = domNode => {
-  switch (domNode.constructor.name) {
-    case "Text": {
-      return domNode.data
-    }
-
-    default: {
-      let s = ""
-      if (domNode.children) {
-        for (let child of domNode.children) {
-          s += extractTextFromElement(child)
-        }
-      }
-
-      return s
-    }
-  }
-}
+// const extractTextFromElement = domNode => {
+//   switch (domNode.constructor.name) {
+//     case "Text": {
+//       return domNode.data
+//     }
+//
+//     default: {
+//       let s = ""
+//       if (domNode.children) {
+//         for (let child of domNode.children) {
+//           s += extractTextFromElement(child)
+//         }
+//       }
+//
+//       return s
+//     }
+//   }
+// }
 
 const TutorialPage = ({children}) => {
   return (
@@ -147,28 +144,9 @@ export const TutorialPanel = ({html, id}) => {
     if (viewport.current) {
       viewport.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    hljs.registerLanguage(CycloneLanguageId, hljsCyclone)
-    hljs.highlightAll()
   }, [router.asPath]);
 
-  const options = {
-    replace(domNode) {
-      if (domNode.tagName === "code") {
-        const code = extractTextFromElement(domNode)
-        if (isCycloneExecutableCode(code)) {
-          return (
-            <ExecutableCode execCode={code} onTry={() => setCode(code)}>
-              <code style={{whiteSpace: "pre-wrap"}} className={domNode.attribs.class} >
-                {domToReact(domNode.children, options)}
-              </code>
-            </ExecutableCode>
-          )
-        }
-      }
-    },
-  }
-
-  const parsed = parse(html, options)
+  const parsed = parse(html, getHtmlCodeHighlightOptions(code => setCode(code)))
   const editorHeight = resultHeight + height
 
   const editorCommands = {

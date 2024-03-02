@@ -10,25 +10,25 @@
 </ul>
 <h4>1.3.1 Type 1</h4>
 <p>To specify a particular node or subpath to be included in a path to be found, we can just use the name of a node or path operator (->). For example, the following condition statement specifies two path conditions on a path to be discovered. That is the path (to be discovered by Cyclone) must go through a node <strong>S3</strong> and must not include a subpath <strong>S2->S3</strong>.</p>
-<pre><code>condition (S3, !(S2->S3)) 
+<pre><code class="language-cyclone">condition (S3, !(S2->S3)) 
 </code></pre>
 <p>You can specify multiple path conditions in a <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/condition-expr.html">condition</a> statement and use comma to separate each of them. All the path conditions in a <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/condition-expr.html">condition</a> statement are logically anded.</p>
 <h4>1.3.2 Type 2</h4>
 <p>In some cases, you may only know some parts of a path you are looking for or a set of paths that has the same properties. For example, the following condition</p>
 <p>Condition 1: a set of path(s) that has a length of <strong>5</strong> and begins and ends at node <strong>S1</strong> .</p>
 <p>In Cyclone's language specification, we can use a path operator named <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/anyone-op.html">any one</a>. The any one operator is denoted as <strong>_</strong> (underscore). It essentially means that any node in a graph as long as it can form a valid path. With <strong>_</strong>(any one) operator, we now are able to describe Condition 1 as follows:</p>
-<pre><code>condition  (S1->_->_->_->_->S1) 
+<pre><code class="language-cyclone">condition  (S1->_->_->_->_->S1) 
 </code></pre>
 <p>Similarly, the following condition describes a set of path(s) that has length of <strong>4</strong> with node <strong>S1</strong> in the middle.</p>
-<pre><code>condition  (_->_->S1->_->_) 
+<pre><code class="language-cyclone">condition  (_->_->S1->_->_) 
 </code></pre>
 <h4>1.3.3 Type 3</h4>
 <p>The third type of path operator allows us to specify <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/occur-op.html">the number of occurrence</a> of a node or path. For example, Finding Hamiltonian path problem in <a href="https://classicwuhao.github.io/cyclone_tutorial/chapter1/tutorial.html">Chapter 0</a> requires all nodes in a graph to be visited exactly once. When this kind of scenarios come up, we can use <strong>^{i:j}</strong> path operator to limit the number of occurrence of a particular node or path. For example,</p>
-<pre><code>condition  (S1^{1:3}) 
+<pre><code class="language-cyclone">condition  (S1^{1:3}) 
 </code></pre>
 <p>this condition means that the node <strong>S1</strong> can only appear in a path between <strong>1</strong> and <strong>3</strong> times.</p>
 <p><strong>^{i:j}</strong> specifies a lower bound <strong>i</strong> and an upper bound <strong>j</strong>. This operator can be applied to both a node and a path. If only a lower bound <strong>i</strong> is specified, then this means exactly <strong>i</strong> times. For example, the following condition specifies a path <strong>S1->S2</strong> can only occur exactly twice.</p>
-<pre><code>condition  ( (S1->S2)^{2} ) 
+<pre><code class="language-cyclone">condition  ( (S1->S2)^{2} ) 
 </code></pre>
 <h4>Compound Path Conditions</h4>
 <p>Multiple path conditions can be joined as a compound path condition by using standard logical operators. In Cyclone, logical operators are the same as those are commonly used in other programming languages. The following list outlines supported logical operators in Cyclone.</p>
@@ -39,6 +39,6 @@
 <li><strong>!</strong>: logical not</li>
 </ul>
 <p>For example, the following condition is a compound path condition:</p>
-<pre><code>condition  ( !(S1->S3) &#x26;&#x26; ( _->S4->_ || S5^{1:3}) ) 
+<pre><code class="language-cyclone">condition  ( !(S1->S3) &#x26;&#x26; ( _->S4->_ || S5^{1:3}) ) 
 </code></pre>
 <p>The above compound path condition contains three path conditions.</p>

@@ -16,12 +16,8 @@ import {
 } from "@mantine/core";
 import {IconCheck} from "@tabler/icons-react";
 import classes from "../../styles/modules/HeroSection.module.css"
-import hljs from "highlight.js";
-import {useEffect, useState} from "react";
-import hljsCyclone from "@/generated/hljs/cyclone";
 import Config from "../../../resource/config.json"
-import {CycloneLanguageId} from "@/core/monaco/language";
-import {ExecutableCode} from "@/component/tutorial/code";
+import {ExecutableCycloneCode} from "@/component/utils/code";
 import localforage from "localforage";
 import {useRouter} from "next/router";
 
@@ -30,17 +26,17 @@ import {useRouter} from "next/router";
 * */
 
 const HeroSection = () => {
-  const [exampleCode, setExampleCode] = useState("")
+  // const [exampleCode, setExampleCode] = useState("")
   const router = useRouter()
 
-  useEffect(() => {
-    hljs.registerLanguage(CycloneLanguageId, hljsCyclone)
-    const highlightedCode = hljs.highlight(
-      Config.home.exampleCode,
-      { language: CycloneLanguageId }
-    ).value
-    setExampleCode(highlightedCode)
-  }, [])
+  // useEffect(() => {
+  //   hljs.registerLanguage(CycloneLanguageId, hljsCyclone)
+  //   const highlightedCode = hljs.highlight(
+  //     Config.home.exampleCode,
+  //     { language: CycloneLanguageId }
+  //   ).value
+  //   setExampleCode(highlightedCode)
+  // }, [])
 
   const onTry = async () => {
     await localforage.setItem("tmp_code", Config.home.exampleCode)
@@ -91,9 +87,10 @@ const HeroSection = () => {
         {/* <Image src={image.src} className={classes.image} /> */}
         <ScrollArea className={classes.display}>
           <TypographyStylesProvider fz={"sm"} p={0}>
-            <ExecutableCode execCode={Config.home.exampleCode} onTry={onTry}>
-              <pre style={{whiteSpace: "pre-wrap"}} dangerouslySetInnerHTML={{__html: exampleCode}} />
-            </ExecutableCode>
+            {/* <ExecutableCycloneCode code={Config.home.exampleCode} onTry={onTry}> */}
+            {/*   <pre style={{whiteSpace: "pre-wrap"}} dangerouslySetInnerHTML={{__html: exampleCode}} /> */}
+            {/* </ExecutableCycloneCode> */}
+            <ExecutableCycloneCode code={Config.home.exampleCode} onTry={onTry} />
           </TypographyStylesProvider>
         </ScrollArea>
       </div>

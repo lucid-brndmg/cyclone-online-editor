@@ -131,7 +131,6 @@ Here is a basic structure for the project:
 └── src
     ├── component
     ├── core
-    ├── generated
     ├── lib
     ├── pages
     ├── state
@@ -140,16 +139,16 @@ Here is a basic structure for the project:
 
 There are several directories that worth noticing:
 
-| path              | description                                                                                                                                                                                                                                                                                |
-|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| /execution_server | The execution server that executes cyclone code. Consider this the 'backend' of the editor.                                                                                                                                                                                                |
-| /public           | Static files for Next.js. Some of the generated files are included.                                                                                                                                                                                                                        |
-| /public/dynamic   | Stores generated code example, reference document and editor theme definitions. Please do not edit them directly                                                                                                                                                                           |
-| /public/vs        | Stores resource files that are required by the editor component (monaco editor)                                                                                                                                                                                                            |
-| /raw              | Stores raw resources for code examples, reference documents and tutorial pages (both in Markdown)                                                                                                                                                                                          |
-| /resource         | Stores generated tutorial HTMLs, images, resource manifests and some configurations in JSON.                                                                                                                                                                                               |
-| /scripts          | Stores code generation scripts in JS and Shell. Execute these scripts only at repo's root directory and DO NOT execute them anywhere else.                                                                                                                                                 |
-| /src              | Source code directory. Component structures are equivalent to Next.js page router's structure and `core` contains the core logic for the semantic checker and other modules of cyclone. Please do not touch `generated` directory since these codes are generated automatically by scripts |
+| path              | description                                                                                                                                                                                                                                                                               |
+|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| /execution_server | The execution server that executes cyclone code. Consider this the 'backend' of the editor.                                                                                                                                                                                               |
+| /public           | Static files for Next.js. Some of the generated files are included.                                                                                                                                                                                                                       |
+| /public/dynamic   | Stores generated code example, reference document and editor theme definitions. Please do not edit them directly                                                                                                                                                                          |
+| /public/vs        | Stores resource files that are required by the editor component (monaco editor)                                                                                                                                                                                                           |
+| /raw              | Stores raw resources for code examples, reference documents and tutorial pages (both in Markdown)                                                                                                                                                                                         |
+| /resource         | Stores generated tutorial HTMLs, images, resource manifests and some configurations in JSON.                                                                                                                                                                                              |
+| /scripts          | Stores code generation scripts in JS and Shell. Execute these scripts only at repo's root directory and DO NOT execute them anywhere else.                                                                                                                                                |
+| /src              | Source code directory. Component structures are equivalent to Next.js page router's structure and `core` contains the core logic for the semantic checker and other modules of cyclone. |
 
 ### Managing Resources
 
@@ -219,7 +218,33 @@ npm run gentutorial
 
 And then documents will be generated as HTML files for Next.js to load also a manifest is automatically generated.
 
-For code blocks inside tutorial, if a code block contains a `machine` block or `graph` block, a shortcut to execute the code will be displayed on UI when user browsing.
+For code blocks inside tutorial documents, if a code block has the language `cyclone` and contains a `machine` or `graph` syntax, a shortcut to execute the code will be displayed on UI when user browsing. For example:
+
+````markdown
+Here is an example that has the code execution feature:
+
+```cyclone
+machine SomeMachine {
+    // ...Code example content
+}
+```
+
+While this code block doesn't:
+
+```cyclone
+check for 1, 2, 3 reach (S1)
+```
+Because it does not contain valid executable Cyclone source code.
+
+This block would have no code highlighting effect at all:
+```
+trans {A -> B}
+```
+Because no 'cyclone' language mark was marked.
+
+````
+
+**Notice the 'cyclone' language mark is required for each highlighted code blocks otherwise there will be no highlighting effect for the block.** This rule also applies for reference documents.
 
 #### Reference Documents
 
@@ -607,12 +632,13 @@ The file `src/core/definitions.js` contains enum definitions for cyclone's compo
 
 All variables in this file are written in JavaScript object but used as enumerations. When updating these enum definitions, please don't use duplicated value.
 
-#### Code Highlights Inside Documentations
-Some of the code inside documents are highlighted. This is because the project introduced Highlight.js library and a spec file to do this.
+#### Code Highlights
+This project has 2 sets of code highlight rules for Cyclone:
 
-To change the rules for highlight.js, please visit `scripts/utils/highlight_spec.mjs`. This file is imported by another script and the project itself. For the script it must evaluate the return value of `highlightSpecCode` function and get the rules, and that return value will be copied into `src/generated/hljs/cyclone.js`.
+- Monaco editor's rules: rules applied for the code editor that based on Monaco
+- Highlight.js rules: rules applied for all highlighted code blocks in all document-liked components, including tutorials, sharing code preview and references
 
-Doing this complicated code generation is because it's the only way to make both Node.js and Next.js happy... The actual reason is written in that file as comments.
+To change monaco editor's highlight rules, please visit `src/core/monaco/language.js` and mainly see the definition of `CycloneMonacoTokens`. To change the highlight rules for highlight.js, please visit `src/core/utils/highlight.js`. 
 
 #### Parser & Semantic Analyzer
 
