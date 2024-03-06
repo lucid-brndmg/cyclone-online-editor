@@ -28,8 +28,20 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {isGraphviz} from "@/core/utils/language";
 
 export const CodeExecutionButton = ({...props}) => {
-  const {code, setCode, editorCtx} = useEditorStore()
-  const {setIsLoading, setIsError, setVisualDataCopy, setExecutionResult, isLoading, executionResult, setParsedPaths, setErrorMessage, setIsPolling, isPolling, setParsedTraces, setTraceIsGraphviz} = useEditorExecutionStore()
+  const {code, editorCtx} = useEditorStore()
+  const {
+    setIsLoading,
+    setIsError,
+    setVisualDataCopy,
+    setExecutionResult,
+    setParsedPaths,
+    setErrorMessage,
+    setIsPolling,
+    setParsedTraces,
+    setTraceIsGraphviz,
+    setCompilerOptions,
+    isLoading, executionResult, isPolling,
+  } = useEditorExecutionStore()
   const isPollingRef = useRef(isPolling)
   const invalidCode = useMemo(() => code.trim().length === 0, [code])
   const {executionServer, execPollWait} = useEditorSettingsStore()
@@ -95,6 +107,8 @@ export const CodeExecutionButton = ({...props}) => {
     setIsError(false)
     setErrorMessage("")
     setVisualDataCopy(editorCtx.getVisualData())
+    setCompilerOptions(editorCtx.compilerOptions)
+    setTraceIsGraphviz(false)
 
     try {
       const resp = await fetch(`${executionServer.trim() || Config.executionServer.url}/exec`, {

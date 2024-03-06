@@ -19,7 +19,7 @@ export const SharedCodePreview = ({shared}) => {
   const router = useRouter()
   const onTry = async () => {
     await localforage.setItem("tmp_code", code)
-    await router.push("/playground")
+    await router.push("/editor")
   }
   return (
     <Stack>

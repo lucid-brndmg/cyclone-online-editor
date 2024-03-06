@@ -40,7 +40,7 @@ const HeroSection = () => {
 
   const onTry = async () => {
     await localforage.setItem("tmp_code", Config.home.exampleCode)
-    await router.push("/playground")
+    await router.push("/editor")
   }
 
   return (
@@ -76,11 +76,11 @@ const HeroSection = () => {
           </List>
 
           <Group mt={30}>
-            <Button radius="xl" size="md" className={classes.control} color={"orange"} component={"a"} href={"/tutorial"}>
+            <Button radius="xl" size="md" className={classes.control} color={"orange"} component={"a"} href={"/editor"}>
               Get Started
             </Button>
-            <Button variant="default" radius="xl" size="md" className={classes.control} component={"a"} href={"/playground"}>
-              Playground
+            <Button variant="default" radius="xl" size="md" className={classes.control} component={"a"} href={"/tutorial"}>
+              Tutorial
             </Button>
           </Group>
         </div>
@@ -110,7 +110,7 @@ const Copyright = () => {
             </Text>
             <Anchor c={"orange"} fz={"sm"} href={"https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"}>Language Reference</Anchor>
             <br/>
-            <Anchor c={"orange"} fz={"sm"} href={"https://cyclone4web.cs.nuim.ie/editor/"}>Another Cyclone Playground</Anchor>
+            <Anchor c={"orange"} fz={"sm"} href={"https://cyclone4web.cs.nuim.ie/editor/"}>Another Cyclone Editor</Anchor>
             <br/>
             <Anchor c={"orange"} fz={"sm"} href={"https://classicwuhao.github.io/cyclone_tutorial/tutorial-content.html"}>Cyclone Homepage</Anchor>
           </Box>
@@ -153,15 +153,16 @@ const LinkCard = ({title, desc, url, color, shadow, withBorder, size}) => {
 const LinksSection = () => {
   const learningLinks = [
     {title: "Learn", url: "/tutorial", desc: "Learning The Cyclone Language and trying the code inside the tutorials"},
-    {title: "Online Editor", url: "/playground", desc: "Writing Cyclone using the online development environment"},
+    {title: "Online Editor", url: "/editor", desc: "Writing Cyclone using the online development environment"},
     {title: "Installation", url: "https://classicwuhao.github.io/cyclone_tutorial/installation.html", desc: "Install Cyclone on your local machine"}
   ]
 
   const resourceLinks = [
     {title: "Reference Docs", desc: "Language reference documents", url: "https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"},
-    {title: "Another Online Editor", desc: "A simpler online Cyclone editor", url: "https://cyclone4web.cs.nuim.ie/editor/"},
     {title: "Official Tutorials", desc: "Official tutorial website for Cyclone without an online editor", url: "https://classicwuhao.github.io/cyclone_tutorial/tutorial-content.html"},
-    {title: "Source Code", desc: "Source code of the Cyclone specification language", url: "https://github.com/classicwuhao/Cyclone"}
+    {title: "Cyclone Analyzer", desc: "The static analyzer of Cyclone that this website is using", url: "https://github.com/lucid-brndmg/cyclone-analyzer"},
+    // {title: "Another Online Editor", desc: "A simpler online Cyclone editor", url: "https://cyclone4web.cs.nuim.ie/editor/"},
+    {title: "Source Code", desc: "Source code of this project", url: "https://github.com/lucid-brndmg/cyclone-online-editor"}
   ]
   return (
     <Container size={"xl"} w={"100%"} pb={"xl"}>

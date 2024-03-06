@@ -56,6 +56,7 @@ export default class EditorSemanticContext {
   goal
   isBuildSyntaxBlocks = false
   syntaxBlockBuilder = null
+  compilerOptions = new Map()
 
   constructor(isBuildSyntaxBlocks = false) {
     this.isBuildSyntaxBlocks = isBuildSyntaxBlocks
@@ -245,6 +246,15 @@ export default class EditorSemanticContext {
               finalPosition: md.finalPosition
             }
           }
+          break
+        }
+
+        case SemanticContextType.CompilerOption: {
+          const {
+            name, value
+          } = block.metadata
+          this.compilerOptions.set(name, value)
+          break
         }
       }
     })

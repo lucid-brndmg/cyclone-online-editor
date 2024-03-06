@@ -6,7 +6,7 @@ import {FileStateWrapper} from "@/component/helper/browser";
 import Head from "next/head";
 import {useEditorHelperStore} from "@/state/editorHelperStore";
 
-const PlaygroundMainContent = () => {
+const EditorMainContent = () => {
   const {width} = useEditorSettingsStore()
   const {setHelperTab, setOutlineTab} = useEditorHelperStore()
   const commands = {
@@ -38,17 +38,17 @@ const PlaygroundMainContent = () => {
   )
 }
 
-const PlaygroundPage = () => {
+const EditorPage = () => {
   return (
     <>
       <Head>
-        <title>Cyclone Playground</title>
+        <title>Cyclone Editor</title>
       </Head>
       <main>
-        <PlaygroundMainContent />
+        <EditorMainContent />
       </main>
     </>
   )
 }
 
-export default PlaygroundPage
+export default EditorPage

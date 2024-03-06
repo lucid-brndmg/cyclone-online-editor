@@ -350,7 +350,7 @@ export const genGraphvizExecutionResultPaths = ({states, edges}, options) => {
   return codes
 }
 
-// THE CODE FOR THE <table> ELEMENT'S STYLE COPIED FROM https://graphviz.org/Gallery/directed/psg.html
+// THE CODE FOR THE <table> ELEMENT'S STYLE REFERENCED https://graphviz.org/Gallery/directed/psg.html
 // OTHER PARTS ARE WRITTEN ON MY OWN
 export const genGraphvizTrace = (traces, options) => {
   const codes = []

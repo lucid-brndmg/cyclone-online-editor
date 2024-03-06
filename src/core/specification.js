@@ -30,7 +30,8 @@ const errorTypeWarnings = new Set([
   ErrorType.CodeInsideAbstractNode,
   ErrorType.EmptyEdge,
   ErrorType.DuplicatedEnumField,
-  ErrorType.DuplicatedEdgeTarget
+  ErrorType.DuplicatedEdgeTarget,
+  ErrorType.OptionTraceNotFound
 ])
 
 export const isWarning = errorType => errorTypeWarnings.has(errorType)

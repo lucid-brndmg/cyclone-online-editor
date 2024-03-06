@@ -21,23 +21,25 @@ const DocItem = ({group, doc}) => {
 
   useEffect(() => {
     getDocumentById(group.id, doc.id).then(html => {
+      // parse(html, getHtmlCodeHighlightOptions())
       setDocContent(html)
     })
   }, [])
 
   const parsed = useMemo(() => {
     if (docContent) {
-      return parse(docContent, getHtmlCodeHighlightOptions())
+      const parsed = parse(docContent, getHtmlCodeHighlightOptions())
+      return parsed
     }
 
     return null
   }, [docContent])
-
+  
   return (
     <TypographyStylesProvider p={0} fz={"sm"} pos={"relative"}>
-      <LoadingOverlay visible={parsed == null} />
-      {/* <div dangerouslySetInnerHTML={{ __html: docContent || "" }} /> */}
-      {parsed}
+      {/* <LoadingOverlay visible={parsed == null} /> */}
+      {/* <div dangerouslySetInnerHTML={{ __html: docContent ?? '??' }} /> */}
+      {parsed ?? "loading"}
     </TypographyStylesProvider>
   )
 }

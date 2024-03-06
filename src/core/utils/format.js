@@ -49,6 +49,7 @@ const errorTypeDescription = {
   [ErrorType.EmptyEdge]: "Empty Edge",
   [ErrorType.DuplicatedEnumField]: "Duplicated Enum",
   [ErrorType.DuplicatedEdgeTarget]: "Duplicated Edge Target",
+  [ErrorType.OptionTraceNotFound]: "Option Output Ignored",
 
   [ErrorType.RemoteError]: "Remote Execution Error"
 }
@@ -93,7 +94,8 @@ const eWhereFunctionCall = () => {
 }
 
 const eTypeMismatchFunction = ({ident, got, expected}) => {
-  return `type mismatch on function ${ident}, got: ${formatTypes(got)}, expected types are: ${formatSignatureInputs(expected)}`
+  const isIdentifier = /\w+/.test(ident)
+  return `type mismatch on ${isIdentifier ? "function" : "operator"} ${ident}, got: ${formatTypes(got)}, expected types are: ${formatSignatureInputs(expected)}`
 }
 
 const eTypeMismatchVarDecl = ({ident, expected, got}) => {
@@ -143,7 +145,7 @@ const eReturnExprViolation = () => {
 }
 
 const eTypeMismatchReturn = ({expected, got}) => {
-  return `type mismatch on function return, expected to return ${formatType(expected)}, got ${formatType(got)}`
+  return `type mismatch on return expression, function expected to return ${formatType(expected)}, got ${formatType(got)}`
 }
 
 const eStatementAfterReturn = () => {
@@ -190,6 +192,10 @@ const eWhereInlineVariable = () => {
   return `where clause can not be applied to local variables`
 }
 
+const eOptionTraceNotFound = () => {
+  return `option-trace not enabled. Hence option-output has no effect.`
+}
+
 const errorMessageFormatter = {
   [ErrorType.RemoteError]: eMsgBased,
   [ErrorType.SyntaxError]: eMsgBased,
@@ -221,7 +227,8 @@ const errorMessageFormatter = {
   [ErrorType.DuplicatedEdgeTarget]: eDuplicatedEdgeTarget,
   [ErrorType.InvalidNodeModifier]: eInvalidNodeModifier,
   [ErrorType.EnumNotAllowedInVariable]: eEnumNotAllowedInVariable,
-  [ErrorType.WhereInlineVariable]: eWhereInlineVariable
+  [ErrorType.WhereInlineVariable]: eWhereInlineVariable,
+  [ErrorType.OptionTraceNotFound]: eOptionTraceNotFound
 }
 
 export const formatErrorMessage = (type, params, source) => {
@@ -311,8 +318,6 @@ export const formatTypes = types => types.length ? `(${types.map(t => formatType
 export const formatSignatureInputs = signatures => signatures
   .map(({input}) => formatTypes(input))
   .join(" | ")
-
-export const formatRepeatedTypes = (type, times) => formatTypes(new Array(times).fill(type))
 
 export const cycloneCodeMD = code => "```cyclone\n" +
   code +

@@ -6,6 +6,8 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {useDebouncedValue} from "@mantine/hooks";
 import {CodeConsoleResultSection} from "@/component/editor/execution";
 import {StatusBar, Toolbar} from "@/component/editor/bars";
+import {useEffect, useRef} from "react";
+import localforage from "localforage";
 
 export const CycloneEditorForm = ({
   light = false,
@@ -16,6 +18,20 @@ export const CycloneEditorForm = ({
   const [debouncedCode] = useDebouncedValue(code, 200)
 
   const {height, width, monacoOptions, setWidth, setHeight, editorCodeOptions} = useEditorSettingsStore()
+
+  const initRef = useRef(false)
+
+  useEffect(() => {
+    setTimeout(() => initRef.current = true, 200)
+  }, []);
+
+  useEffect(() => {
+    if (!initRef.current) {
+      return
+    }
+    localforage.setItem("tmp_code", debouncedCode).then(() => console.log("progress saved"))
+
+  }, [debouncedCode])
 
   const onMouseDown = e => {
     const [initX, initY] = [e.clientX, e.clientY]

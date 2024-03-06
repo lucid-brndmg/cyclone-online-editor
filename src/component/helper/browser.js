@@ -29,10 +29,10 @@ export const FileStateWrapper = () => {
   useEffect(() => {
     initOnPageLoad()
       .then(async () => {
-        if (router.pathname === "/playground") {
+        if (router.pathname === "/editor") {
           const code = await localforage.getItem("tmp_code")
           if (code) {
-            await localforage.removeItem("tmp_code")
+            // await localforage.removeItem("tmp_code")
             setCode(code)
             // setTimeout(() => setCode(code), 100)
             setIsSaved(false)
@@ -127,7 +127,7 @@ export const BrowserPanel = () => {
     title: 'Change Unsaved',
     children: (
       <Text size="sm">
-        Current code change is unsaved, continue will lost your progress.
+        Changes unsaved, by continue will lost your progress.
       </Text>
     ),
     labels: { confirm: 'Continue', cancel: 'Cancel' },

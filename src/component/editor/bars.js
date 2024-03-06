@@ -23,17 +23,17 @@ import {useMemo, useState} from "react";
 import {isWarning} from "@/core/specification";
 import {SharePopover} from "@/component/share/popover";
 
-const OpenInPlaygroundButton = () => {
+const OpenInEditorButton = () => {
   const {code} = useEditorStore()
   const router = useRouter()
 
   const onOpen = async () => {
     await localforage.setItem("tmp_code", code)
-    await router.push("/playground")
+    await router.push("/editor")
   }
 
   return (
-    <Button onClick={onOpen} leftSection={<IconPencil />} variant={"outline"} color={"blue"} disabled={!code.trim().length}>Open in Playground</Button>
+    <Button onClick={onOpen} leftSection={<IconPencil />} variant={"outline"} color={"blue"} disabled={!code.trim().length}>Open in Editor</Button>
   )
 }
 
@@ -94,7 +94,7 @@ export const Toolbar = ({
 
       <Button.Group>
         {
-          light ? <OpenInPlaygroundButton /> : null
+          light ? <OpenInEditorButton /> : null
         }
         <ShareButton />
       </Button.Group>

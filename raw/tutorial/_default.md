@@ -5,7 +5,7 @@ title: "Table of Contents"
 
 # Tutorial
 
-Welcome to cyclone! Here are the tutorial we needed for learning the language. If you are already familiar with the language, feel free to try [the playground](/playground). 
+Welcome to cyclone! Here are the tutorial we needed for learning the language. If you are already familiar with the language, feel free to try [the playground](/editor). 
 
 ## 0. Introduction
 

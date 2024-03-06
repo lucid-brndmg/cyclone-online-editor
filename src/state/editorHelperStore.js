@@ -3,7 +3,7 @@ import Config from "../../resource/config.json"
 
 export const useEditorHelperStore = create((set, get) => ({
 
-  helperTab: Config.editor.playgroundDefaultTab,
+  helperTab: Config.editor.editorDefaultTab,
   setHelperTab: helperTab => set({helperTab}),
 
   outlineTab: "structure",

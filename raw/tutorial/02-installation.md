@@ -41,7 +41,7 @@ The detailed instructions for running cyclone on different platforms can be foun
 
 ### Online Editor
 
-An online editor that supports coding your Cyclone spec is [here](/playground). An older editor could be found [here](https://cyclone4web.cs.nuim.ie/editor/)
+An online editor that supports coding your Cyclone spec is [here](/editor). An older editor could be found [here](https://cyclone4web.cs.nuim.ie/editor/)
 
 ------
 

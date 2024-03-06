@@ -29,6 +29,7 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {tutorialTable} from "@/core/resources/tutorial";
 import {useEditorStore} from "@/state/editorStore";
 import {formatStateTransRelation} from "@/core/utils/format";
+import localforage from "localforage";
 
 const manifestSelectionData = tutorialManifest.map(t => ({label: t.title, value: t.id}))
 
@@ -145,6 +146,10 @@ export const TutorialPanel = ({html, id}) => {
       viewport.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [router.asPath]);
+
+  useEffect(() => {
+    localforage.getItem("tmp_code").then(c => setCode(c ?? ""))
+  }, []);
 
   const parsed = parse(html, getHtmlCodeHighlightOptions(code => setCode(code)))
   const editorHeight = resultHeight + height

@@ -2,7 +2,7 @@
 
 Cyclone online editor is an online development environment for the [Cyclone Specification Language](https://classicwuhao.github.io/cyclone_tutorial/tutorial-content.html). 
 
-The website includes an interactive online editor, a tutorial page and a playground designed for learning the cyclone language & developing cyclone source code online.
+The website includes an interactive Cyclone code editor and a tutorial page designed for learning the Cyclone language & writing Cyclone source code online.
 
 This project uses [cyclone analyzer](https://github.com/lucid-brndmg/cyclone-analyzer) for parsing and analyzing cyclone's source code. See its readme file for details.
 
@@ -10,7 +10,6 @@ This project uses [cyclone analyzer](https://github.com/lucid-brndmg/cyclone-ana
 
 ## TODO
 - Add more tutorials
-- Styling improvement
 - Fix bugs & finish TODOs
 
 ## Acknowledgements
@@ -27,15 +26,15 @@ Website Features:
 - Responsive layout and using [Mantine](https://mantine.dev/) as the UI framework
 - Dark Mode
 
-Editor Features:
+Code Editor Features:
 - **Syntax Highlighting:** Display highlighted source code and supports multiple themes.
-- **Syntax, Semantic & Type Checking:** Check cyclone source code for syntax errors, type errors and semantic errors & warnings. Errors will be highlighted in real-time on the editor.
+- **Syntactic & Semantic Analysis:** Check cyclone source code for syntax errors, type errors and semantic errors & warnings. Errors will be highlighted in real-time on the editor.
 - **Hover Information:** Display type info & reference docs when mouse hovered on keywords or identifiers.
 - **Code Completion & Snippets:** Provide auto-completions & snippets when typing. Scoped identifiers could be provided as well.
 - **Code Execution:** Execute cyclone source code online & get result and traces.
 - **Code Lens:** Show realtime state & edge relations, all operators for transitions supported (such as `+`, `<->`, `*`, etc...)
 
-Playground Features:
+Other Features:
 - **File Browser:** Provides a file browser to load official examples instantly, also user may save (or load) their source code inside the browser.
 - **Quick Reference:** Look up language keywords, build-in functions & operators, compile options instantly.
 - **Code Outline:** View code structure in a tree and jump to definition in one click just like VSCode. Also view all errors & warnings as list.
@@ -250,7 +249,7 @@ Because no 'cyclone' language mark was marked.
 
 Reference documents are simple documents that describes the language components such as keywords, operators or compiler options. These documents will be displayed when:
 
-- User is at playground's reference panel, and user could visit all reference documents
+- User is at editor's reference panel, and user could visit all reference documents
 - User's mouse is hovering on some keyword, identifier or operator on the editor, and the document (if exists) will be popped up for user to examine its info (like VSCode)
 
 These documents are separated by categories which named by *groups* inside manifest. A group is just a folder containing markdown files that describes a certain keyword. For example, 'Builtin Functions' could be a group, and each builtin function should be a separate Markdown document. 
@@ -605,10 +604,10 @@ The website config is the `resource/config.json` file. In this file you could ch
   "editor": {
     // Editor's maximum error display amount
     "errorStorageLimit": 1000,
-    // Which tab to initialize when /playground page gets refreshed
+    // Which tab to initialize when /editor page gets refreshed
     // available values:
     // browser, reference, outline, visual
-    "playgroundDefaultTab": "browser"
+    "editorDefaultTab": "browser"
   },
   "executionServer": {
     // Execution server's default URL, should change this in production

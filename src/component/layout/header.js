@@ -27,7 +27,7 @@ import {SettingsPopover} from "@/component/editor/settings";
 const links = [
   { link: '/', label: 'Home' },
   { link: '/tutorial', label: 'Tutorial' },
-  { link: '/playground', label: 'Playground' },
+  { link: '/editor', label: 'Editor' },
 ];
 
 const CycloneLogo = ({...props}) => {

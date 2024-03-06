@@ -1,5 +1,3 @@
-import {OutlineKind} from "@/core/definitions";
-import {pairIncludes} from "@/lib/list";
 import cycloneAnalyzer from "cyclone-analyzer";
 
 const {IdentifierKind, SemanticContextType, IdentifierType, SyntaxBlockKind} = cycloneAnalyzer.language.definitions
