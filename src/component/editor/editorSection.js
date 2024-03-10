@@ -8,6 +8,7 @@ import {CodeConsoleResultSection} from "@/component/editor/execution";
 import {StatusBar, Toolbar} from "@/component/editor/bars";
 import {useEffect, useRef} from "react";
 import localforage from "localforage";
+import Config from "../../../resource/config.json"
 
 export const CycloneEditorForm = ({
   light = false,
@@ -101,6 +102,7 @@ export const CycloneEditorForm = ({
           height={`${height}svh`}
           externalCommands={commands}
           buildSyntaxBlockTree={!light}
+          enableCDN={Config.editor.monacoEnableCDN}
         />
         <StatusBar onClickErrors={onClickErrorDisplay}/>
       </Stack>

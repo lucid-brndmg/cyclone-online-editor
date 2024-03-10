@@ -49,6 +49,7 @@ export const CycloneCodeEditor = ({
   onEditorContext = null,
   externalCommands = {},
   buildSyntaxBlockTree = false,
+  enableCDN = true,
   ready,
   onReady,
   ...props
@@ -375,6 +376,10 @@ export const CycloneCodeEditor = ({
       model: null
     })
 
+    if (enableCDN) {
+      onReady(true)
+    }
+
     // editor.setModel()
   }
 
@@ -417,18 +422,22 @@ export const CycloneCodeEditor = ({
     monaco.editor.setModelMarkers(monacoCtx.model, "owner", errorsConverted)
   }, [errors])
 
-  return (
-    <MonacoSetup ready={ready} onReady={onReady}>
-      <Editor
-        defaultLanguage={CycloneLanguageId}
-        value={code}
-        onChange={(v) => {
-          onCode(v)
-        }}
-        options={monacoOptions}
-        onMount={prepareEditor}
-        {...props}
-      />
-    </MonacoSetup>
-  );
+  const editor = <Editor
+    defaultLanguage={CycloneLanguageId}
+    value={code}
+    onChange={(v) => {
+      onCode(v)
+    }}
+    options={monacoOptions}
+    onMount={prepareEditor}
+    {...props}
+  />
+
+  return enableCDN
+    ? editor
+    : (
+      <MonacoSetup ready={ready} onReady={onReady}>
+        {editor}
+      </MonacoSetup>
+    );
 }

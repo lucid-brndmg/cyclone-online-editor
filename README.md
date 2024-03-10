@@ -607,7 +607,13 @@ The website config is the `resource/config.json` file. In this file you could ch
     // Which tab to initialize when /editor page gets refreshed
     // available values:
     // browser, reference, outline, visual
-    "editorDefaultTab": "browser"
+    "editorDefaultTab": "browser",
+    
+    // Allows Monaco Editor load its resource from a remote CDN
+    // The CDN Monaco uses is https://www.jsdelivr.com/
+    // If the website is deployed locally in a LAN-like environment, set this to false in order to improve loading speed or prevent network error
+    // If the website is deployed in a remote server, set this to true in order to save bandwidth
+    "monacoEnableCDN": false
   },
   "executionServer": {
     // Execution server's default URL, should change this in production
