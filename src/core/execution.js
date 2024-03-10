@@ -1,7 +1,6 @@
 import {posPair} from "@/lib/position";
-import {language} from "cyclone-analyzer";
+import {ErrorSource, ExtendedErrorType} from "@/core/definitions";
 
-const {ErrorSource, ErrorType} = language.definitions
 
 const regexFindPathInResultNG = /\w+->\w+(->\w+)*/
 const regexFindPathInResult = /\w+->\w+(->\w+)*/g
@@ -138,7 +137,7 @@ export const sanitizeResult = result => {
         ),
         msg: trimmed,
 
-        type: ErrorType.RemoteError,
+        type: ExtendedErrorType.RemoteError,
         params: {msg: trimmed}
       })
 

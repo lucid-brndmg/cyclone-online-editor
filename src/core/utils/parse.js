@@ -1,9 +1,10 @@
 import {SyntaxErrorListener} from "@/core/utils/syntax";
 import cycloneAnalyzer from "cyclone-analyzer";
+import {ErrorSource} from "@/core/definitions";
 
 export const parseCycloneSyntax = ({input, onError}) => {
-  const lexerErrorListener = new SyntaxErrorListener(onError, cycloneAnalyzer.language.definitions.ErrorSource.Lexer)
-  const parserErrorListener = new SyntaxErrorListener(onError, cycloneAnalyzer.language.definitions.ErrorSource.Parser)
+  const lexerErrorListener = new SyntaxErrorListener(onError, ErrorSource.Lexer)
+  const parserErrorListener = new SyntaxErrorListener(onError, ErrorSource.Parser)
 
   return cycloneAnalyzer.utils.antlr.parseCycloneSyntax({input, lexerErrorListener, parserErrorListener})
 

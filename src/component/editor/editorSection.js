@@ -29,7 +29,7 @@ export const CycloneEditorForm = ({
     if (!initRef.current) {
       return
     }
-    localforage.setItem("tmp_code", debouncedCode).then(() => console.log("progress saved"))
+    localforage.setItem("tmp_code", debouncedCode)// .then(() => console.log("progress saved"))
 
   }, [debouncedCode])
 

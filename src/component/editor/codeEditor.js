@@ -19,6 +19,7 @@ import {getKeywordHoverDocument} from "@/core/resources/referenceDocs";
 import {getErrorLevel} from "@/core/monaco/error";
 import {pos} from "@/lib/position";
 import {LoadingOverlay} from "@mantine/core";
+import {ErrorSource} from "@/core/definitions";
 
 const {IdentifierKind, IdentifierType} = cycloneAnalyzer.language.definitions
 
@@ -96,7 +97,7 @@ export const CycloneCodeEditor = ({
     errorsRef.current.clear()
     editorCtx.attach(analyzer)
     // graphBuilder.attach(analyzer)
-    analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es))
+    analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es.map(e => ({...e, source: ErrorSource.Semantic}))))
     // analyzer.ready(endPos)
 
     if (debouncedCode.trim().length === 0) {

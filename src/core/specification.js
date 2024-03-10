@@ -1,7 +1,7 @@
 import spec from "../../resource/cyclone_spec.json"
 import cycloneAnalyzer from "cyclone-analyzer";
+import {ExtendedErrorType} from "@/core/definitions";
 
-const {ErrorType} = cycloneAnalyzer.language.definitions
 
 export const cycloneLiterals = spec.literals
 
@@ -24,14 +24,14 @@ export const cycloneFullKeywordsSet = new Set(cycloneFullKeywords)
 export const cycloneOperators = spec.operators
 
 const errorTypeWarnings = new Set([
-  ErrorType.NoStartNodeDefined,
-  ErrorType.NoGoalDefined,
-  ErrorType.DuplicatedEdge,
-  ErrorType.CodeInsideAbstractNode,
-  ErrorType.EmptyEdge,
-  ErrorType.DuplicatedEnumField,
-  ErrorType.DuplicatedEdgeTarget,
-  ErrorType.OptionTraceNotFound
+  ExtendedErrorType.NoStartNodeDefined,
+  ExtendedErrorType.NoGoalDefined,
+  ExtendedErrorType.DuplicatedEdge,
+  ExtendedErrorType.CodeInsideAbstractNode,
+  ExtendedErrorType.EmptyEdge,
+  ExtendedErrorType.DuplicatedEnumField,
+  ExtendedErrorType.DuplicatedEdgeTarget,
+  ExtendedErrorType.OptionTraceNotFound
 ])
 
 export const isWarning = errorType => errorTypeWarnings.has(errorType)

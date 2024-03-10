@@ -1,4 +1,4 @@
-import {posRangeIncludes} from "@/lib/position";
+import {positionComparator, posRangeIncludes} from "@/lib/position";
 import cycloneAnalyzer from "cyclone-analyzer";
 
 const {SemanticContextType} = cycloneAnalyzer.language.definitions
@@ -15,33 +15,34 @@ class PositionTable {
       value
     })
 
-    // if (!this.context[x]) {
-    //   this.context[x] = {}
+    this.context.sort(positionComparator)
+
+    // const content = {
+    //   startPosition,
+    //   stopPosition,
+    //   value
     // }
-    //
-    // this.context[x][y] = value
+    // const ctxLength = this.context.length
+    // if (ctxLength) {
+    //   let i
+    //   for (i = ctxLength - 1; i >= 0; i-- ) {
+    //     if (positionComparator(content, this.context[i]) < 0) {
+    //       this.context[i + 1] = this.context[i]
+    //     } else break;
+    //   }
+    //   this.context[i + 1] = content
+    // } else {
+    //   this.context.push(content)
+    // }
   }
 
-  find(line, column, filterFn = null) {
+  find(line, column) {
     // TODO: optimize this using binary search
 
-    const candidates = this.context.filter(pair => posRangeIncludes({line, column}, pair) && (filterFn ? filterFn(pair.value) : true))
-    return candidates[candidates.length - 1]
-  }
+    // const candidates = this.context.filter(pair => posRangeIncludes({line, column}, pair) )
+    // return candidates[candidates.length - 1]
 
-  sort() {
-    // SCOPES HAVE A SPECIAL FEATURE:
-    // LET SCOPE A, B
-    // IF A.START < B.START THEN A.STOP > B.STOP
-    // THEY CAN ONLY BE NESTED, NEVER INTERSECTED
-
-    this.context.sort((a, b) => {
-      if (a.startPosition.line === b.startPosition.line) {
-        return a.startPosition.column - b.startPosition.column
-      } else {
-        return a.startPosition.line - b.startPosition.line
-      }
-    })
+    return this.context.findLast(pair => posRangeIncludes({line, column}, pair) )
   }
 }
 
@@ -64,13 +65,12 @@ export default class EditorSemanticContext {
 
   // identifierCoordsTable = new FixedCoordinateTable()
 
-  findAvailableIdentifiers(line, col, filter = null) {
-    return this.scopePosition.find(line, col, filter)
+  findAvailableIdentifiers(line, col) {
+    return this.scopePosition.find(line, col)
   }
 
   setSortIdentifier(pos, value) {
     this.scopePosition.set(pos, value)
-    this.scopePosition.sort()
   }
 
   // pushScopeLayerScope(layer, type, position) {
