@@ -1,6 +1,6 @@
 ---
 title: "Compiler Options"
-keywords: ["option", "log", "trace"]
+keywords: ["option", "log", "trace", "debug", "timeout", "precision", "detect", "output"]
 id: "cmp_opts"
 ---
 

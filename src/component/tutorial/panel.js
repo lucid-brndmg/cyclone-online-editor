@@ -33,25 +33,6 @@ import localforage from "localforage";
 
 const manifestSelectionData = tutorialManifest.map(t => ({label: t.title, value: t.id}))
 
-// const extractTextFromElement = domNode => {
-//   switch (domNode.constructor.name) {
-//     case "Text": {
-//       return domNode.data
-//     }
-//
-//     default: {
-//       let s = ""
-//       if (domNode.children) {
-//         for (let child of domNode.children) {
-//           s += extractTextFromElement(child)
-//         }
-//       }
-//
-//       return s
-//     }
-//   }
-// }
-
 const TutorialPage = ({children}) => {
   return (
     <TypographyStylesProvider p={"sm"} className={classes.body}>
@@ -99,7 +80,7 @@ const TutorialHeadBar = ({id}) => {
           : null
       }
 
-      <Group gap={8}>
+      <Group gap={8} style={{cursor: "pointer"}} onClick={() => router.push("/tutorial")}>
         <IconBook />
         <Text fw={500}>
           Cyclone Tutorial

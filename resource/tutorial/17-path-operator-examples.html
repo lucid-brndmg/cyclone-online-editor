@@ -1,0 +1,53 @@
+<h3>Path Operator Examples</h3>
+<p>Many constraints on a path can be expressed using Cyclone's path operators. Understanding Cyclone's path operators is the key to express the kinds of constraints you want to capture. In this Section, we show a few examples of some of the path operators and their semantics.</p>
+<h4>Definition:</h4>
+<p>Given a path condition <strong>c</strong>, Cyclone discovers a path <strong>p</strong> that provably satisfies <strong>c</strong>.</p>
+<h4>Example 1.</h4>
+<pre><code class="language-cyclone"> condition ( S1->S2->S3 )
+</code></pre>
+<p>The path condition in Example 1 means that <strong>S1->S2->S3</strong> is a subpath that can appear anywhere in a path to be discovered (by Cyclone). In other words, a path <strong>p</strong> must include <strong>S1->S2->S3</strong>.</p>
+<h4>Example 2.</h4>
+<pre><code class="language-cyclone"> condition ( S1 &#x26;&#x26; !S2 )
+</code></pre>
+<p>This path condition specifies a compound path condition that contains two path conditions: <strong>S1</strong> and <strong>!S2</strong>. Hence, this condition means that <strong>p</strong> must include node <strong>S1</strong> and exclude <strong>S2</strong>. Note that operator <strong>!</strong> denotes exclusion, though it looks the same as logical not operator.</p>
+<h4>Example 3.</h4>
+<pre><code class="language-cyclone"> condition ( Sx->_->Sy )
+</code></pre>
+<p>This condition uses an any one operator(<strong>_</strong>) to indicate a subpath that from <strong>Sx</strong> must go through one node to <strong>Sy</strong>. But we don't know which one. This depends on the node picked by Cyclone and the connections between <strong>Sx</strong> and <strong>Sy</strong>. Given the following part of a graph, <strong>any one operator means</strong> it could be any one of these nodes: <strong>S0,...,Si,Si+1,Si+2,...Sn</strong>.</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter1/anyone_example.png" alt="img"></p>
+<p>Hence, the above condition is equivalent to the following:</p>
+<pre><code class="language-cyclone"> condition ( Sx->S0->Sy || Sx->Si->Sy || ... ||Sx->Sn->Sy )
+</code></pre>
+<h4>Example 4.</h4>
+<pre><code class="language-cyclone"> condition ( (S1->S2->S3)^{1:3} )
+</code></pre>
+<p>The above path condition specifies <strong>S1->S2->S3</strong> must occur between 1 and 3 times (inclusive) in <strong>p</strong>. Path operator <strong>^{i:j}</strong> (postfix operator) can be applied to a node and a path. However, this operator requires parentheses for a path. For example, the following condition:</p>
+<pre><code class="language-cyclone"> condition ( S1^{2}, S1->S2->S3^{1:3} )
+</code></pre>
+<p>Ths first condition specifies node <strong>S1</strong> must occur exactly twice in <strong>p</strong>. The second condition is illegal. The current version of Cyclone cannot recognize such usage.</p>
+<h4>Example 5.</h4>
+<pre><code class="language-cyclone"> condition ( >>(S1->S2->S3) &#x26;&#x26; &#x3C;&#x3C;(S1->S2->S3) )
+</code></pre>
+<p>The condition above uses both place operator (prefix): >> and &#x3C;&#x3C;. Place operator allows users to specify an exact location that a node or a path can appear in <strong>p</strong>. Operator >> calculates location from left to right, and &#x3C;&#x3C; does it from right to left. The exact location in <strong>p</strong> is specified using an index value starting from 0 to n where n is the length of <strong>p</strong> (|p|). In the case when there is no index value specified, the default value 0 is used. The following diagrams illustrate >> and &#x3C;&#x3C;.</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter1/place_operator_1.png" alt="img"></p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter1/place_operator_2.png" alt="img"></p>
+<p>The index value(s) are specified using subscripts. <strong>S1</strong> has an index value of 1. For a node, the valid index ranges from <strong>0</strong> to n. For a path <strong>s</strong>, the valid index values depend on the length of <strong>s</strong>. For example, let <strong>|p| = 6</strong> and <strong>s</strong> be X->Y. The maximum index value can go is 5, since |s| is 2.</p>
+<p>Any values beyond that is illegal. The following diagram illustrates this example.</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter1/place_operator_example.png" alt="img"></p>
+<p>Hence, our path condition requires Cyclone to find a <strong>p</strong> that starts and ends with the same subpath: S1->S2->S3</p>
+<h4>Example 6.</h4>
+<pre><code class="language-cyclone"> condition ( >>2(S1->S2->S3) &#x26;&#x26; (S1->S2->S3)^{3} )
+</code></pre>
+<p>The above compound path condition specifies that S1->S2->S3 must start at third node in <strong>p</strong> and it must occur (in p) three times. In this case, you can take an advantage of using both prefix and postfix operators and merge them into one single path condition.</p>
+<pre><code class="language-cyclone"> condition ( >>2(S1->S2->S3)^{3} )
+</code></pre>
+<h4>Exercises</h4>
+<p>Determine the semantic validity of each of the following path condition. If a condition is valid, explain its meaning in English</p>
+<pre><code class="language-cyclone">1: condition ( S1^{1:2} &#x26;&#x26; (S4->S5) || S5->!S6 )
+2: condition ( S1->_->_->S1 || (S1->S1)^{2:4} )
+3: condition ( >>3(S3->_->S7)^{2:4} )
+4: check for 6 condition ( >>(S1->S2)^{2} || &#x3C;&#x3C;2(S5->S6)  )
+5: check for 6 condition ( >>6(S3->S4) || !(S3->S4)^{2}  )
+6: check for 7,8,9 condition (>>(_->_->S5), S5^{3})reach(S1,S2,S3)
+7: check for 7 condition (&#x3C;&#x3C;6(S2->S3),S1^{2:3}^S4^S5,!(!S5))reach(S1,S2)
+</code></pre>

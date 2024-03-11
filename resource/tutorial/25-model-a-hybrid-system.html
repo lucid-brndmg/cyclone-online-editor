@@ -1,0 +1,40 @@
+<h3>2.5 Model a Hybrid System</h3>
+<p>In this section, we will learn how to use Cyclone to verify a simple hybrid system. A hybrid system has both continuous and discrete dynamic behavior and it can both <strong>flow</strong> and <strong>jump</strong>. Typically, flow is described by some <strong>differential equations</strong> and jumps are modeled as a <strong>finite state machine</strong>.</p>
+<p>To model a hybrid system, we will establish a model of physics and model of software. The physics model describes continuous dynamics and software model describes discrete dynamics.</p>
+<h4>Bouncing Ball</h4>
+<p>A classic example of a hybrid system is the bouncing ball (A system with impact). A ball is dropped from a predefined height. It then hits the ground (after a certain time), loses some energy and bounces back into the air and starts to fall again.</p>
+<p>Its physical model can be described using the following differential equation:</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/free_fall.png" alt="img"></p>
+<p>where <strong>v</strong> is our velocity (with respect to time t), <strong>x</strong> is the height, and <strong>g</strong> is the gravitational acceleration 9.81/ms2. As time (t) goes by, the ball moves closer (x) to the ground and eventually hits the ground when x=0. It then dissipates its energy and starts to bounce back. This behavior is modeled using the following equation:</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/bounce.png" alt="img"></p>
+<p><strong>-c v</strong> accounts for the loss of energy due to the ball's deformation, where <strong>c ∈[0,1]</strong> is a constant.</p>
+<p>The following graphs show the position of the ball and its velocity when time passes.</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/bb_graph.png" alt="img"></p>
+<p>Now, We can use a finite state machine to describe discrete states of a bouncing ball. This state machine is as follows:</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/bb_sys.png" alt="img"></p>
+<p>Further, the invariant here is no matter which state we are in our x (the height) should always stay positive (>=0). Hence, we have our Cyclone spec:</p>
+<pre><code class="language-cyclone">graph Verify {
+    real x where x >= 0; //height
+    real v; //velocity 
+    real t where t > 0; //time
+    const real G=9.81; //gravity acceleration
+    real c where c >= 0 &#x26;&#x26; c&#x3C;=1; //coefficient of energy loss
+    normal start state Fall{ 
+        x = x + v * t; 
+        v = v - G * t; 
+    }
+    normal state Bounce{ 
+            v = -c * v;
+            x = 0; 
+    }
+    trans  t1 { Fall -> Fall }
+    trans  t2 { Fall -> Bounce  where  (x&#x3C;=0 &#x26;&#x26; v&#x3C;=0);}//guard
+    trans  t3 { Bounce -> Fall }
+    invariant  BouncingBallInv { x>=0; }//state invariant
+}
+</code></pre>
+<p>Next, we can just specify our goal section to ask Cyclone to check for specific traces of a counter-example.</p>
+<pre><code class="language-cyclone">goal { 
+    check for 2,3,4,5  reach (Fall,Bounce)
+}
+</code></pre>

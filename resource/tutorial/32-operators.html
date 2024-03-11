@@ -1,0 +1,187 @@
+<h3>3.2 Operators</h3>
+<p>Cyclone supports standard operators that are commonly adapted in programming languages domain. All operators supported are listed in the following sections.</p>
+<h4>Arithmetic Operators</h4>
+<p>The following operators can be applied to int and real types.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Name</strong></th>
+<th><strong>Meaning</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>+</td>
+<td>add</td>
+<td>a+b;</td>
+</tr>
+<tr>
+<td>-</td>
+<td>minus</td>
+<td>a-b;</td>
+</tr>
+<tr>
+<td>*</td>
+<td>multiplication</td>
+<td>a*b;</td>
+</tr>
+<tr>
+<td>/</td>
+<td>division</td>
+<td>a/b;</td>
+</tr>
+<tr>
+<td>%</td>
+<td>remainder</td>
+<td>a%b;</td>
+</tr>
+<tr>
+<td>**</td>
+<td>power</td>
+<td>a**b;</td>
+</tr>
+<tr>
+<td>++</td>
+<td>post-increment</td>
+<td>a++;</td>
+</tr>
+<tr>
+<td>--</td>
+<td>post-decrement</td>
+<td>a--;</td>
+</tr>
+</tbody>
+</table>
+<p>Pre-increment and pre-decrement operators are not available in Cyclone. Hence, ++a/--a; is illegal in current version of Cyclone.</p>
+<p>In any situation, you can add (minus/multiply/divide) an integer to a real and Cyclone will automatically treat the result as a real number. For example, Cyclone returns a type checking error for the following code:</p>
+<pre><code class="language-cyclone">int x=2;
+real y=1.234;
+int z=x+y;//illegal - type error
+</code></pre>
+<h4>Boolean Operators</h4>
+<p>The following operators can be applied to bool types.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Name</strong></th>
+<th><strong>Meaning</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&#x26;&#x26;</td>
+<td>and</td>
+<td>a &#x26;&#x26; b;</td>
+</tr>
+<tr>
+<td>||</td>
+<td>or</td>
+<td>a || b;</td>
+</tr>
+<tr>
+<td>^</td>
+<td>xor</td>
+<td>a ^ b;</td>
+</tr>
+<tr>
+<td>!</td>
+<td>not/negation</td>
+<td>!a;</td>
+</tr>
+<tr>
+<td>=></td>
+<td>implication</td>
+<td>a => b;</td>
+</tr>
+</tbody>
+</table>
+<h4>Relational Operators</h4>
+<p>The following operators can be applied to int and real types.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Name</strong></th>
+<th><strong>Meaning</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>></td>
+<td>greater than</td>
+<td>a > b;</td>
+</tr>
+<tr>
+<td>≥</td>
+<td>greater than or equal to</td>
+<td>a >= b;</td>
+</tr>
+<tr>
+<td>&#x3C;</td>
+<td>less than</td>
+<td>a &#x3C; b;</td>
+</tr>
+<tr>
+<td>≤</td>
+<td>less than or equal to</td>
+<td>a&#x3C;=b;</td>
+</tr>
+</tbody>
+</table>
+<h4>Standard Operators</h4>
+<p>The following operators can be applied to int, real and bool types.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Name</strong></th>
+<th><strong>Meaning</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>==</td>
+<td>comparison</td>
+<td>a == b;</td>
+</tr>
+<tr>
+<td>!=</td>
+<td>not equal to</td>
+<td>a != b;</td>
+</tr>
+<tr>
+<td>+=</td>
+<td>plus equal to</td>
+<td>a+=b;</td>
+</tr>
+<tr>
+<td>-=</td>
+<td>minus equal to</td>
+<td>a-=b;</td>
+</tr>
+<tr>
+<td>*=</td>
+<td>multiply equal to</td>
+<td>a*=b;</td>
+</tr>
+<tr>
+<td>/=</td>
+<td>divide equal to</td>
+<td>a/=b;</td>
+</tr>
+<tr>
+<td>=</td>
+<td>assignment</td>
+<td>a=b;</td>
+</tr>
+</tbody>
+</table>
+<h4>One Operator</h4>
+<p>Besides the operators mentioned above, Cyclone also provides a special operator called one operator. The one operator allows users to specify/express the meaning of exactly one of multiple conditions must be met. For example, the following code indicates that exactly one of the three conditions: a≥x,a≥y,a≥z must be met.</p>
+<pre><code class="language-cyclone">one(a>=x,a>=y,a>=z);
+</code></pre>
+<p>The type of each condition must be a boolean expression. The one operator can also be used in a nested way. For example,</p>
+<pre><code class="language-cyclone">one(a+b>t,t+a>s,one(a>=x,a>=y,a>=z));
+</code></pre>

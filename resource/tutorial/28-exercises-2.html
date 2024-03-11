@@ -1,0 +1,40 @@
+<h3>2.8 Exercises (2)</h3>
+<h4>Analyzing Recursive Functions</h4>
+<p>The McCarthy91 function is a recursive function. It is often used as a test case for formal verification within computer science. The McCarthy91 function is defined as follows:</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/mccarthy91.svg" alt="img"></p>
+<ul>
+<li>Use Cyclone to model this recursive function and show that M(87)=91.</li>
+<li>Use Cyclone to prove that for any n ≤ 100, M(n) always returns 91. You may assume that the upper bound here is 200 steps (check for 200).</li>
+</ul>
+<p>Hint: you need to use an additional variable <strong>s</strong> to remember the number of function calls on a stack. When <strong>s</strong> is zero, M(n) should have its results based on the definition above.</p>
+<h4>Dijkstra's Token Ring Algorithm</h4>
+<p>One of the most famous algorithms in distributed system is Dijktra's token ring algorithm. This algorithm has started the self-stabilization field as a subfield of fault-tolerance. It still receives interest even after 40 years.</p>
+<p>So what is self-stabilization ? If you haven't heard the term before, no worries. We explain the term here. Let's put it in a simple way. Regardless of a system's <strong>initial</strong> state, a self-stabilization algorithm can ensure a system to converge to a legitimate state within a bounded amount of time without any outside intervention.</p>
+<p>Dijkstra describes his ring token algorithm originally in this <a href="https://www.cs.utexas.edu/users/EWD/ewd04xx/EWD426.PDF">paper</a>. So how does this algorithm work ? There are some machines connected in a ring fashion (see the following picture) and</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/ring.png" alt="img"></p>
+<p>each of them needs a token to have access to some resources. The invariant here is that there is exactly one token in the ring. Hence, there is exactly one machine can have access to the resources. This is what we called the stable state. So what are the bad states. There are two cases here:</p>
+<ul>
+<li>
+<ol>
+<li>There are no tokens in a ring.</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li>There are more than one tokens in a ring.</li>
+</ol>
+</li>
+</ul>
+<p>To deal with these two cases, Dijkstra uses the following code:</p>
+<p>For the first machine: <strong>if L=S then S=(S+1) mod k</strong></p>
+<p>For the other machines: <strong>if L≠S then S=L</strong></p>
+<p>So the L here represents the state of current machine, S here is state of the next machine in the ring. k here means the number of states of a machine could have. If the state of current machine (L) is not equal to the state of next machine (S), then L has the token. However, when the state of the first machine is equal to the last machine in the ring, then this means that L has the token. For example, suppose we only use a two-state variable for each machine. Then, the following configuration represent:</p>
+<ul>
+<li>1100 (machine 1 has the token.)</li>
+<li>1011 (machine 1,2 and 0 has the token, respectively.)</li>
+<li>0101 (machine 1,2 and 3 has the token, respectively.)</li>
+</ul>
+<p>You may model this algorithm in some other specification language such as <a href="http://lamport.azurewebsites.net/tla/tla.html">TLA+</a>, then model check all possible states of this algorithm could have.</p>
+<p>However, our ring here is really just a graph and each machine in this ring is a node. Hence, using a graph-based specification might be much more natural to model this algorithm. We can use Cyclone to show this algorithm is self stabilizing in a very unique way. We may also use Cyclone to observe how this algorithm eventually converges to a stable state (given any initial states) by producing a trace.</p>
+<p>Suppose we have a total of 4 machines and each machine has 5 different states. Now use Cyclone to model this scenario and show/prove that this algorithm is self stabilizing.</p>
+<p>Hint: you may add <strong>option-trace=true;</strong> at the beginning of your spec to ask Cyclone to produce a trace. A trace in Cyclone is a sequence of states (nodes) that contain concrete values for each variable (used for computation). Thus, in this way you can observe how a system starting from a bad state converges to the stable state.</p>

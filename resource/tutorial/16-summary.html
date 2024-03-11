@@ -1,0 +1,48 @@
+<h3>1.6 Summary</h3>
+<p>In this Section, we summaries the fundamental features of Cyclone specification language.</p>
+<h4>Specification Structure</h4>
+<p>Overall, a Cyclone specification contains three sections (current version): node section, edge section and goal section. The goal section is optional. If there is no goal section defined, Cyclone will not compile the specification. But it is still a valid specification.</p>
+<p>There are four modifiers can be used for specifying a node.</p>
+<ul>
+<li><strong><a href="https://classicwuhao.github.io/cyclone_tutorial/expr/abstract-key.html">abstract</a></strong>: a node with abstract modifier cannot contain other information such as variables or expressions.</li>
+<li><strong><a href="https://classicwuhao.github.io/cyclone_tutorial/expr/start-key.html">start</a></strong>: a node with start modifier specifies an entry point for Cyclone to discover a path defined in a goal section. Only one start node can be specified.</li>
+<li><strong><a href="https://classicwuhao.github.io/cyclone_tutorial/expr/normal-key.html">normal</a></strong>: a node can contain information such as variables and expressions.</li>
+<li><strong><a href="https://classicwuhao.github.io/cyclone_tutorial/expr/final-key.html">final</a></strong>: a node marked final modifier is a node to be reached by a path to be discovered. Multiple final nodes can be defined. The set of final nodes will be unioned with the nodes specified in a reach statement.</li>
+</ul>
+<p>It is illegal to use abstract and normal together. It is legal to use start and final together. By default, a node is abstract.</p>
+<p>The keyword edge is for creating an edge in a graph. An edge can be labelled with a string via using label keyword. A where clause can be used on an edge to specify a guard on a transition (not available in the current version).</p>
+<h4>Goal Section</h4>
+<p>A goal has the following syntax:</p>
+<pre><code>(check | enumerate)  for  Integer+ 
+    (condition (PathCondition1,PathCondition2,...,PathConditionn))?
+    (reach (Node1,Node2,...,Noden))?
+</code></pre>
+<p>Both condition and reach statements are optional for a goal. If there is no reach statement specified, Cyclone will discover a path that reaches one of the nodes with final modifier. If there is a reach statement and some final nodes defined in node section, then Cyclone will discover a path that reaches one of the union of two sets of nodes.</p>
+<p>All path conditions specified in a condition statement are logically conjoined. One can use a single compound path condition to form logical disjunction as follows:</p>
+<pre><code class="language-cyclone">      condition ( 
+                PathCondition1 || PathCondition2 || 
+                ... || PathConditionn)
+</code></pre>
+<h4>Path Operators</h4>
+<p>Wisely use path operators can help Cyclone to find path(s) you want. However, there are some common pitfalls of using some of the path operators.</p>
+<p>Operator <strong>!</strong> <strong>cannot</strong> be applied to a node in a path, but can be applied to an entire path. Thus, the following code is illegal.</p>
+<pre><code class="language-cyclone">!S1->S2 
+</code></pre>
+<p>If you would like to exclude S1->S2, then use</p>
+<pre><code class="language-cyclone">!(S1->S2) 
+</code></pre>
+<p>If you just want to say exclude <strong>S1</strong> along in this path, then use</p>
+<pre><code class="language-cyclone">!S1 
+</code></pre>
+<p>Operator <strong>^{i..j}</strong> can be applied to both a node or an entire path, but not a node in a path. For example, the following is illegal</p>
+<pre><code class="language-cyclone">S1->S2^{3}->S3->...
+</code></pre>
+<p>If you wish to say node <strong>S2</strong> must appear three times before node <strong>S3</strong> in this path, then you can just use</p>
+<pre><code class="language-cyclone">S1->S2->S2->S2->S3->...
+</code></pre>
+<p>However, if you wish to say node <strong>S2</strong> must appear three times and include this path as well, then you use</p>
+<pre><code class="language-cyclone">S2^{3} &#x26;&#x26; S1->S2->S3->...
+</code></pre>
+<p>If you want to find a path that has a length ranging from <strong>i</strong> to <strong>j</strong>, you can construct a compound path condition by using logical disjunction. For example, all path(s) with length from <strong>3</strong> to <strong>5</strong> begins and ends with <strong>S1</strong>, you could construct the following compound path condition:</p>
+<pre><code class="language-cyclone">(S1_->_->_->S1) || (S1_->_->_->_->S1) || (S1_->_->_->_->_->S1)
+</code></pre>

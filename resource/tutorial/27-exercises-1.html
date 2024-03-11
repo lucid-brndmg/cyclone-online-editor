@@ -1,0 +1,35 @@
+<h3>2.7 Exercises (1)</h3>
+<h4>Second Solution</h4>
+<p>Use Cyclone to find the second solution to <a href="/tutorial/23-defuse-a-bomb">the defuse bomb problem</a>. Hint: you need to use path conditions to eliminate non-meaningful actions such as Fill Jug1 -> Empty Jug1 -> Fill Jug1.</p>
+<h4>Verifying Programs</h4>
+<p>Use Cyclone to prove the validity of the following programs (don't forget you need to specify a loop invariant). In all programs below, the variables type are integers.</p>
+<pre><code>// Program 1
+    [x >=0]
+    a = x;
+    y = 0;
+    while (a!=0){
+        y = y + 1;
+        a = a - 1;
+    }
+    [x = y]
+</code></pre>
+<p>The precondition here is <strong>x>=0</strong> and postcondition here is <strong>x=y</strong></p>
+<pre><code>// Program 2
+    [y=y0 ∧ y >=0]
+    z = 0;
+    while (y!=0){
+        z = z + x;
+        y = y - 1;
+    }
+    [z = x * y0]
+</code></pre>
+<p>The precondition here is <strong>y=y0</strong> ∧ y >=0; and postcondition here is <strong>z = x * y0</strong></p>
+<pre><code>// Program 3
+    [x>=0]
+    y = 0;
+    while (y!=x){
+        y = y + 1;
+    }
+    [x = y]
+</code></pre>
+<p>The precondition here is <strong>x>=0</strong> and postcondition here is <strong>x = y</strong></p>

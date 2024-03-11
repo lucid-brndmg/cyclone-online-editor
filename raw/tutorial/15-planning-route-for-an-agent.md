@@ -1,6 +1,7 @@
 ---
 title: "1.5 Planning Route for an Agent"
 prev: "14-finding-hamiltonian-path"
+next: "16-summary"
 order: 7
 ---
 
@@ -54,7 +55,7 @@ Compile this specification along with our path conditions, Cyclone successfully 
 
 Do you know you can use check to check multiple path lengths? You just separate each path using a comma. See the following example:
 
-```
+```cyclone
  check for 8, 9, 10 condition ( ... ) ...
 ```
 

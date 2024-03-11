@@ -1,0 +1,39 @@
+<h3>2.2 Proving Zero-sum Game</h3>
+<p>A zero-sum game essentially is a scenario that has two players, where the result is an advantage for one player and a loss for the other player.</p>
+<p>We can write a Cyclone specification to model this scenario and prove a game indeed ensuring the sum of two player's stake is <strong>zero</strong>.</p>
+<p>Let's assume there are two players: <strong>P1</strong> and <strong>P2</strong>. When P1 wins a game, P1's stake gets increased by 1 and P2 loses his stake by 1. When P2 wins a game, his stake also gets increased by 1 and P1 loses his stake by 1. At the start of the game, both their stake is 0.</p>
+<p>Hence, we can build the following state machine to describe different states for the two players.</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/zerosum.png" alt="img"></p>
+<p>The <strong>Start</strong> state denotes our initial state and in this state both player's stake are set to 0.</p>
+<pre><code class="language-cyclone">int  stake1; // player1's stake.
+int  stake2; // player2's stake.
+
+start normal state  Start {
+  stake1 = 0;
+  stake2 = 0;
+}
+</code></pre>
+<p>From the <strong>Start</strong> state either player 1 wins (<strong>P1W</strong>) or player 2 wins (<strong>P2W</strong>). When player 1 wins, we increment his stake by 1 and decrement player2's stake by 1.</p>
+<pre><code class="language-cyclone">normal state  P1W {
+  stake1 = stake1 + 1;
+  stake2 = stake2 - 1;
+}
+</code></pre>
+<p>Simiarly, when player 2 wins we increment his stake by 1 and decrement player1's stake by 1.</p>
+<pre><code class="language-cyclone">normal state  P2W {
+  stake1 = stake1 - 1;
+  stake2 = stake2 + 1;
+}
+</code></pre>
+<p>To show this is a zero sum game, we want to prove that no matter whoever wins the stake of the winner plus the stake of the loser should always be <strong>0</strong>. This is called an <strong><a href="https://classicwuhao.github.io/cyclone_tutorial/expr/invariant.html">invariant</a></strong>. It indicates the stake from both players should always be 0 no matter which state a player is in.</p>
+<p>In Cyclone, one could use <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/invariant.html">invariant</a> statement to specify an invariant for all states defined in a specification. Hence, we write the following invariant</p>
+<pre><code class="language-cyclone">//a zero-sum invariant for two players. 
+invariant  zerosum { stake1 + stake2 == 0;}
+</code></pre>
+<p>Next, we prove that if we game multiple rounds the invariant should always hold. Therefore, we write the following goal section.</p>
+<pre><code class="language-cyclone">goal{ 
+  check for 1,2,3,4,5 reach (P1W,P2W)
+}
+</code></pre>
+<p>Here, we asks Cyclone to check 5 games. The check for statement here specifies <strong>5</strong> different games. For example, 1 means a game only has 1 round. When there exists an invariant in the specification, the goal section becomes to ask Cyclone to discover a <strong>counter-example</strong>. In other words, we are asking Cyclone to give us a path (counter-example) such that it will break our invariant.</p>
+<p>In this example, it is impossible to find such a counter-example. Hence, we prove this indeed is a zero-sum game within a bound of 5 games.</p>

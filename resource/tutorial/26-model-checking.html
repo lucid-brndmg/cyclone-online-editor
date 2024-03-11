@@ -1,0 +1,59 @@
+<h3>2.6 Model Checking</h3>
+<p>In this section, we will learn how to use Cyclone to perform some model checking that uses elementary operators. Essentially, model checking is a technique that can check whether a transition system meets its defined specification. A specification is typically written in a set of Linear Temporal Logic (LTL)/Computational Tree Logic (CTL) formulas.</p>
+<p>Though Cyclone's specification language is different from LTL/CTL formulas, one can use some of its features to express the properties described by LTL/CTL formulas.</p>
+<h4>2-bit Counter</h4>
+<p>Let us look at a transition system that captures the states of a 2-bit counter. A 2-bit counter has two bits: left (<strong>l</strong>) and right (<strong>r</strong>). In order to move from one state to the next one, our 2-bit counter uses the following transition function <strong>R</strong>:</p>
+<pre><code>    R: l'= (l ≠ r) ∧ r'=¬r
+</code></pre>
+<p>where l' is a new value for the left bit. This value is computed based on the values from l and r in the previous state. Similarly, r is calculated by negating its value in previous state. Hence, based on this transition function R we now can plot the following state chart.</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/two_bit_counter.png" alt="img"></p>
+<p>The initial state set both l and r to 0 (false) by using the following LTL formula:</p>
+<pre><code>    ¬l ∧ ¬r 
+</code></pre>
+<p>Now suppose we want to check the following property:</p>
+<pre><code>    Property: G(¬l ∨ ¬ r)
+</code></pre>
+<p><strong>G</strong> here is a temporal operator and represents globally (◻). Thus, this property states that either left or right bit is not set and this should be always true in our transition system.</p>
+<p>One can use a traditional model checker (such as NuSMV) to check the above property. <strong>Since a transition system is really just a graph, Cyclone can also be used for model checking in a very unique way.</strong></p>
+<p>Now, let us show you how to use Cyclone to model check this transition system against our property.</p>
+<p>First, we define how left and right bit changes based on our transition function in a single state <strong>S</strong>:</p>
+<pre><code class="language-cyclone">normal start state S {
+    l = (l!=r); 
+    r = !r; 
+}
+</code></pre>
+<p>Next, we create a transition. In this case, we can just simply loop on our state S since transition function is defined inside S.</p>
+<pre><code class="language-cyclone">trans t { S -> S }
+</code></pre>
+<p>How do we express our temporal property ? In previous sections, we used <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/invariant.html">invariant</a> statement to express a formula/property must hold in all states. That is no matter which execution path Cyclone explores, an invariant must hold. Thus, we can use an <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/invariant.html">invariant</a> to express <strong>G</strong> operator.</p>
+<pre><code class="language-cyclone">invariant property { (!l || !r); }
+</code></pre>
+<p>Finally, we would like to say that at initial state <strong>l</strong> and <strong>r</strong> are both set to 0. In Cyclone, you could use an <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/initial.html">initial</a> statement to specify an initial condition for a variable. If a variable is used with an initial statement, then it refers to the initial state. A state even before defined <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/start-key.html">start</a> state.</p>
+<pre><code class="language-cyclone">assert ( !initial(l) &#x26;&#x26;  !initial(r) );
+</code></pre>
+<p>Recall that if a specification contains an <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/invariant.html">invariant</a>, Cyclone will look for a counter-example that can break the invariant. Thus, we use the following statement to model check whether this specification satisfies our property.</p>
+<pre><code class="language-cyclone">check for 2,3,4 reach(S)
+</code></pre>
+<p>In fact, we ask Cyclone to perform bounded checking for the execution paths that have a length of 2, 3 and 4 respectively. In this case, Cyclone successful finds a counter-example with an execution path length of 3. Hence, our property does not hold for this specification.</p>
+<p><strong>Alternatively</strong>, one can simply just use an <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/assert.html">assert</a> to express our property instead of an <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/invariant">invariant.</a></p>
+<pre><code class="language-cyclone">assert !(!l || !r);
+</code></pre>
+<p>Here, we are asking Cyclone to discover an execution path that make our property failed. It is equivalent to the LTL formula:<strong>◇ !property</strong></p>
+<p>Note that a smaller bound may unable to reveal a design flaw. In this sense, multiple different larger bounds can be used just like the ones we used. The full specification is available <a href="https://classicwuhao.github.io/cyclone_tutorial/chapter2/two_bit_counter.cyclone">here</a>.</p>
+<h4>A Transition System</h4>
+<p>Given a transition system as follows, sometime we would like to find a path such that a set of propositions always hold. In this scenario, we could use <strong>always</strong> modifier in an assert statement.</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/ts.png" alt="img"></p>
+<p>In this transition system, <strong>L(S0)=L(S3)={a}</strong>, <strong>L(S1)={a,b}</strong> and <strong>L(S2)={b}</strong>. Suppose we would like check the following property:</p>
+<pre><code>    Property: there exists a path that a always holds.
+</code></pre>
+<p>Surely, one can use an <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/invariant.html">invariant</a> to check whether there exists a path that <strong>a</strong> does not hold. We can simply enumerate all possible such paths, and whatever remains must be the path satisfies our property. However, this approach is not natural and quite tedious. To facilitate such scenario, Cyclone provides a keyword <strong>always</strong> that can be used with along with an <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/assert.html">assert </a>statement. They keyword <strong>always</strong> tells Cyclone a boolean expression must hold at all times. Therefore, we can use the following statement to express our property:</p>
+<pre><code class="language-cyclone">assert always ( a );
+</code></pre>
+<p>This tells Cyclone to find a path that <strong>a</strong> always holds. In this transition system, path S0 -> S1 -> S3 -> S3 -> ... satisfies this property. The above assert statement acts like <strong>∃◻</strong> in CTL (Computation Tree Logic). Similarly, the following assert statement acts like <strong>∃◇</strong>.</p>
+<pre><code class="language-cyclone">assert some ( a );
+</code></pre>
+<p>Note the difference between an <strong>assert</strong> statement without using keyword <strong>some</strong> and a one with <strong>some</strong> is as follows:</p>
+<ul>
+<li>assert ( a ): Finds a path that leads to <strong>a</strong> holds. <strong>a</strong> only needs to hold when a path is terminated/a state is reached.</li>
+<li>assert some ( a ): Finds a path that <strong>a</strong> holds sometime in a path. Thus, <strong>a</strong> may not hold when a path is terminated/a state is reached.</li>
+</ul>

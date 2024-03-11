@@ -1,0 +1,39 @@
+<h3>3.4 Conditional Transitions</h3>
+<p>In this section, we will discuss another important feature in Cyclone that is conditional transition.</p>
+<h4>Conditional Transitions</h4>
+<p>A conditional transition in Cyclone is a transition that can only happen when a condition is satisfied. With this feature, you can turn conventional an <strong>IF-ELSE</strong> or a <strong>Loop</strong> structure into a conditional transition. This is particularly useful when you want to specify something can only happen under certain conditions.</p>
+<p>The semantics of a conditional transition is when a condition is satisfied the transition <strong>must</strong> happen. In other words, the transition never happens if the condition is not met. Here is an example:</p>
+<pre><code class="language-cyclone"> trans { A -> B where x > 0; }
+</code></pre>
+<p>The transition A -> B can only be triggered when variable x is greater than 0. Otherwise, the transition could never happen. This is the same as writing an <strong>IF</strong> statement: <strong>IF (x>0) { A-> B }</strong>.</p>
+<p>Since a conditional transition can only happen when its condition is satisfied, it can be used to perfectly model an <strong>IF</strong>-<strong>ELSE</strong> statement. Consider the following example:</p>
+<pre><code class="language-cyclone"> trans { A -> B where x > 0; }
+ trans { A -> C }
+</code></pre>
+<p>The transition A -> C actually can happen when <strong>x &#x3C;= 0</strong> . This condition is implicitly implied since A -> B can only happen when <strong>x>0</strong>. Hence, the two transitions above is equivalent to the transitions below:</p>
+<pre><code class="language-cyclone"> trans { A -> B where x > 0; }
+ trans { A -> C where x &#x3C;= 0; }
+</code></pre>
+<h4>Non-determinism</h4>
+<p>Non-determinism naturally exists in Cyclone's language. For example, A can always go to B or C given the following non-conditional transitions.</p>
+<pre><code class="language-cyclone"> trans { A -> B }
+ trans { A -> C }
+</code></pre>
+<p>For conditional transitions, non-determinism can also be introduced when users specify multiple conditions for one or more transitions. When this happens, Cyclone typically chooses 'the first' satisfied transition. In fact, it is decided by two things. (1) The order of transitions stored internally (2) The underlying solver verifies a condition. For example, the following conditional transitions are non-deterministic.</p>
+<pre><code class="language-cyclone"> trans { A -> B where x > 1; }
+ trans { A -> C where x > 2; }
+ trans { A -> D where x > 3; }
+</code></pre>
+<p>This because when <strong>x=4</strong>, we can always go to B or C or D since each condition here is satisfied. Cyclone most likely picks the transition A-> B. However, you can always control Cyclone to pick the transition that you prefer by simply specify a path condition. Say if you would like to go through transition A->C, then you can add additional path condition: <strong>(A->C)</strong> and Cyclone will always choose the transition A->C.</p>
+<p>One might also use <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/enumerate-expr.html">enumerate</a> command to enumerate all possible satisfied transitions, this is particularly useful when you would like to achieve something like branch or decision coverage for your model.</p>
+<h4>Dead Transition</h4>
+<p>When one specifies multiple conditional transitions, it is easy to accidentally introduce a special transition called dead transition. Just like its name, a dead transition is a transition never occurs because its condition may never be satisfied. For example, the following conditional transitions introduces a dead transition A->D.</p>
+<pre><code class="language-cyclone"> trans { A -> B where x > 1; }
+ trans { A -> C where x &#x3C;= 1; }
+ trans { A -> D }
+</code></pre>
+<p>Though the transition A->D does not specify any condition (non-conditional transition), it never happens because the variable x always either satisfies x>1 or x&#x3C;=1. Hence, Cyclone always chooses either A->B or A->C but never picks A->D. Thus, users need to pay particular attention to the conditions they write. Eliminating dead transitions can reduce the number of conditions Cyclone generates and optimize verification (searching) performance unless one intentionally want to introduce a dead transition.</p>
+<p>If you want Cyclone also picks the transition A->D regardless of choosing A->B or A->C, then you can add the following condition to make this transition becomes non-deterministic.</p>
+<pre><code class="language-cyclone"> trans { A -> D where true; }
+</code></pre>
+<p>When you enumerate all satisfied transitions, A -> B, A->C and A->D are always chosen by Cyclone.</p>

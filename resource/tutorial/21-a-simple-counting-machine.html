@@ -1,0 +1,64 @@
+<h1>Chapter 2: Building Simple Models</h1>
+<p>In Chapter 1, you have learned how to write a basic Cyclone specification and use path conditions to find the path you want. In this Chapter, you will learn how to program with Cyclone and use Cyclone to check whether a model is correct.</p>
+<h3>2.1 A Simple Counting Machine</h3>
+<p>In a Cyclone specification, one can write conventional code. Just like Java or C code, you can declare variables and perform some computation. Let's start with a very simple machine. Suppose you want to build a counting machine. This machine keeps a counter in memory and can execute three kinds of instructions:</p>
+<ul>
+<li>
+<ol>
+<li>RESET: reset our counter to 0.</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li>INC: increment our counter by 1.</li>
+</ol>
+</li>
+<li>
+<ol start="3">
+<li>DEC: decrement our counter by 1.</li>
+</ol>
+</li>
+</ul>
+<p>Each instruction can be followed by another to form an <strong>instruction sequence</strong>. For example, after executing the following instruction sequence our counter is 1</p>
+<pre><code>RESET
+INC
+DEC
+INC
+</code></pre>
+<p>At the beginning, we say our counter is reset to 0 and then our counting machine starts to execute. So our counting machine can be represented as the following state machine.</p>
+<p><img src="https://classicwuhao.github.io/cyclone_tutorial/chapter2/counter.png" alt="img"></p>
+<p>We use a variable <strong>c</strong> to represent our counter. State <strong>R</strong> is our reset state. State <strong>I</strong> simply increments our counter by 1. State <strong>D</strong> decrements our counter.</p>
+<p>To model this counting machine, we now can write conventional code inside a Cyclone specification. For example, the following specification models our counting machine.</p>
+<pre><code class="language-cyclone">machine Counting { 
+    int  c;
+    start normal state  R {c=0;} 
+    normal state  I {c=c+1;} 
+    normal state  D {c=c-1;} 
+    transition  t1 { R -> I } 
+    transition  t2 { R -> D } 
+    transition  t3 { I -> R } 
+    transition  t4 { I -> D } 
+    transition  t5 { I -> I } 
+    transition  t6 { D -> R } 
+    transition  t7 { D -> I } 
+    transition  t8 { D -> D } 
+} 
+</code></pre>
+<p>In the specification above, we declare an integer type variable <strong>c</strong> as our counter. This variable can be accessed or updated by any state(s) defined in the specification. Thus, our states <strong>I</strong> and <strong>D</strong> increment/decrement our counter respectively. The modifier normal enables a node or state to contain conventional code. <strong>If a state or node does not use the modifier normal, then all the code it contains is ignored by Cyclone compiler. So make sure you check your state modifier before launching Cyclone's compiler.</strong></p>
+<p>Now suppose we want to find out <strong>all</strong> possible instruction sequences that can make our <strong>counter=3</strong> using <strong>6</strong> instructions. Further, we also would like to cover instruction <strong>DEC</strong>.</p>
+<p>So we add the following goal section into our current Cyclone specification:</p>
+<pre><code class="language-cyclone">goal{ 
+    assert c==3;
+    enumerate for 5 condition ( D ) reach (R,I,D)
+}
+</code></pre>
+<p>The <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/assert.html">assert</a> statement allows us to specify a <strong>content condition</strong> that must be fulfilled. In general, a <strong>content condition</strong> is an expression that specifies the kind of conditions must be met when Cyclone successfully discovers a path. This condition together with our <strong>path condition (must cover DEC)</strong> and <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/reach-expr.html">reach</a> statement forms the final conditions. Cyclone solves the conditions and returns the following instruction sequences:</p>
+<ul>
+<li>R->I->I->D->I->I</li>
+<li>R->I->D->I->I->I</li>
+<li>R->I->I->I->I->D</li>
+<li>R->I->I->I->D->I</li>
+<li>R->D->I->I->I->I</li>
+<li>R->D->R->I->I->I</li>
+</ul>
+<p>Note that <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/assert.html">assert</a> must specify a boolean expression. A goal section can contain multiple assert statements.</p>

@@ -1,0 +1,137 @@
+---
+title: "3.3 Assertion and Invariant"
+prev: "32-operators"
+next: "34-conditional-transitions"
+order: 22
+---
+
+### 3.3 Assertion and Invariant
+
+In this section, we will explain assertions and invariants in Cyclone so that you can use them wisely for specifying the conditions you want.
+
+#### Assertion
+
+An assertion in Cyclone specifies a content condition. A content condition is different from a path condition (covered in Chapter 1). A path condition specifies how Cyclone searches for ideal solution based on specific path constraints while a content condition tells how Cyclone explores search space based on specific computation instructions (code). Both path and content conditions can be used together in the goal section. Combining both path and content conditions can be particularly useful in many scenarios.
+
+For example, the following code tells Cyclone to search for a path (upto length=10) such that when it reaches either node (state) S or T, x must be greater or equal to y. In the meanwhile, this path must contain node (state) S exactly twice.
+
+```cyclone
+ assert x>=y;
+ check upto 10 condition (S^{2}) reach (S,T)
+```
+
+S^{2} is a path condition and x>=y is a content condition. In this case, Cyclone must find a path that satisfies both conditions.
+
+#### Four forms
+
+An assertion has four forms in Cyclone and users can choose any one of them to use.
+
+Let φ be our property or condition to be checked, we can have following four forms of assertion in Cyclone.
+
+```cyclone
+assert φ
+```
+
+This is the most common or standard use of an assertion. It means that the condition φ only needs to be satisfied in the last node (state) of the path discovered by Cyclone. Graphically, we can represent this type of assertions using the following diagram. ![img](https://classicwuhao.github.io/cyclone_tutorial/chapter3/assert1.png)
+
+
+
+This type of assertions can help you to discover whether your model has a path that leads to the condition φ.
+
+```cyclone
+assert φ in (S)
+```
+
+The second form of assertion comes with an in clause. Users can use in clause to specify a list of nodes or states. Here, we only use one state S. This means that φ only need to hold in state S along the path discovered by Cyclone. Graphically, you can view this assertion as the following diagram.
+
+
+
+![img](https://classicwuhao.github.io/cyclone_tutorial/chapter3/assert2.png)
+
+Note that you may specify a list of states with in clause. When there are multiple states specified, then φ only needs to satisfied in any one of them. This type of assertions is particularly useful when you only want to restrict your property for a subset of states.
+
+```cyclone
+assert some φ
+```
+
+The third type of assertion allows you to use one of our modifiers some. This means that φ needs to be satisfied in any of the states along the path discovered by Cyclone. In fact, this modifier acts like **EF** operator in CTL. Hence, we can visual this using the following diagram.
+
+
+
+![img](https://classicwuhao.github.io/cyclone_tutorial/chapter3/assert3.png)
+
+φ may be satisfied in any of the states along the path. Note this is different from our first form of assertion. In the first form of assertion, φ only needs to be satisfied in the last state of a path. Here with modifier some, φ could be satisfied in any of the states in the path and this may include the last state in path. Thus, this form of assertion is useful for checking whether your model can satisfy your property φ in some paths.
+
+```cyclone
+assert always φ
+```
+
+The last type of assertion allows you to use one of our modifiers always. This means that φ needs to be satisfied in every state along the path discovered by Cyclone. In fact, this modifier acts like **EG** operator in CTL. Hence, we can visual this using the following diagram.
+
+
+
+![img](https://classicwuhao.github.io/cyclone_tutorial/chapter3/assert4.png)
+
+This form of assertion is useful for finding whether your model contains a path that can make a property (φ) always hold.
+
+#### Invariant
+
+An invariant in Cyclone specifies something that should always hold. For example, a loop invariant can be specified using an invariant in Cyclone. If a Cyclone specification contains an invariant, then Cyclone will try to find a **counter-example** that can break the invariant. This is useful for proving validity of your model by finding no counter-examples.
+
+In order to use invariant correctly, there a few rules we need to mention here. First, an invariant in Cyclone only requires to be hold before entering and leaving a state. Consider the following example,
+
+```cyclone
+ normal state  S { 
+   x=-1;
+   x=y+a;
+ }
+ invariant A { x>=0;} 
+```
+
+invariant **A** requires variable **x** to be greater or equal to 0 in every state. Obviously, in state **S** our invariant **A** seems to be broken because x is first assigned to **-1**, then gets reassigned y+a. However, an invariant in Cyclone is allowed to be violated in a state as long as it holds before and leaving this state. Thus, as long as our invariant **A** here holds before entering state S and after executing x=y+a, Cyclone will not consider this invariant is violated.
+
+However, the following example will break our invariant A.
+
+```cyclone
+ normal state  S { 
+   x=y+a;
+   x=-1;
+ }
+ invariant A { x>=0;} 
+```
+
+Second, Cyclone also allows an invariant to be violated before entering the starting state. However, an invariant must be established when leaving the starting state. Consider the following example,
+
+```cyclone
+ int x=-1;
+ normal start state  S { 
+   x=0;
+ }
+ invariant A { x>=0;} 
+```
+
+our variable **x** is initialized with -1, and gets reassigned to 0 in starting state S. Thus, Cyclone will not consider our invariant **A** is violated. However, Cyclone will consider **A** is violated in the following example.
+
+```cyclone
+ int x=0;
+ normal start state  S { 
+   x=-1;
+ }
+ invariant A { x>=0;} 
+```
+
+#### Two forms
+
+There are two forms of invariants a user can use in Cyclone. Let φ again be our property or condition to be met.
+
+```cyclone
+invariant A { φ }
+```
+
+This means that invariant A must hold in every state defined in your model. If it does not, Cyclone will discover a counter-example within specified path lengths.
+
+```cyclone
+invariant A { φ } in (S1, S2, ... ,Si)
+```
+
+This form of invariant uses an in clause to list a set of states. This means that our invariant A here is an invariant for a subset of states. Thus, **A** only holds for a set of states: S1, S2, ... ,Si. Cyclone will discover counter-example if **A** is violated in these states.
