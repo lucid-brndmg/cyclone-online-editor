@@ -29,7 +29,7 @@
   },
   {
     "label": "goal",
-    "insert": "goal {\n\t$0\n}"
+    "insert": "goal {\n\t\n\tcheck for ${0:1}\n}"
   },
   {
     "label": "trans",
