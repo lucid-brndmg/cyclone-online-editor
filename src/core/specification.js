@@ -31,7 +31,8 @@ const errorTypeWarnings = new Set([
   ExtendedErrorType.EmptyEdge,
   ExtendedErrorType.DuplicatedEnumField,
   ExtendedErrorType.DuplicatedEdgeTarget,
-  ExtendedErrorType.OptionTraceNotFound
+  ExtendedErrorType.OptionTraceNotFound,
+  ExtendedErrorType.DuplicatedCheckForPathLength
 ])
 
 export const isWarning = errorType => errorTypeWarnings.has(errorType)

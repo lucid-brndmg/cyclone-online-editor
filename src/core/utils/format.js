@@ -33,6 +33,7 @@ const errorTypeDescription = {
   [ExtendedErrorType.InvalidNodeModifier]: "Invalid Node Modifier",
   [ExtendedErrorType.EnumNotAllowedInVariable]: "Enum Not Allowed Here",
   [ExtendedErrorType.WhereInlineVariable]: "Where Clause In Local Variables",
+  [ExtendedErrorType.InvalidCheckForPathLength]: "Invalid Path Length",
 
   [ExtendedErrorType.TypeMismatchFunction]: "Type Mismatch",
   [ExtendedErrorType.TypeMismatchReturn]: "Type Mismatch",
@@ -49,6 +50,7 @@ const errorTypeDescription = {
   [ExtendedErrorType.DuplicatedEnumField]: "Duplicated Enum",
   [ExtendedErrorType.DuplicatedEdgeTarget]: "Duplicated Edge Target",
   [ExtendedErrorType.OptionTraceNotFound]: "Option Output Ignored",
+  [ExtendedErrorType.DuplicatedCheckForPathLength]: "Duplicated Path Length",
 
   [ExtendedErrorType.RemoteError]: "Remote Execution Error"
 }
@@ -179,8 +181,10 @@ const eDuplicatedEdgeTarget = ({identifier}) => {
   return `duplicated edge target: ${identifier}`
 }
 
-const eInvalidNodeModifier = ({combination}) => {
-  return `invalid node / state modifier combination: "${combination.join(" + ")}"`
+const eInvalidNodeModifier = ({combination, duplication}) => {
+  return combination
+    ? `invalid node modifier combination: "${combination.join(" + ")}"`
+    : `duplicated node modifiers: "${duplication.join(", ")}"`
 }
 
 const eEnumNotAllowedInVariable = () => {
@@ -193,6 +197,14 @@ const eWhereInlineVariable = () => {
 
 const eOptionTraceNotFound = () => {
   return `option-trace not enabled. Hence option-output has no effect.`
+}
+
+const eInvalidCheckForPathLength = ({text}) => {
+  return `invalid path length, should be greater than 0: ${text}`
+}
+
+const eDuplicatedCheckForPathLength = ({text}) => {
+  return `duplicated path length: ${text}`
 }
 
 const errorMessageFormatter = {
@@ -226,7 +238,9 @@ const errorMessageFormatter = {
   [ExtendedErrorType.InvalidNodeModifier]: eInvalidNodeModifier,
   [ExtendedErrorType.EnumNotAllowedInVariable]: eEnumNotAllowedInVariable,
   [ExtendedErrorType.WhereInlineVariable]: eWhereInlineVariable,
-  [ExtendedErrorType.OptionTraceNotFound]: eOptionTraceNotFound
+  [ExtendedErrorType.OptionTraceNotFound]: eOptionTraceNotFound,
+  [ExtendedErrorType.InvalidCheckForPathLength]: eInvalidCheckForPathLength,
+  [ExtendedErrorType.DuplicatedCheckForPathLength]: eDuplicatedCheckForPathLength
 }
 
 export const formatErrorMessage = (type, params, source) => {
