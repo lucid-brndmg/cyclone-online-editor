@@ -184,7 +184,7 @@ const eDuplicatedEdgeTarget = ({identifier}) => {
 const eInvalidNodeModifier = ({combination, duplication}) => {
   return combination
     ? `invalid node modifier combination: "${combination.join(" + ")}"`
-    : `duplicated node modifiers: "${duplication.join(", ")}"`
+    : `duplicated node modifiers: ${duplication.join(", ")}`
 }
 
 const eEnumNotAllowedInVariable = () => {
@@ -200,7 +200,7 @@ const eOptionTraceNotFound = () => {
 }
 
 const eInvalidCheckForPathLength = ({text}) => {
-  return `invalid path length, should be greater than 0: ${text}`
+  return `invalid path length. path length should be greater than 0, got ${text}`
 }
 
 const eDuplicatedCheckForPathLength = ({text}) => {
