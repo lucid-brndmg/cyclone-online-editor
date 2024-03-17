@@ -34,6 +34,7 @@ const errorTypeDescription = {
   [ExtendedErrorType.EnumNotAllowedInVariable]: "Enum Not Allowed Here",
   [ExtendedErrorType.WhereInlineVariable]: "Where Clause In Local Variables",
   [ExtendedErrorType.InvalidCheckForPathLength]: "Invalid Path Length",
+  [ExtendedErrorType.AnonymousEdgeIdentifier]: "Identifier In Anonymous Edge",
 
   [ExtendedErrorType.TypeMismatchFunction]: "Type Mismatch",
   [ExtendedErrorType.TypeMismatchReturn]: "Type Mismatch",
@@ -207,6 +208,10 @@ const eDuplicatedCheckForPathLength = ({text}) => {
   return `duplicated path length: ${text}`
 }
 
+const eAnonymousEdgeIdentifier = () => {
+  return `anonymous edges can not have identifier`
+}
+
 const errorMessageFormatter = {
   [ExtendedErrorType.RemoteError]: eMsgBased,
   [ExtendedErrorType.SyntaxError]: eMsgBased,
@@ -240,7 +245,8 @@ const errorMessageFormatter = {
   [ExtendedErrorType.WhereInlineVariable]: eWhereInlineVariable,
   [ExtendedErrorType.OptionTraceNotFound]: eOptionTraceNotFound,
   [ExtendedErrorType.InvalidCheckForPathLength]: eInvalidCheckForPathLength,
-  [ExtendedErrorType.DuplicatedCheckForPathLength]: eDuplicatedCheckForPathLength
+  [ExtendedErrorType.DuplicatedCheckForPathLength]: eDuplicatedCheckForPathLength,
+  [ExtendedErrorType.AnonymousEdgeIdentifier]: eAnonymousEdgeIdentifier,
 }
 
 export const formatErrorMessage = (type, params, source) => {

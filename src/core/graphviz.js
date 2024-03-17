@@ -97,17 +97,21 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
     identifier,
     label,
     whereExpr,
+    operators,
     fromState,
     targetStates,
-    isBiWay,
     labelKeyword
   } of trans) {
+    const isBiWay = operators.has("<->")
     if (!definedStates.has(fromState)) {
       statesDef.push(genUndefinedState(fromState, previewOptions))
       definedStates.add(fromState)
     }
     const transPieces = []
     for (let sTo of targetStates) {
+      if (sTo === fromState && operators.has("+")) {
+        continue
+      }
       let attrs = []
       if (!definedStates.has(sTo)) {
         statesDef.push(genUndefinedState(sTo, previewOptions))

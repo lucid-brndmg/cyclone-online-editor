@@ -594,10 +594,10 @@ cssesc@^3.0.0:
   resolved "https://registry.npmjs.org/cssesc/-/cssesc-3.0.0.tgz"
   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
 
-cyclone-analyzer@0.0.10:
-  version "0.0.10"
-  resolved "https://registry.npmjs.org/cyclone-analyzer/-/cyclone-analyzer-0.0.10.tgz"
-  integrity sha512-qin7rWQKvHv06OsWNqIgQdI6MBV/jczQTkBIUiTxaTU/BI92z52+Wh4ZT4PJKhYOe8z4FOKUfEXxO0mz37tEUA==
+cyclone-analyzer@0.0.14:
+  version "0.0.14"
+  resolved "https://registry.npmjs.org/cyclone-analyzer/-/cyclone-analyzer-0.0.14.tgz"
+  integrity sha512-In/36Tgaz8v5zrOAg5IsuJhuZ4BRB0OU5eAKQ+mFr8R5m2E6RBlNA75sBFRv5mevrqJIVw0g03S8v7OmFG/tOw==
   dependencies:
     antlr4 "^4.13.1-patch-1"
 

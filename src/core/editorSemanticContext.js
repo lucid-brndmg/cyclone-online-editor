@@ -109,7 +109,7 @@ export default class EditorSemanticContext {
       identifier,
       label,
       whereExpr,
-      isBiWay: operators.has("<->"),
+      operators,
       targetStates,
       fromState,
       position,
