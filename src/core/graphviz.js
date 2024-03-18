@@ -1,5 +1,11 @@
 import {map2elems} from "@/lib/list";
 import {dropRegex, dropRegexes, simplify} from "@/lib/string";
+import cycloneAnalyzer from "cyclone-analyzer";
+
+const {
+  expandAnonymousEdge,
+  isAnonymousEdge
+} = cycloneAnalyzer.utils.edge
 
 export const DisplayDirection = {
   Auto: "auto",
@@ -93,35 +99,56 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
       : []
   )
   // const definedTrans = new Map()
-  for (let {
-    identifier,
-    label,
-    whereExpr,
-    operators,
-    fromState,
-    targetStates,
-    labelKeyword
-  } of trans) {
-    const isBiWay = operators.has("<->")
+  for (let t of trans) {
+    const {
+      identifier,
+      label,
+      whereExpr,
+      operators,
+      fromState,
+      toStates,
+      labelKeyword
+    } = t
+
     if (!definedStates.has(fromState)) {
       statesDef.push(genUndefinedState(fromState, previewOptions))
       definedStates.add(fromState)
     }
     const transPieces = []
-    for (let sTo of targetStates) {
-      if (sTo === fromState && operators.has("+")) {
-        continue
+    const isAnon = isAnonymousEdge(t)
+    const rawRelations = isAnon
+      ? expandAnonymousEdge(t, [...definedStates])
+      : [{source: fromState, target: toStates[0]}]
+    const relations = []
+
+    if (isAnon) {
+      const s = new Map()
+      for (let {source, target} of rawRelations) {
+        const e = [source, target].sort().join(":")
+        if (s.has(e)) {
+          s.get(e).isBi = true
+        } else {
+          s.set(e, {source, target, isBi: false})
+        }
       }
+      relations.push(...s.values())
+    } else {
+      relations.push(...rawRelations)
+    }
+    for (let {source, target, isBi} of relations) {
+      // if (sTo === fromState && (operators.has("+") || (operators.has("<->") && ))) {
+      //   continue
+      // }
       let attrs = []
-      if (!definedStates.has(sTo)) {
-        statesDef.push(genUndefinedState(sTo, previewOptions))
-        definedStates.add(sTo)
+      if (!definedStates.has(target)) {
+        statesDef.push(genUndefinedState(target, previewOptions))
+        definedStates.add(target)
       }
 
-      if (isBiWay) {
+      if (isBi) {
         attrs.push(`dir=both`)
       }
-      if (resultEdgesDef.has(`${fromState},${sTo}`) || (isBiWay && resultEdgesDef.has(`${sTo},${fromState}`))) {
+      if (resultEdgesDef.has(`${source},${target}`) || (isBi && resultEdgesDef.has(`${target},${source}`))) {
         attrs.push(`color=darkgreen`, `fontcolor=darkgreen`)
       }
 
@@ -157,7 +184,7 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
       } else if (previewOptions.paddingEdgeText) {
         attrs.push(`label=" "`)
       }
-      transPieces.push(`${fromState} -> ${sTo}${genAttrs(attrs)};`)
+      transPieces.push(`${source} -> ${target}${genAttrs(attrs)};`)
     }
     if (transPieces.length) {
       transRelations.push(transPieces)
@@ -375,11 +402,6 @@ export const genGraphvizTrace = (traces, options) => {
       const bg = fields.length ? "white" : "black"
       const label = `<table border="0" cellborder="0" cellpadding="3" bgcolor="${bg}"><tr><td bgcolor="black" align="center" colspan="2"><font color="white">${raw}</font></td></tr>${fields.map(({key, value}) => `<tr><td align="left" port="r1">${key} = ${value}</td></tr>`)}</table>`
       states.push(`${id}[style = "filled" penwidth = 1 fillcolor = "${bg}" fontname = "Courier New" shape = "Mrecord" label =<${label}>];`)
-//       states.push(`${id} [color="black", style="rounded, filled" , fillcolor="darkorange" , shape="rect", label= <
-//  \t\t <table border='0' cellborder='0' style='rounded'>
-// \t\t\t <tr><td align="center" colspan="2" > <b>${raw}</b></td></tr>
-// \t\t\t ${fields.map(({key, value}) => `<tr><td align="center">${key} :</td><td>${value}</td></tr>`).join("\n\t\t\t")}
-// \t\t </table> > ]`)
     }
 
     const dir = options.direction === DisplayDirection.Auto

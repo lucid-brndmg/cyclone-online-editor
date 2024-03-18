@@ -104,21 +104,17 @@ export default class EditorSemanticContext {
   }
 
   // operator: -> | <-> | * | +
-  defineTransition(identifier, label, whereExpr, fromState, operators, targetStates, position, expr, labelKeyword) {
+  defineTransition(metadata, position, expr) {
+    const {identifier, fromState, involvedStates} = metadata
     this.transitions.push({
-      identifier,
-      label,
-      whereExpr,
-      operators,
-      targetStates,
-      fromState,
+      targetStates: involvedStates,
+      ...metadata,
       position,
-      labelKeyword
     })
     if (identifier) {
-      this.namedTransitions.set(identifier, targetStates)
+      this.namedTransitions.set(identifier, involvedStates)
     }
-    for (let state of targetStates) {
+    for (let state of involvedStates) {
       if (state !== fromState) {
         this.registerTransInState(state, identifier, expr)
       }
@@ -197,16 +193,22 @@ export default class EditorSemanticContext {
         case SemanticContextType.TransDecl: {
           const {metadata, position} = block
           const expr = payload.start.getInputStream().getText(payload.start.start, payload.stop.stop)
+          // this.defineTransition(
+          //   metadata.identifier,
+          //   metadata.label,
+          //   metadata.whereExpr,
+          //   metadata.fromState,
+          //   metadata.operators,
+          //   metadata.involvedStates,
+          //   position,
+          //   expr,
+          //   metadata.labelKeyword
+          // )
+
           this.defineTransition(
-            metadata.identifier,
-            metadata.label,
-            metadata.whereExpr,
-            metadata.fromState,
-            metadata.operators,
-            metadata.involvedStates,
+            metadata,
             position,
             expr,
-            metadata.labelKeyword
           )
           break
         }

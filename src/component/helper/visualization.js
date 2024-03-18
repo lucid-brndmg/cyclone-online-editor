@@ -25,7 +25,12 @@ import {genGraphvizExecutionResultPaths, genGraphvizPreview, genGraphvizTrace} f
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {GraphvizMultiPreview, GraphvizSinglePreview} from "@/component/utils/graphviz";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
-import {graphviz} from "d3-graphviz"; // KEEP THIS LINE
+import {graphviz} from "d3-graphviz";
+import cycloneAnalyzer from "cyclone-analyzer"; // KEEP THIS LINE
+
+const {
+  edgeLengths
+} = cycloneAnalyzer.utils.edge
 
 const PreviewPanel = () => {
   const {editorCtx} = useEditorStore()
@@ -33,7 +38,8 @@ const PreviewPanel = () => {
   const [visualData, setVisualData] = useState(null)
   const [definedStatesGraphviz, tip] = useMemo(() => {
     if (visualData?.states.size || visualData?.trans.length) {
-      return [genGraphvizPreview(visualData, graphviz), <Text c={"dimmed"} maw={"70%"} size={"sm"}><b>Got {visualData.states.size} states with {visualData.trans.length} edges.</b> Try execute the code by click "run" to see the final result.</Text>]
+      const el = edgeLengths(visualData.trans, [...visualData.states.keys()])
+      return [genGraphvizPreview(visualData, graphviz), <Text c={"dimmed"} maw={"70%"} size={"sm"}><b>Got {visualData.states.size} states with {el} edges.</b> Try execute the code by click "run" to see the final result.</Text>]
     } else {
       return ["", <Text size={"sm"} c={"dimmed"}>Got no defined states. Define some in code to see result.</Text>]
     }
@@ -83,7 +89,9 @@ const ExecPanel = () => {
       return []
     }
     const graphs = blendIn
-      ? parsedPaths.edges.map(edge => genGraphvizPreview(visualDataCopy, graphviz, {states: parsedPaths.states, edge}))
+      ? parsedPaths.edges.map(edge => {
+        return genGraphvizPreview(visualDataCopy, graphviz, {states: new Set(edge), edge})
+      })
       : genGraphvizExecutionResultPaths(parsedPaths, graphviz)
     return graphs.map((code, i) => ({
       filename: `path-${i}`,
