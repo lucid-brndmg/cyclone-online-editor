@@ -17,7 +17,11 @@ export const serviceLogger = (() => {
 
   return winston.createLogger({
     transports,
-    format: winston.format.json(),
+    // format: winston.format.json(),
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json()
+    ),
     level: config.logger.service.level
   })
 })()

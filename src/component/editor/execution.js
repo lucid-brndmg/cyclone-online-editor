@@ -50,6 +50,9 @@ export const CodeExecutionButton = ({...props}) => {
     isPollingRef.current = isPolling
   }, [isPolling]);
 
+  const execServerAddr = process.env.NEXT_PUBLIC_CYCLONE_EXEC_SERVER
+    ?? Config.executionServer.url
+
   const preparePoll = (id) => {
     const begin = Date.now()
     setIsPolling(true)
@@ -72,7 +75,7 @@ export const CodeExecutionButton = ({...props}) => {
         return
       }
       try {
-        const resp = await fetch(`${executionServer.trim() || Config.executionServer.url}/get?id=${id}`, {
+        const resp = await fetch(`${executionServer.trim() || execServerAddr}/get?id=${id}`, {
           mode: "cors"
         }).then(it => it.json())
         switch (resp?.code) {
@@ -111,7 +114,7 @@ export const CodeExecutionButton = ({...props}) => {
     setTraceIsGraphviz(false)
 
     try {
-      const resp = await fetch(`${executionServer.trim() || Config.executionServer.url}/exec`, {
+      const resp = await fetch(`${executionServer.trim() || execServerAddr}/exec`, {
         method: "POST",
         body: JSON.stringify({program: code}),
         mode: 'cors',

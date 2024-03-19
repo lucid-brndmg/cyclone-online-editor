@@ -101,5 +101,5 @@ export const serve = () => {
   app.use(router.routes())
   app.listen(config.server.port, config.server.host)
 
-  serviceLogger.info(`server listening at ${config.server.host}:${config.server.port}`);
+  serviceLogger.info(`server listening at ${config.server.host}:${config.server.port} under ${config.queue.enabled ? "QUEUE" : "SYNCHRONOUS"} mode`);
 }

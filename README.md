@@ -345,7 +345,7 @@ In the source code of the server there is a configuration file named `config.jso
     "enabled": false,
     // worker concurrency
     // how many program could be executed in a batch
-    "concurrency": 50,
+    "concurrency": 4,
     // store the execution result into redis for how long (seconds)
     "resultTTLSecs": 300,
     // automatically clear temp source code files in interval (ms)
@@ -627,6 +627,8 @@ The website config is the `resource/config.json` file. In this file you could ch
   }
 }
 ```
+
+Additionally, an env variable `NEXT_PUBLIC_CYCLONE_EXEC_SERVER` would be treated as an override to `executionServer.url` of `resource/config.json`. A .env file could be written to the project root with this variable, and the value would be used for execution server's address. A re-build would be required in order to use the latest value from env.
 
 ### Further Developing
 

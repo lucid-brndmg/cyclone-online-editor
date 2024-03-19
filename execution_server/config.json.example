@@ -13,7 +13,7 @@
   },
   "queue": {
     "enabled": false,
-    "concurrency": 50,
+    "concurrency": 15,
     "resultTTLSecs": 300,
     "autoClearFileIntervalMs": 300000
   },

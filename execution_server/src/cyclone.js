@@ -65,7 +65,7 @@ export const checkProgram = program => {
   return {}
 }
 
-export const logResult = (input, result, args, execOpts) => {
+export const logResult = (input, result, args, execOpts, id) => {
   const patterns = config.logger.execution.patterns
 
   for (let i = 0; i < patterns.length; i ++) {
@@ -78,7 +78,8 @@ export const logResult = (input, result, args, execOpts) => {
       executionLogger[level]({
         output: customSlice(result, sliceOutput),
         input: customSlice(input, sliceInput),
-        args, execOpts, patternIndex: i
+        args, execOpts, patternIndex: i,
+        id
       })
       break
     }
@@ -109,7 +110,7 @@ export const execCycloneProgram = async (program, id) => {
       return {code: ResponseCode.UnsuccessfulExecution}
     }
 
-    logResult(program, result, args, opts)
+    logResult(program, result, args, opts, id)
 
     const spl = result.split(/[\r\n]+/)
     const traceLine = spl.find(line => line.startsWith(config.cyclone.traceKeyword))
@@ -120,7 +121,7 @@ export const execCycloneProgram = async (program, id) => {
         try {
           traceContent = await fs.promises.readFile(tracePath, "utf-8")
         } catch (error) {
-          serviceLogger.error("error reading trace", {error});
+          serviceLogger.error("error reading trace", {error, id});
         }
       }
     }
@@ -157,7 +158,7 @@ export const execCycloneProgram = async (program, id) => {
       return {code: ResponseCode.ExecutionTimeout, data: config.cyclone.mandatoryTimeoutMs, garbage: tmpFiles}
     }
 
-    serviceLogger.error("cyclone execution error", {error: e})
+    serviceLogger.error("cyclone execution error", {error: e, id})
     return {code: ResponseCode.InternalError, garbage: tmpFiles}
   }
 }
