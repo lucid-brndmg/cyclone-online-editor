@@ -1,0 +1,14 @@
+services:
+  frontend:
+    image: fyp24wh008/frontend:dev
+    build:
+      target: dev
+    ports:
+      - 3000:3000
+
+  exec-server:
+    image: fyp24wh008/exec-server:dev
+    build:
+      target: dev
+    ports:
+      - 9000:9000
