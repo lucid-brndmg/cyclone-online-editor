@@ -51,15 +51,7 @@
     },
     "execution": {
       "level": "debug",
-      "patterns": [
-        {
-          "re": "(\\s+\"org\\.nuim\\.cyclone)",
-          "reFlag": null,
-          "level": "error",
-          "sliceInput": -1,
-          "sliceOutput": -1
-        }
-      ],
+      "patterns": [],
       "console": true,
       "file": {
         "dirname": "./",

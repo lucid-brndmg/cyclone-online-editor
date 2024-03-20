@@ -48,7 +48,7 @@ router.post("/exec", async ctx => {
       ctx.body = {code: ResponseCode.Enqueued, data: id}
     } else {
       const {code, data} = await execCycloneProgram(program, id)
-
+      serviceLogger.debug("sync execution completed", {code, data, id})
       ctx.body = {code, data}
     }
   } catch (error) {

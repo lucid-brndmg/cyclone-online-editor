@@ -67,7 +67,9 @@ export const checkProgram = program => {
 
 export const logResult = (input, result, args, execOpts, id) => {
   const patterns = config.logger.execution.patterns
-
+  if (!patterns.length) {
+    return
+  }
   for (let i = 0; i < patterns.length; i ++) {
     const {re, reFlag, level, sliceInput, sliceOutput} = patterns[i]
     // v8 automatically caches regex
@@ -98,12 +100,12 @@ export const execCycloneProgram = async (program, id) => {
   // let result = await execShellCommand(command, {cwd: config.cyclonePath, timeout: config.cycloneMandatoryTimeoutMs})
 
   try {
-    const args = ["-jar", path.join(config.cyclone.path, config.cyclone.executable), tmpPath]
+    const args = ["-jar", path.join(config.cyclone.path, config.cyclone.executable), tmpPath, "--nocolor"]
     const opts = {cwd: srcPath, timeout: config.cyclone.mandatoryTimeoutMs}
 
     let result = (await execFileAsync("java", args, opts))
       // clear colors
-      .replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '')
+      // .replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '')
 
     if (!result) {
       // failed to execute, NOT failed to solve
