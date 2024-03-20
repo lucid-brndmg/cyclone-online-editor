@@ -7,6 +7,7 @@ services:
       target: prod
       args:
         PUBLIC_URL: /projects/FYP24WH008
+        EXEC_SERVER: /projects/FYP24WH008/server
 
   # single exec server
   exec-server:

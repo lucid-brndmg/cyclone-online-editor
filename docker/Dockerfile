@@ -23,7 +23,9 @@ COPY . .
 # ARG sets variable during build process
 # ENV injects it into the container
 ARG PUBLIC_URL
+ARG EXEC_SERVER
 ENV PUBLIC_URL=${PUBLIC_URL}
+ENV NEXT_PUBLIC_CYCLONE_EXEC_SERVER=${EXEC_SERVER}
 RUN npm run build
 EXPOSE 3000
 CMD ["run", "start"]
