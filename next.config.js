@@ -13,7 +13,7 @@ const nextConfig = {
   reactStrictMode: true,
   basePath: baseUrl,
   env: {
-    PUBLIC_URL: process.env.PUBLIC_URL
+    PUBLIC_URL: process.env.PUBLIC_URL || ""
   },
   webpack: (config, {isServer}) => {
     if(!isServer) {

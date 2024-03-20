@@ -94,9 +94,9 @@ export const LayoutHeader = () => {
             </Tooltip>
           </SettingsPopover>
 
-          <Tooltip label="Language Reference">
-            <ActionIcon component={"a"} target="_blank" href={"https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"} size={"lg"} variant="default" aria-label="Language Reference">
-              <IconLink style={{ width: '70%', height: '70%' }} stroke={1.5} />
+          <Tooltip label="Source Code">
+            <ActionIcon component={"a"} target="_blank" href={"https://github.com/lucid-brndmg/cyclone-online-editor"} size={"lg"} variant="default" aria-label="Source Code">
+              <IconBrandGithub style={{ width: '70%', height: '70%' }} stroke={1.5} />
             </ActionIcon>
           </Tooltip>
 
@@ -109,7 +109,7 @@ export const LayoutHeader = () => {
           </Tooltip>
 
           <Tooltip label={`Switch to ${destColorMode} mode`}>
-            <ActionIcon size={"lg"} onClick={() => setColorScheme(destColorMode)} variant="default" aria-label="Color Mode">
+            <ActionIcon size={"lg"} onClick={() => setColorScheme(destColorMode)} variant="default" aria-label="Toggle Color Mode">
               {
                 nextJsPleasedColorScheme === "light"
                   ? <IconMoon style={{ width: '70%', height: '70%' }} stroke={1.5} />

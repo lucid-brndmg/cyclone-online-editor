@@ -6,6 +6,7 @@ export default function Document() {
     <Html lang="en">
       <Head>
         <ColorSchemeScript defaultColorScheme="auto" />
+        <link rel="icon" href={`${process.env.PUBLIC_URL}/favicon.ico`} />
       </Head>
       <body>
       <Main />

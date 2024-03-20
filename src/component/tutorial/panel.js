@@ -77,7 +77,7 @@ const TutorialHeadBar = ({id}) => {
     <Group justify={"space-between"} p={"sm"}>
       {
         prev
-          ? <Anchor size={"sm"} href={prev.href}>{'<'} {prev.title}</Anchor>
+          ? <Anchor component={Link} size={"sm"} href={prev.href}>{'<'} {prev.title}</Anchor>
           : null
       }
 
