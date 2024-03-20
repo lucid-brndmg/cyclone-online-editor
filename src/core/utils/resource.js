@@ -4,12 +4,14 @@ const publicUrl = process.env.PUBLIC_URL || ''
 
 export const PublicUrl = {
   Editor: `${publicUrl}/editor`,
-  Dynamic: `${publicUrl}/dynamic`,
   Tutorial: `${publicUrl}/tutorial`,
   Home: publicUrl + "/",
   MonacoScripts: `${publicUrl}/vs`,
 
-  TutorialBase: "/tutorial"
+  TutorialBase: "/tutorial",
+  EditorBase: "/editor",
+  HomeBase: "/",
+  Dynamic: `${publicUrl}/dynamic`
 }
 
 // const dynamicResource = path => `${PublicUrl.Dynamic}${path}`

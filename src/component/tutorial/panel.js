@@ -81,7 +81,7 @@ const TutorialHeadBar = ({id}) => {
           : null
       }
 
-      <Group gap={8} style={{cursor: "pointer"}} onClick={() => router.push(PublicUrl.Tutorial)}>
+      <Group gap={8} style={{cursor: "pointer"}} onClick={() => router.push(PublicUrl.TutorialBase)}>
         <IconBook />
         <Text fw={500}>
           Cyclone Tutorial

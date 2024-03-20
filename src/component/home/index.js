@@ -41,7 +41,7 @@ const HeroSection = () => {
 
   const onTry = async () => {
     await localforage.setItem("tmp_code", Config.home.exampleCode)
-    await router.push(PublicUrl.Editor)
+    await router.push(PublicUrl.EditorBase)
   }
 
   return (

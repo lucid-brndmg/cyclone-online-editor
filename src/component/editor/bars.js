@@ -30,7 +30,7 @@ const OpenInEditorButton = () => {
 
   const onOpen = async () => {
     await localforage.setItem("tmp_code", code)
-    await router.push(PublicUrl.Editor)
+    await router.push(PublicUrl.EditorBase)
   }
 
   return (

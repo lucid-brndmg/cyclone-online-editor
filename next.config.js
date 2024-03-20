@@ -12,6 +12,9 @@ const baseUrl = process.env.PUBLIC_URL || ''
 const nextConfig = {
   reactStrictMode: true,
   basePath: baseUrl,
+  env: {
+    PUBLIC_URL: process.env.PUBLIC_URL
+  },
   webpack: (config, {isServer}) => {
     if(!isServer) {
       config.plugins.push(new MonacoWebpackPlugin({

@@ -35,7 +35,7 @@ const CycloneLogo = ({...props}) => {
   const router = useRouter()
 
   return (
-    <Group {...props} gap={"xs"} style={{cursor: "pointer", userSelect: "none"}} onClick={() => router.push(PublicUrl.Home)}>
+    <Group {...props} gap={"xs"} style={{cursor: "pointer", userSelect: "none"}} onClick={() => router.push(PublicUrl.HomeBase)}>
       <Image width={28} height={28} component={NextImage} src={logo} alt="cyclone logo" />
       <Text fw={500} size={"lg"}>CYCLONE</Text>
     </Group>
@@ -49,7 +49,7 @@ export const LayoutHeader = () => {
   const destColorMode = computedColorScheme === "light" ? "dark" : "light"
   const [helpOpened, setHelpOpened] = useState(false)
 
-  const path = router.pathname
+  const path = router.basePath + router.pathname
   // This state & effect is needed to please NextJS from throwing "Hydration failed because the initial UI does not match what was rendered on the server"
   const [nextJsPleasedColorScheme, setNextJsPleasedColorScheme] = useState("light")
   useEffect(() => {

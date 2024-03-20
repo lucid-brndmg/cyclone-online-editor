@@ -20,7 +20,7 @@ export const SharedCodePreview = ({shared}) => {
   const router = useRouter()
   const onTry = async () => {
     await localforage.setItem("tmp_code", code)
-    await router.push(PublicUrl.Editor)
+    await router.push(PublicUrl.EditorBase)
   }
   return (
     <Stack>

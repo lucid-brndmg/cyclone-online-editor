@@ -9,7 +9,7 @@ import {timeDifference} from "@/lib/time";
 import {codeExampleTable} from "@/core/resources/codeExample";
 import {downloadBlobFile} from "@/lib/dom";
 import {modals} from "@mantine/modals";
-import {dynamicCodeExample} from "@/core/utils/resource";
+import {dynamicCodeExample, PublicUrl} from "@/core/utils/resource";
 import localforage from "localforage";
 import {useRouter} from "next/router";
 
@@ -29,7 +29,7 @@ export const FileStateWrapper = () => {
   useEffect(() => {
     initOnPageLoad()
       .then(async () => {
-        if (router.pathname === "/editor") {
+        if (router.pathname === PublicUrl.EditorBase) {
           const code = await localforage.getItem("tmp_code")
           if (code) {
             // await localforage.removeItem("tmp_code")
