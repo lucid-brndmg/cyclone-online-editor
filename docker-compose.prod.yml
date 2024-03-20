@@ -1,0 +1,20 @@
+# docker compose file used in production
+services:
+  frontend:
+    image: ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_SLUG}
+    build:
+      target: prod
+      args:
+        PUBLIC_URL: /projects/FYP24WH008
+        EXEC_SERVER: /projects/FYP24WH008/server
+    ports:
+      - 127.0.0.1:${CI_FRONTEND_PORT}:3000
+    restart: always
+
+  exec-server:
+    image: ${CI_REGISTRY_IMAGE}/exec-server:${CI_COMMIT_REF_SLUG}
+    build:
+      target: dev
+    ports:
+      - 127.0.0.1:${CI_EXECSRV_PORT}:9000
+    restart: always

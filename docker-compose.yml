@@ -1,0 +1,18 @@
+# Base docker compose file
+# see docker-compose.override.yml for dev-specific setup
+#     docker-compose.test.yml for production emlulation setup
+#     docker-compose.prod.yml for production deployment setup
+name: fyp24wh008
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    # depends_on:
+    #    - backend
+
+  exec-server:
+    build:
+      context: execution_server
+      dockerfile: docker/Dockerfile
