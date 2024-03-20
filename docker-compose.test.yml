@@ -1,0 +1,28 @@
+# docker compose config emulating production deployment
+services:
+  # docker container running frontend app
+  frontend:
+    image: fyp24wh008/frontend:test
+    build:
+      target: prod
+      args:
+        PUBLIC_URL: /projects/FYP24WH008
+
+  # single exec server
+  exec-server:
+    image: fyp24wh008/exec-server:test
+    build:
+      target: dev
+
+  # server emulating production Nginx
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - 127.0.0.1:8080:80
+    volumes:
+      - type: bind
+        source: ./docker/nginx/default.conf
+        target: /etc/nginx/conf.d/default.conf
+      - type: bind
+        source: ./docker/nginx/index.html
+        target: /usr/share/nginx/html/index.html
