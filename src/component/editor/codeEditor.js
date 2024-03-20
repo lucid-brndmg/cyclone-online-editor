@@ -20,13 +20,14 @@ import {getErrorLevel} from "@/core/monaco/error";
 import {pos} from "@/lib/position";
 import {LoadingOverlay} from "@mantine/core";
 import {ErrorSource} from "@/core/definitions";
+import {PublicUrl} from "@/core/utils/resource";
 
 const {IdentifierKind, IdentifierType} = cycloneAnalyzer.language.definitions
 
 const MonacoSetup = ({children, ready, onReady}) => {
   // const [ready, setReady] = useState(false)
   useEffect(() => {
-    loader.config({paths: {vs: "/vs"}})
+    loader.config({paths: {vs: PublicUrl.MonacoScripts}})
     loader.init().then((monaco) => {
       onReady(true)
     })

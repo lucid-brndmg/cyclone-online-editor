@@ -23,13 +23,14 @@ import {
   IconArrowBigRightFilled, IconArrowNarrowLeft, IconArrowNarrowRight, IconBook
 } from "@tabler/icons-react";
 import parse from 'html-react-parser';
-import {ExecutableCycloneCode, getHtmlCodeHighlightOptions, HighlightedCycloneCode} from "@/component/utils/code";
+import {ExecutableCycloneCode, htmlCodeUrlReplacer, HighlightedCycloneCode} from "@/component/utils/code";
 import {isCycloneExecutableCode} from "@/core/utils/language";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {tutorialTable} from "@/core/resources/tutorial";
 import {useEditorStore} from "@/state/editorStore";
 import {formatStateTransRelation} from "@/core/utils/format";
 import localforage from "localforage";
+import {PublicUrl} from "@/core/utils/resource";
 
 const manifestSelectionData = tutorialManifest.map(t => ({label: t.title, value: t.id}))
 
@@ -46,11 +47,11 @@ const resolveManifestPrevNext = id => {
   const current = tutorialTable[id]
   const prev = current.prev ? {
     title: tutorialTable[current.prev].title,
-    href: `/tutorial${current.prev === "_default" ? "" : `/${current.prev}`}`
+    href: `${PublicUrl.TutorialBase}${current.prev === "_default" ? "" : `/${current.prev}`}`
   } : null
   const next = current.next ? {
     title: tutorialTable[current.next].title,
-    href: `/tutorial${current.next === "_default" ? "" : `/${current.next}`}`
+    href: `${PublicUrl.TutorialBase}${current.next === "_default" ? "" : `/${current.next}`}`
   } : null
 
   return {prev, next}
@@ -65,8 +66,8 @@ const TutorialHeadBar = ({id}) => {
   useEffect(() => {
     if (resolvedId !== selectedId) {
       location.href = selectedId === "_default"
-        ? "/tutorial"
-        : `/tutorial/${selectedId}`
+        ? PublicUrl.Tutorial
+        : `${PublicUrl.Tutorial}/${selectedId}`
     }
   }, [selectedId])
 
@@ -80,7 +81,7 @@ const TutorialHeadBar = ({id}) => {
           : null
       }
 
-      <Group gap={8} style={{cursor: "pointer"}} onClick={() => router.push("/tutorial")}>
+      <Group gap={8} style={{cursor: "pointer"}} onClick={() => router.push(PublicUrl.Tutorial)}>
         <IconBook />
         <Text fw={500}>
           Cyclone Tutorial
@@ -112,7 +113,7 @@ const TutorialFootBar = ({id}) => {
 
 const NotFoundPrompt = () => (
   <Text>
-    Tutorial not found. <Anchor href={"/tutorial"}>Back to category</Anchor>
+    Tutorial not found. <Anchor href={PublicUrl.Tutorial}>Back to category</Anchor>
   </Text>
 )
 
@@ -132,7 +133,7 @@ export const TutorialPanel = ({html, id}) => {
     localforage.getItem("tmp_code").then(c => setCode(c ?? ""))
   }, []);
 
-  const parsed = parse(html, getHtmlCodeHighlightOptions(code => setCode(code)))
+  const parsed = parse(html, htmlCodeUrlReplacer(code => setCode(code)))
   const editorHeight = resultHeight + height
 
   const editorCommands = {

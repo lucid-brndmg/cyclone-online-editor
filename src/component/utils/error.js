@@ -1,5 +1,6 @@
 import {Button, Container, Group, Text, Title} from "@mantine/core";
 import classes from "../../styles/modules/ErrorPageTemplate.module.css"
+import {PublicUrl} from "@/core/utils/resource";
 
 // referenced: https://ui.mantine.dev/category/error-pages/
 export const ErrorPageTemplate = ({
@@ -15,7 +16,7 @@ export const ErrorPageTemplate = ({
         {description}
       </Text>
       <Group justify="center">
-        <Button variant="subtle" size="md" component={"a"} href={"/"}>
+        <Button variant="subtle" size="md" component={"a"} href={PublicUrl.Home}>
           Take me back to home page
         </Button>
       </Group>

@@ -8,10 +8,6 @@ This project uses [cyclone analyzer](https://github.com/lucid-brndmg/cyclone-ana
 
 *This project is a final year project (CS440[A]) at Maynooth University.*
 
-## TODO
-- Add more tutorials
-- Fix bugs & finish TODOs
-
 ## Acknowledgements
 
 This project is guided under the supervision of [Dr.Hao Wu](https://classicwuhao.github.io/) with some suggestions from [Dr. Vanush Paturyan](https://www.maynoothuniversity.ie/people/vanush-paturyan).
@@ -629,6 +625,8 @@ The website config is the `resource/config.json` file. In this file you could ch
 ```
 
 Additionally, an env variable `NEXT_PUBLIC_CYCLONE_EXEC_SERVER` would be treated as an override to `executionServer.url` of `resource/config.json`. A .env file could be written to the project root with this variable, and the value would be used for execution server's address. A re-build would be required in order to use the latest value from env.
+
+There is another env variable `PUBLIC_URL` could be configured corresponding to the public (base) url prefix of the frontend.
 
 ### Further Developing
 

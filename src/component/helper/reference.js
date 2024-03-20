@@ -14,21 +14,21 @@ import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {getDocumentById, getGroupDocument} from "@/core/resources/referenceDocs";
 import {useDebouncedValue} from "@mantine/hooks";
 import parse from "html-react-parser";
-import {getHtmlCodeHighlightOptions} from "@/component/utils/code";
+import {htmlCodeUrlReplacer} from "@/component/utils/code";
 
 const DocItem = ({group, doc}) => {
   const [docContent, setDocContent] = useState(null)
 
   useEffect(() => {
     getDocumentById(group.id, doc.id).then(html => {
-      // parse(html, getHtmlCodeHighlightOptions())
+      // parse(html, htmlCodeUrlReplacer())
       setDocContent(html)
     })
   }, [])
 
   const parsed = useMemo(() => {
     if (docContent) {
-      const parsed = parse(docContent, getHtmlCodeHighlightOptions())
+      const parsed = parse(docContent, htmlCodeUrlReplacer())
       return parsed
     }
 
@@ -58,7 +58,7 @@ const GroupItem = ({group}) => {
 
   const parsed = useMemo(() => {
     if (groupDoc) {
-      return parse(groupDoc, getHtmlCodeHighlightOptions())
+      return parse(groupDoc, htmlCodeUrlReplacer())
     }
 
     return null

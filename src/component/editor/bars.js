@@ -22,6 +22,7 @@ import {sieveCount} from "@/lib/list";
 import {useMemo, useState} from "react";
 import {isWarning} from "@/core/specification";
 import {SharePopover} from "@/component/share/popover";
+import {PublicUrl} from "@/core/utils/resource";
 
 const OpenInEditorButton = () => {
   const {code} = useEditorStore()
@@ -29,7 +30,7 @@ const OpenInEditorButton = () => {
 
   const onOpen = async () => {
     await localforage.setItem("tmp_code", code)
-    await router.push("/editor")
+    await router.push(PublicUrl.Editor)
   }
 
   return (

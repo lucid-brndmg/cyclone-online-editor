@@ -14,6 +14,7 @@ import {
   ThemeIcon
 } from "@mantine/core";
 import {IconBook2, IconCircleCheck, IconEye, IconFolder, IconListTree} from "@tabler/icons-react";
+import {PublicUrl} from "@/core/utils/resource";
 
 export const HelpModal = ({opened, onOpened}) => {
   const editorItems = [
@@ -60,7 +61,7 @@ export const HelpModal = ({opened, onOpened}) => {
               </List>
               <Space />
               <Text size={"sm"}>
-                Lite version of the code editor is also available when browsing tutorial but with less functionalities. To unlock the full power of the cyclone editor and get the best user experience, please visit <Anchor href={"/editor"}>Cyclone Editor</Anchor>.
+                Lite version of the code editor is also available when browsing tutorial but with less functionalities. To unlock the full power of the cyclone editor and get the best user experience, please visit <Anchor href={PublicUrl.Editor}>Cyclone Editor</Anchor>.
               </Text>
             </Stack>
             <Stack gap={"xs"}>

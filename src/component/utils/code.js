@@ -6,6 +6,7 @@ import {CycloneLanguageId} from "@/core/monaco/language";
 import hljsCyclone from "@/core/utils/highlight";
 import {downloadTextFile} from "@/lib/dom";
 import {isCycloneExecutableCode} from "@/core/utils/language";
+import {PublicUrl} from "@/core/utils/resource";
 
 export const HighlightedCycloneCode = ({code}) => {
   const [hlResult, setHlResult] = useState("")
@@ -86,17 +87,30 @@ const extractTextFromElement = domNode => {
   }
 }
 
-export const getHtmlCodeHighlightOptions = onTry => ({
+export const htmlCodeUrlReplacer = onTry => ({
   replace(domNode) {
-    if (domNode.tagName === "pre") {
-      const codeNode = domNode?.children[0]
-      const code = extractTextFromElement(domNode)
-      if (codeNode?.tagName === "code" && codeNode?.attribs?.class === "language-cyclone") {
-        return onTry && isCycloneExecutableCode(code)
-          ? <ExecutableCycloneCode code={code} onTry={() => onTry(code)} />
-          : <HighlightedCycloneCode code={code} />
-      } else {
-        return (<pre>{code}</pre>)
+    switch (domNode.tagName) {
+      case "pre": {
+        const codeNode = domNode?.children[0]
+        const code = extractTextFromElement(domNode)
+        if (codeNode?.tagName === "code" && codeNode?.attribs?.class === "language-cyclone") {
+          return onTry && isCycloneExecutableCode(code)
+            ? <ExecutableCycloneCode code={code} onTry={() => onTry(code)} />
+            : <HighlightedCycloneCode code={code} />
+        } else {
+          return (<pre>{code}</pre>)
+        }
+      }
+      case "a": {
+        const url = domNode.attribs?.href
+        if (!url) return
+        if (url.startsWith("/editor")) {
+          domNode.attribs.href = `${PublicUrl.Editor}${url.slice("/editor".length)}`
+        } else if (url.startsWith("/tutorial")) {
+          domNode.attribs.href = `${PublicUrl.Tutorial}${url.slice("/tutorial".length)}`
+        } else if (url === "/") {
+          domNode.attribs.href = PublicUrl.Home
+        }
       }
     }
   },

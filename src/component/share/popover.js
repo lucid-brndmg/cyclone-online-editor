@@ -4,6 +4,7 @@ import lzString from "lz-string"
 import {useEffect, useState} from "react";
 import {IconCopy} from "@tabler/icons-react";
 import {useDebouncedValue} from "@mantine/hooks";
+import {PublicUrl} from "@/core/utils/resource";
 
 const ShareUrlPanel = () => {
   const {code} = useEditorStore()
@@ -20,7 +21,7 @@ const ShareUrlPanel = () => {
         ...params,
         date: new Date().toISOString()
       }))
-      setUrl(`${location.origin}/share/${query}`)
+      setUrl(`${location.origin}${PublicUrl.Home}share/${query}`)
     }
   }, [code, debouncedParams]);
   return  (

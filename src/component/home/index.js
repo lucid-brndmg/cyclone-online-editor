@@ -20,6 +20,7 @@ import Config from "../../../resource/config.json"
 import {ExecutableCycloneCode} from "@/component/utils/code";
 import localforage from "localforage";
 import {useRouter} from "next/router";
+import {PublicUrl} from "@/core/utils/resource";
 
 /*
 * Reference: https://ui.mantine.dev/category/hero/
@@ -40,7 +41,7 @@ const HeroSection = () => {
 
   const onTry = async () => {
     await localforage.setItem("tmp_code", Config.home.exampleCode)
-    await router.push("/editor")
+    await router.push(PublicUrl.Editor)
   }
 
   return (
@@ -76,10 +77,10 @@ const HeroSection = () => {
           </List>
 
           <Group mt={30}>
-            <Button radius="xl" size="md" className={classes.control} color={"orange"} component={"a"} href={"/editor"}>
+            <Button radius="xl" size="md" className={classes.control} color={"orange"} component={"a"} href={PublicUrl.Editor}>
               Get Started
             </Button>
-            <Button variant="default" radius="xl" size="md" className={classes.control} component={"a"} href={"/tutorial"}>
+            <Button variant="default" radius="xl" size="md" className={classes.control} component={"a"} href={PublicUrl.Tutorial}>
               Tutorial
             </Button>
           </Group>
@@ -152,8 +153,8 @@ const LinkCard = ({title, desc, url, color, shadow, withBorder, size}) => {
 
 const LinksSection = () => {
   const learningLinks = [
-    {title: "Learn", url: "/tutorial", desc: "Learning The Cyclone Language and trying the code inside the tutorials"},
-    {title: "Online Editor", url: "/editor", desc: "Writing Cyclone using the online development environment"},
+    {title: "Learn", url: PublicUrl.Tutorial, desc: "Learning The Cyclone Language and trying the code inside the tutorials"},
+    {title: "Online Editor", url: PublicUrl.Editor, desc: "Writing Cyclone using the online development environment"},
     {title: "Installation", url: "https://classicwuhao.github.io/cyclone_tutorial/installation.html", desc: "Install Cyclone on your local machine"}
   ]
 

@@ -23,18 +23,19 @@ import {
 } from "@tabler/icons-react";
 import {HelpModal} from "@/component/modal/helpModal";
 import {SettingsPopover} from "@/component/editor/settings";
+import {PublicUrl} from "@/core/utils/resource";
 
 const links = [
-  { link: '/', label: 'Home' },
-  { link: '/tutorial', label: 'Tutorial' },
-  { link: '/editor', label: 'Editor' },
+  { link: PublicUrl.Home, label: 'Home' },
+  { link: PublicUrl.Tutorial, label: 'Tutorial' },
+  { link: PublicUrl.Editor, label: 'Editor' },
 ];
 
 const CycloneLogo = ({...props}) => {
   const router = useRouter()
 
   return (
-    <Group {...props} gap={"xs"} style={{cursor: "pointer", userSelect: "none"}} onClick={() => router.push("/")}>
+    <Group {...props} gap={"xs"} style={{cursor: "pointer", userSelect: "none"}} onClick={() => router.push(PublicUrl.Home)}>
       <Image width={28} height={28} component={NextImage} src={logo} alt="cyclone logo" />
       <Text fw={500} size={"lg"}>CYCLONE</Text>
     </Group>
@@ -56,7 +57,7 @@ export const LayoutHeader = () => {
   }, [computedColorScheme]);
 
   const items = links.map((link) => {
-    const activeStyle = ((link.link !== "/" && path.startsWith(link.link)) || (link.link === "/" && path === link.link))
+    const activeStyle = ((link.link !== PublicUrl.Home && path.startsWith(link.link)) || (link.link === PublicUrl.Home && path === link.link))
       ? {
         backgroundColor: "var(--mantine-color-orange-filled)",
         color: "var(--mantine-color-white)"

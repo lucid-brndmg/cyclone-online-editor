@@ -105,7 +105,7 @@ export const execCycloneProgram = async (program, id) => {
 
     let result = (await execFileAsync("java", args, opts))
       // clear colors
-      // .replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '')
+      .replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '')
 
     if (!result) {
       // failed to execute, NOT failed to solve

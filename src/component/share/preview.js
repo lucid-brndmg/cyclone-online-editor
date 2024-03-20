@@ -13,13 +13,14 @@ import {IconCopy, IconPencil, IconPlayerPlayFilled} from "@tabler/icons-react";
 import localforage from "localforage";
 import {useRouter} from "next/router";
 import {HighlightedCycloneCode} from "@/component/utils/code";
+import {PublicUrl} from "@/core/utils/resource";
 
 export const SharedCodePreview = ({shared}) => {
   const {date, title, author, code} = shared
   const router = useRouter()
   const onTry = async () => {
     await localforage.setItem("tmp_code", code)
-    await router.push("/editor")
+    await router.push(PublicUrl.Editor)
   }
   return (
     <Stack>
