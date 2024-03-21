@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 // import "../styles/hljsOneLight.css"
 import {useDebouncedValue} from "@mantine/hooks";
+import "../styles/global.css"
 
 const theme = createTheme({
   /** Put your mantine theme override here */

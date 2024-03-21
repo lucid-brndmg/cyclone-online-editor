@@ -4,7 +4,7 @@ import {
   Button,
   Container,
   Divider,
-  Group,
+  Group, Image,
   List, Paper,
   rem,
   ScrollArea, SimpleGrid, Space,
@@ -12,7 +12,7 @@ import {
   Text,
   ThemeIcon,
   Title,
-  TypographyStylesProvider
+  TypographyStylesProvider,
 } from "@mantine/core";
 import {IconCheck} from "@tabler/icons-react";
 import classes from "../../styles/modules/HeroSection.module.css"
@@ -21,6 +21,7 @@ import {ExecutableCycloneCode} from "@/component/utils/code";
 import localforage from "localforage";
 import {useRouter} from "next/router";
 import {PublicUrl} from "@/core/utils/resource";
+import logo from '../../../resource/image/logo.png'
 
 /*
 * Reference: https://ui.mantine.dev/category/hero/
@@ -43,14 +44,16 @@ const HeroSection = () => {
     await localforage.setItem("tmp_code", Config.home.exampleCode)
     await router.push(PublicUrl.EditorBase)
   }
-
-  return (
+    return (
     <Container size="xl">
       <div className={classes.inner}>
         <div className={classes.content}>
-          <Title className={classes.title}>
-            A <span className={classes.highlight}>graph-based</span> specification language
-          </Title>
+          <Group style={{flexWrap: "nowrap"}}>
+            <img src={logo.src} width={96} height={96} style={{animation: "spin 4s infinite linear"}} />
+            <Title className={classes.title}>
+              A <span className={classes.highlight}>graph-based</span> specification language
+            </Title>
+          </Group>
           <Text c="dimmed" mt="md">
             Solve graph-based problems by writing a few lines of code & provide a general solution to problems that can be described as a graph.
           </Text>

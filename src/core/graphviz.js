@@ -104,7 +104,6 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
       identifier,
       label,
       whereExpr,
-      operators,
       fromState,
       toStates,
       labelKeyword
@@ -136,9 +135,6 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
       relations.push(...rawRelations)
     }
     for (let {source, target, isBi} of relations) {
-      // if (sTo === fromState && (operators.has("+") || (operators.has("<->") && ))) {
-      //   continue
-      // }
       let attrs = []
       if (!definedStates.has(target)) {
         statesDef.push(genUndefinedState(target, previewOptions))
