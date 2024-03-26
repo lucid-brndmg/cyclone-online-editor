@@ -34,7 +34,7 @@ const errorTypeDescription = {
   [ExtendedErrorType.EnumNotAllowedInVariable]: "Enum Not Allowed Here",
   [ExtendedErrorType.WhereInlineVariable]: "Where Clause In Local Variables",
   [ExtendedErrorType.InvalidCheckForPathLength]: "Invalid Path Length",
-  [ExtendedErrorType.AnonymousEdgeIdentifier]: "Identifier In Anonymous Edge",
+  [ExtendedErrorType.AnonymousEdgeIdentifier]: "Identifier On Anonymous Edge",
 
   [ExtendedErrorType.TypeMismatchFunction]: "Type Mismatch",
   [ExtendedErrorType.TypeMismatchReturn]: "Type Mismatch",
@@ -209,7 +209,7 @@ const eDuplicatedCheckForPathLength = ({text}) => {
 }
 
 const eAnonymousEdgeIdentifier = () => {
-  return `anonymous edges can not have identifier`
+  return `an anonymous edge can not have name`
 }
 
 const errorMessageFormatter = {

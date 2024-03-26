@@ -135,7 +135,7 @@ const getSyntaxBlockStyle = block => {
         <SmallGroup>
           <Text fs={"italic"} c={"purple"}>{block.data.keyword}</Text>
           {/* <Text c={identifier ? undefined : "dimmed"}>{identifier ?? "anonymous"}</Text> */}
-          <IdentifierText identifier={identifier} fallback={"anonymous"} isSearched={block.isSearched} />
+          <IdentifierText identifier={identifier} fallback={"unnamed"} isSearched={block.isSearched} />
 
         </SmallGroup>
       )
