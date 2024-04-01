@@ -3,6 +3,7 @@ import classes from "../../styles/modules/ErrorPageTemplate.module.css"
 import {PublicUrl} from "@/core/utils/resource";
 
 // referenced: https://ui.mantine.dev/category/error-pages/
+// Error page: 404
 export const ErrorPageTemplate = ({
   code,
   title,

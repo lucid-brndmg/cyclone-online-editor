@@ -8,6 +8,7 @@ import {downloadTextFile} from "@/lib/dom";
 import {isCycloneExecutableCode} from "@/core/utils/language";
 import {PublicUrl} from "@/core/utils/resource";
 
+// Code highlight for Cyclone
 export const HighlightedCycloneCode = ({code}) => {
   const [hlResult, setHlResult] = useState("")
 
@@ -27,6 +28,7 @@ export const HighlightedCycloneCode = ({code}) => {
   )
 }
 
+// Code block that supports copy and load to editor
 export const ExecutableCycloneCode = ({code, onTry}) => {
 
   return (
@@ -48,6 +50,7 @@ export const ExecutableCycloneCode = ({code, onTry}) => {
   )
 }
 
+// Code block that supports copy and download
 export const CopyableCode = ({code, wrap = false, filename, ...props}) => {
   return (
     <Box pos={"relative"} {...props}>
@@ -68,6 +71,7 @@ export const CopyableCode = ({code, wrap = false, filename, ...props}) => {
   )
 }
 
+// Extract text from element
 const extractTextFromElement = domNode => {
   switch (domNode.constructor.name) {
     case "Text": {
@@ -87,6 +91,9 @@ const extractTextFromElement = domNode => {
   }
 }
 
+// Replacer for HTML elements
+// Replace raw Cyclone code blocks to Highlight.js blocks
+// Replace URLs to match prefix
 export const htmlCodeUrlReplacer = onTry => ({
   replace(domNode) {
     switch (domNode.tagName) {

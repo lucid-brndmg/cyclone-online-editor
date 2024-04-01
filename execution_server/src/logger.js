@@ -1,3 +1,8 @@
+/*
+* Server logger initializers
+*
+* */
+
 import config from "./config.js"
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";

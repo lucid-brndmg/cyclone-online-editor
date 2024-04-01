@@ -1,3 +1,9 @@
+/*
+* Server of KOA
+* Main procedure of various APIs
+*
+* */
+
 import Koa from 'koa';
 import koaRouter from '@koa/router';
 import { bodyParser } from "@koa/bodyparser";
@@ -18,6 +24,7 @@ const router = koaRouter()
 
 app.use(cors())
 
+// execute a source code as request
 router.post("/exec", async ctx => {
   const id = crypto.randomBytes(config.cyclone.idLength).toString("hex")
   const logCtx = {path: "/exec", ip: ctx.ip, id}
@@ -27,6 +34,7 @@ router.post("/exec", async ctx => {
     return ctx.body = {code: ResponseCode.InvalidParams}
   }
 
+  // check for invalid options or syntax errors
   const {invalidOptions, syntaxError} = checkProgram(program)
 
   if (syntaxError) {
@@ -57,6 +65,7 @@ router.post("/exec", async ctx => {
   }
 })
 
+// polling for result, only works under queued mode
 router.get("/get", async ctx => {
   const logCtx = {path: "/get", ip: ctx.ip}
   serviceLogger.info("incoming request", logCtx)
@@ -86,6 +95,7 @@ router.get("/get", async ctx => {
   // }
 })
 
+// get the current version of Cyclone
 router.get("/version", async ctx => {
   const logCtx = {path: "/version", ip: ctx.ip}
   serviceLogger.info("incoming request", logCtx)

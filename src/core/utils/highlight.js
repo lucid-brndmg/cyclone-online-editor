@@ -1,4 +1,6 @@
 import spec from "../../../resource/cyclone_spec.json"
+
+// Code highlight spec for highlight.js that presents in documents
 export default (hljs) => {
   const LITERALS = spec.literals
   const TYPES = spec.types

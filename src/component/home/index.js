@@ -24,6 +24,7 @@ import {PublicUrl} from "@/core/utils/resource";
 import logo from '../../../resource/image/logo.png'
 
 /*
+* Hero section of home page
 * Reference: https://ui.mantine.dev/category/hero/
 * */
 
@@ -172,7 +173,7 @@ const LinksSection = () => {
     <Container size={"xl"} w={"100%"} pb={"xl"}>
       <Stack>
         <Stack>
-          <Title order={3}>Learning & Developing</Title>
+          <Title order={3}>Learning & Solving</Title>
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
             {learningLinks.map((props, i) => <LinkCard size={"lg"} shadow={"md"} color={"orange"} {...props} key={i} />)}
           </SimpleGrid>

@@ -5,6 +5,7 @@ import path from "node:path";
 import fs from "node:fs";
 import {registerCycloneVersion} from "./cyclone.js";
 
+// check for Cyclone path and version
 export const prepareDependencies = async () => {
   // if (conf.queue.enabled && !conf.redis) {
   //   logger.error("No redis config prepared for queue.")

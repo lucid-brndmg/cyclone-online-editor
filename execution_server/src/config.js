@@ -25,6 +25,7 @@ for (let key of ["cyclone", "queue", "redis", "server", "logger"]) {
   }
 }
 
+// read .env
 Object
   .keys(process.env)
   .filter(key => key.startsWith(ENV_PREFIX))

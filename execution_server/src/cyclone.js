@@ -1,3 +1,7 @@
+/*
+* Code validator module + Code execution module
+* */
+
 import path from "node:path"
 import fs from "node:fs"
 import config from "./config.js"
@@ -88,6 +92,7 @@ export const logResult = (input, result, args, execOpts, id) => {
   }
 }
 
+// execute Cyclone program
 export const execCycloneProgram = async (program, id) => {
   const tmpFilename = id + config.cyclone.extension
   const srcPath = config.cyclone.sourcePath

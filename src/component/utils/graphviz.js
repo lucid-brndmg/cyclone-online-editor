@@ -1,3 +1,7 @@
+/*
+* Component of display graphviz DOT images
+* */
+
 import {createRef, forwardRef, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {Box, Button, Code, CopyButton, Group, ScrollArea, SegmentedControl} from "@mantine/core";
@@ -10,6 +14,7 @@ import {AnimationDuration, AnimationSpeed} from "@/core/graphviz";
 import JSZip from "jszip";
 import {CopyableCode} from "@/component/utils/code";
 
+// Graphviz wrapper for React
 const Graphviz = forwardRef(({dot, options, animationSpeed, className}, ref) => {
   const {assignGraphvizId} = useGraphvizStore()
   const id =  useMemo(() => assignGraphvizId(), [])
@@ -61,6 +66,7 @@ const Graphviz = forwardRef(({dot, options, animationSpeed, className}, ref) => 
   </Box>)
 })
 
+// Single graphviz image
 export const GraphvizSinglePreview = ({code, leftSection}) => {
   const [tab, setTab] = useState("Preview")
   const {graphviz: graphvizOptions} = useEditorSettingsStore()
@@ -134,6 +140,7 @@ export const GraphvizSinglePreview = ({code, leftSection}) => {
   )
 }
 
+// multi graphviz images
 export const GraphvizMultiPreview = ({
   codes,
   leftSection

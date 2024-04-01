@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import HomePage from "@/component/home";
 
+// home page
 const Home = () => {
   return (
     <>

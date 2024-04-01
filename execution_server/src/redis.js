@@ -3,7 +3,7 @@ import { createClient } from 'redis';
 import {serviceLogger} from "./logger.js";
 import {exit} from "node:process";
 
-let redis
+let redis // prepare redis
 
 if (config.queue.enabled && !config.redis) {
   serviceLogger.error("No redis config prepared for queue.")

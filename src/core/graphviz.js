@@ -2,6 +2,10 @@ import {map2elems} from "@/lib/list";
 import {dropRegex, dropRegexes, simplify} from "@/lib/string";
 import cycloneAnalyzer from "cyclone-analyzer";
 
+/*
+* Module of converting Cyclone to DOT
+* */
+
 const {
   expandAnonymousEdge,
   isAnonymousEdge
@@ -57,7 +61,7 @@ const genGraphvizStatesDef = (states, options, resultPaths = null) => {
     const color = resultPaths?.states.has(identifier)
       ? ", color=darkgreen, fontcolor=darkgreen"
       : ""
-    codePieces.push(`// ${props} ${identifier}\n${identifier}[label="${identifier}${options.showNodeProps ? `\\n[${props}]` : ""}"${color}];`)
+    codePieces.push(`// ${props} ${identifier}\n${identifier}[label=<${options.showNodeProps ? `<font color="gray"><i >${props}</i></font>` : ""} <b>${identifier}</b>>${color}];`)
   }
 
   return codePieces
@@ -239,15 +243,23 @@ const genGraphvizGoalDef = ({invariants, states, expr, finalPosition}, statesDef
   const def = []
   const id = `<goal>`
   const cleanRes = []
-  if (states.size) {
+  const hasStates = states.size > 0
+  if (hasStates) {
     cleanRes.push(/(reach|stop)\s*\(/g)
   }
   if (invariants.size) {
     cleanRes.push(/with\s*\(/g)
   }
-  const cleanExpr = opts.showDetailedExpressions
-    ? dropRegexes(expr, cleanRes).trim()
-    : `${expr.split(" ").slice(0, 2).join(" ") ?? "check"} ${finalPosition ? `(${finalPosition.startPosition.line}:${finalPosition.startPosition.column + 1})` : ""}`
+  let cleanExpr, goalLabel = ""
+  const reachMatch = /(reach|stop)(?:\s*\(\w+(,\s*\w+)*\))/.exec(expr)
+  if (hasStates && reachMatch) {
+    goalLabel = reachMatch[1] ?? "reach"
+  }
+  if (opts.showDetailedExpressions) {
+    cleanExpr = dropRegexes(expr, cleanRes).trim() + ` ${goalLabel}`
+  } else {
+    cleanExpr = `${expr.split(" ").slice(0, 2).join(" ") ?? "check"} ${finalPosition ? `(${finalPosition.startPosition.line}:${finalPosition.startPosition.column + 1})` : ""} ${goalLabel}`
+  }
   statesDef.push(`${id}[label=" ${cleanExpr} ", color=darkorange, fontcolor=darkorange];`)
   if (opts.showInvariant) {
     for (let inv of invariants) {
@@ -258,6 +270,8 @@ const genGraphvizGoalDef = ({invariants, states, expr, finalPosition}, statesDef
       def.push(`${id} -> ${inv}[color=darkorange];`)
     }
   }
+
+  // goal states
   for (let state of states) {
     if (!definedStates.has(state)) {
       statesDef.push(genUndefinedState(state, opts))
