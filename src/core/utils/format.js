@@ -35,6 +35,7 @@ const errorTypeDescription = {
   [ExtendedErrorType.WhereInlineVariable]: "Where Clause In Local Variables",
   [ExtendedErrorType.InvalidCheckForPathLength]: "Invalid Path Length",
   [ExtendedErrorType.AnonymousEdgeIdentifier]: "Identifier On Anonymous Edge",
+  [ExtendedErrorType.AssertModifierInExpr]: "Invalid Assert Expression",
 
   [ExtendedErrorType.TypeMismatchFunction]: "Type Mismatch",
   [ExtendedErrorType.TypeMismatchReturn]: "Type Mismatch",
@@ -212,6 +213,10 @@ const eAnonymousEdgeIdentifier = () => {
   return `an anonymous edge can not have name`
 }
 
+const eAssertModifierInExpr = () => {
+  return `assertion qualifier 'some | always' can not be used with 'in' clause. Try to remove 'in' clause or remove qualifier`
+}
+
 const errorMessageFormatter = {
   [ExtendedErrorType.RemoteError]: eMsgBased,
   [ExtendedErrorType.SyntaxError]: eMsgBased,
@@ -247,6 +252,7 @@ const errorMessageFormatter = {
   [ExtendedErrorType.InvalidCheckForPathLength]: eInvalidCheckForPathLength,
   [ExtendedErrorType.DuplicatedCheckForPathLength]: eDuplicatedCheckForPathLength,
   [ExtendedErrorType.AnonymousEdgeIdentifier]: eAnonymousEdgeIdentifier,
+  [ExtendedErrorType.AssertModifierInExpr]: eAssertModifierInExpr
 }
 
 export const formatErrorMessage = (type, params, source) => {
