@@ -2,7 +2,7 @@
   "editor": {
     "errorStorageLimit": 1000,
     "editorDefaultTab": "browser",
-    "monacoEnableCDN": false
+    "monacoEnableCDN": true
   },
   "executionServer": {
     "url": "http://127.0.0.1:9000",
