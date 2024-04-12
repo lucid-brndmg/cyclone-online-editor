@@ -70,7 +70,7 @@ const HeroSection = () => {
             }
           >
             <List.Item>
-              <b>Graph-Based</b> – Describe states or nodes and edges that connect them. Solve the problem by finding paths
+              <b>Graph-Based</b> – Describe nodes and edges that connect them. Solve the problem by finding paths
             </List.Item>
             <List.Item>
               <b>Simple & Straightforward</b> – Solve complicated questions by writing a few line of code with a very simple syntax.

@@ -144,7 +144,7 @@ export const SettingsPopover = ({children}) => {
               />
 
               <Switch
-                label={"Code Lens For States"}
+                label={"Code Lens For Nodes"}
                 checked={editorCodeOptions.lensStateEnabled}
                 onChange={e => {
                   setEditorCodeOptions({
@@ -251,7 +251,7 @@ export const SettingsPopover = ({children}) => {
               />
 
               <Switch
-                label={"Display detailed props for states"}
+                label={"Display detailed props for nodes"}
                 checked={graphviz.preview.showNodeProps}
                 onChange={e => setGraphviz({
                   ...graphviz,
