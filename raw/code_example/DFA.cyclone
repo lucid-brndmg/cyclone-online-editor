@@ -1,29 +1,29 @@
 /**
- * A DFA
+ * A DFA 
  * From Introduction to the Theory of Computation
  * Example 1.4 (page 38)
  * A five state-machine M: accepts strings start and end with the same symbol.
- *
+ * 
  */
 
- machine M{
+ graph M{
 
-    abstract start state S{}
-    abstract final state q1{}
-    abstract state q2{}
-    abstract final state r1{}
-    abstract state r2{}
+    abstract start node S{}
+    abstract final node q1{}
+    abstract node q2{}
+    abstract final node r1{}
+    abstract node r2{}
 
-    transition {S->q1 on "a"}
-    transition {S->r1 on "b"}
-    transition {q1->q1 on "a"}
-    transition {q1->q2 on "b"}
-    transition {q2->q1 on "a"}
-    transition {q2->q2 on "b"}
-    transition {r1->r1 on "b"}
-    transition {r1->r2 on "a"}
-    transition {r2->r1 on "b"}
-    transition {r2->r2 on "a"}
+    edge {S->q1 on "a"}
+    edge {S->r1 on "b"}
+    edge {q1->q1 on "a"}
+    edge {q1->q2 on "b"}
+    edge {q2->q1 on "a"}
+    edge {q2->q2 on "b"}
+    edge {r1->r1 on "b"}
+    edge {r1->r2 on "a"}
+    edge {r2->r1 on "b"}
+    edge {r2->r2 on "a"}
 
     goal{
         /**

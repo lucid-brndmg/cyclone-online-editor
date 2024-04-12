@@ -1,37 +1,37 @@
 /*
  * Written by: Hao Wu
  * Created on: 23:45, Feb 17, 2023.
- *
+ * 
  * EinsteinRiddle:
- * There are five houses lined up next to each other along a street. Each house is a different color, and
- * each homeowner is of a different nationality, drinks a different beverage, smokes a different brand of
+ * There are five houses lined up next to each other along a street. Each house is a different color, and 
+ * each homeowner is of a different nationality, drinks a different beverage, smokes a different brand of 
  * cigar, and owns a different pet.
- *
+ *	
  * Using the following 15 clues, can you figure out who owns a pet fish?
- *
+ * 
  * 1. The Englishman lives in the house with red walls.
- * 2. The Swede keeps dogs.
- * 3. The Dane drinks tea.
- * 4. The house with green walls is just to the left of the house with white walls.
- * 5. The owner of the house with green walls drinks coffee.
+ * 2. The Swede keeps dogs. 
+ * 3. The Dane drinks tea. 
+ * 4. The house with green walls is just to the left of the house with white walls. 
+ * 5. The owner of the house with green walls drinks coffee. 
  * 6. The man who smokes Pall Mall keeps birds.
  * 7. The owner of the house with yellow walls smokes Dunhills.
- * 8. The man in the center house drinks milk.
- * 9. The Norwegian lives in the first house.
- * 10.The Blend smoker has a neighbor who keeps cats.
- * 11.The man who smokes Blue Masters drinks beer.
- * 12.The man who keeps horses lives next to the Dunhill smoker.
+ * 8. The man in the center house drinks milk. 
+ * 9. The Norwegian lives in the first house. 
+ * 10.The Blend smoker has a neighbor who keeps cats. 
+ * 11.The man who smokes Blue Masters drinks beer. 
+ * 12.The man who keeps horses lives next to the Dunhill smoker. 
  * 13.The German smokes Prince.
- * 14.The Norwegian lives next to the house with blue walls.
- * 15.The Blend smoker has a neighbor who drinks water.
+ * 14.The Norwegian lives next to the house with blue walls. 
+ * 15.The Blend smoker has a neighbor who drinks water. 
  *
  *
  * We use record and enum data type to build each house with its attributes.
  */
 
 option-trace=true;
-machine EinsteinRiddle{
-
+graph EinsteinRiddle{
+	
 	record HouseA{
 		enum {Red, Yellow, Blue, White, Green} Color;
 		enum {Dog, Fish, Cat, Bird, Horse} Pet;
@@ -73,7 +73,7 @@ machine EinsteinRiddle{
 		enum {English, Sweedish, Danish, Norwegian, German} Nationality;
 	};
 
-	start normal state S{
+	start node S{
 
 		/* Each house has a different color */
 		HouseA.Color != HouseB.Color;
@@ -137,16 +137,16 @@ machine EinsteinRiddle{
 
 	}
 
-	final normal state F{
+	final node F{
 		//clue 1
-		(HouseA.Nationality==#English && HouseA.Color==#Red) ||
+		(HouseA.Nationality==#English && HouseA.Color==#Red) || 
 		(HouseB.Nationality==#English && HouseB.Color==#Red) ||
 		(HouseC.Nationality==#English && HouseC.Color==#Red) ||
 		(HouseD.Nationality==#English && HouseD.Color==#Red) ||
 		(HouseE.Nationality==#English && HouseE.Color==#Red);
 
 		//clue 2
-		(HouseA.Nationality==#Sweedish && HouseA.Pet==#Dog) ||
+		(HouseA.Nationality==#Sweedish && HouseA.Pet==#Dog) || 
 		(HouseB.Nationality==#Sweedish && HouseB.Pet==#Dog) ||
 		(HouseC.Nationality==#Sweedish && HouseC.Pet==#Dog) ||
 		(HouseD.Nationality==#Sweedish && HouseD.Pet==#Dog) ||
@@ -173,17 +173,17 @@ machine EinsteinRiddle{
 		(HouseE.Color==#Green && HouseE.Beverage==#Coffee) ||
 
 		//clue 6
-		(HouseA.Cigar==#PallMall && HouseA.Pet==#Bird) ||
-		(HouseB.Cigar==#PallMall && HouseB.Pet==#Bird) ||
-		(HouseC.Cigar==#PallMall && HouseC.Pet==#Bird) ||
-		(HouseD.Cigar==#PallMall && HouseD.Pet==#Bird) ||
+		(HouseA.Cigar==#PallMall && HouseA.Pet==#Bird) || 
+		(HouseB.Cigar==#PallMall && HouseB.Pet==#Bird) || 
+		(HouseC.Cigar==#PallMall && HouseC.Pet==#Bird) || 
+		(HouseD.Cigar==#PallMall && HouseD.Pet==#Bird) || 
 		(HouseE.Cigar==#PallMall && HouseE.Pet==#Bird);
-
+			
 		//clue 7
-		(HouseA.Cigar==#Dunhill && HouseA.Color==#Yellow) ||
-		(HouseB.Cigar==#Dunhill && HouseB.Color==#Yellow) ||
-		(HouseC.Cigar==#Dunhill && HouseC.Color==#Yellow) ||
-		(HouseD.Cigar==#Dunhill && HouseD.Color==#Yellow) ||
+		(HouseA.Cigar==#Dunhill && HouseA.Color==#Yellow) || 
+		(HouseB.Cigar==#Dunhill && HouseB.Color==#Yellow) || 
+		(HouseC.Cigar==#Dunhill && HouseC.Color==#Yellow) || 
+		(HouseD.Cigar==#Dunhill && HouseD.Color==#Yellow) || 
 		(HouseE.Cigar==#Dunhill && HouseE.Color==#Yellow);
 
 		//clue 8
@@ -212,14 +212,14 @@ machine EinsteinRiddle{
 		(HouseC.Cigar==#BlueMaster && HouseC.Beverage==#Beer) ||
 		(HouseD.Cigar==#BlueMaster && HouseD.Beverage==#Beer) ||
 		(HouseE.Cigar==#BlueMaster && HouseE.Beverage==#Beer);
-
+		
 		//clue 13
 		(HouseA.Nationality==#German && HouseA.Cigar==#Prince) ||
 		(HouseB.Nationality==#German && HouseB.Cigar==#Prince) ||
 		(HouseC.Nationality==#German && HouseC.Cigar==#Prince) ||
 		(HouseD.Nationality==#German && HouseD.Cigar==#Prince) ||
 		(HouseE.Nationality==#German && HouseE.Cigar==#Prince);
-
+		
 		//clue 14
 		(HouseA.Nationality==#Norwegian && HouseB.Color==#Blue) ||
 		(HouseB.Nationality==#Norwegian && ((HouseA.Color==#Blue) || (HouseC.Color==#Blue))) ||

@@ -8,6 +8,9 @@ const assignSaveId = () => `sav-${randomId(8)}`
 export const isManifest = id => id.startsWith("man-")
 
 export const useEditorPersistentStore = create((set, get) => ({
+  newFileCreated: 0,
+  setNewFileCreated: newFileCreated => set({newFileCreated}),
+
   currentFileId: null,
   setCurrentFileId: currentFileId => set(() => ({currentFileId})),
 

@@ -10,9 +10,6 @@ export const useEditorExecutionStore = create((set, get) => ({
   visualDataCopy: null,
   setVisualDataCopy: visualDataCopy => set({visualDataCopy}),
 
-  compilerOptions: null,
-  setCompilerOptions: compilerOptions => set({compilerOptions}),
-
   isLoading: false,
   setIsLoading: isLoading => set({isLoading}),
 

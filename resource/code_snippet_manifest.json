@@ -9,15 +9,19 @@
   },
   {
     "label": "start",
-    "insert": "start state ${1:Name} {\n\t$0\n}"
+    "insert": "start node ${1:Name} {\n\t$0\n}"
   },
   {
     "label": "abstract",
-    "insert": "abstract state ${1:Name} {\n\t$0\n}"
+    "insert": "abstract node ${1:Name} {\n\t$0\n}"
   },
   {
     "label": "normal",
-    "insert": "normal state ${1:Name} {\n\t$0\n}"
+    "insert": "normal node ${1:Name} {\n\t$0\n}"
+  },
+  {
+    "label": "final",
+    "insert": "final node ${1:Name} {\n\t$0\n}"
   },
   {
     "label": "state",
@@ -36,8 +40,16 @@
     "insert": "trans { $0 }"
   },
   {
+    "label": "edge",
+    "insert": "edge { $0 }"
+  },
+  {
     "label": "inv",
     "insert": "invariant ${1:name} { $0 }"
+  },
+  {
+    "label": "rec",
+    "insert": "record ${1:name} { \n\t$0\n };"
   },
   {
     "label": "fun",

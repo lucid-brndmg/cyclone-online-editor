@@ -5,29 +5,29 @@
  * decrement the counter.
  * reset the counter.
  */
-  machine CountingMachine {
-      int  c;
-      start normal state  R {c=0;}
-      normal state  I {c=c+1;}
-      normal state  D {c=c-1;}
+graph CountingMachine { 
+    int  c;
+    start normal node  R {c=0;}
+    normal node  I {c=c+1;}
+    normal node  D {c=c-1;}
 
-      trans { R -> I }
-      trans { R -> D }
-      trans { I -> R }
-      trans { I -> D }
-      trans { I -> I }
-      trans { D -> R }
-      trans { D -> I }
-      trans { D -> D }
-
+    edge { R -> I }
+    edge { R -> D }
+    edge { I -> R }
+    edge { I -> D }
+    edge { I -> I }
+    edge { D -> R }
+    edge { D -> I }
+    edge { D -> D }
+        
     goal{
         /**
-         * Find all possible of instruction sequences that uses 6 instructions
-         * to make the counter=3 and must uses decrement instruction at least once.
+         * Find all possible of instruction sequences that use 6 instructions 
+         * to make the counter=3 and must use the decrement instruction somewhere.
          */
 
         assert c==3;
         enumerate for 5 condition (D) reach (R,I,D)
     }
-
+	
 }

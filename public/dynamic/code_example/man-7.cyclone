@@ -12,7 +12,7 @@
     abstract node S4{}
     abstract node S5{}
     abstract node S6{}
-
+    
     /* the set of edges */
     edge { S0 -> S1 }
     edge { S0 -> S3 }
@@ -34,10 +34,10 @@
     goal{
         // each node must appear exactly once.
         check for 6 condition (
-                S0^{1} && S1^{1} &&
-                S2^{1} && S3^{1} &&
-                S4^{1} && S5^{1} &&
-                S6^{1} )
-        reach (S0,S1,S2,S3,S4,S5,S6) //any node could be a terminating node.
+                S0^{1} && S1^{1} && 
+                S2^{1} && S3^{1} && 
+                S4^{1} && S5^{1} && 
+                S6^{1} ) 
+        reach (S0,S1,S2,S3,S4,S5,S6) //path could end at any one of the nodes.
     }
  }

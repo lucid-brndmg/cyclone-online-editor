@@ -128,11 +128,11 @@ const eInvalidNamedExprScope = ({ident, scopes}) => {
 }
 
 const eStartNodeDuplicated = ({ident}) => {
-  return `start state already defined as ${ident}, only 1 start state could exist in current graph`
+  return `start node already defined as ${ident}, only 1 start node could exist in current graph`
 }
 
 const eCodeInsideAbstractNode = () => {
-  return `code inside abstract node / state will be ignored by the compiler`
+  return `code inside abstract node will be ignored by the compiler`
 }
 
 const eNoGoalDefined = () => {
@@ -140,7 +140,7 @@ const eNoGoalDefined = () => {
 }
 
 const eNoStartNodeDefined = () => {
-  return `no start node / state defined in current graph`
+  return `no start node defined in current graph`
 }
 
 const eReturnExprViolation = () => {
@@ -160,7 +160,7 @@ const eDuplicatedEdge = () => {
 }
 
 const eEmptyEdge = () => {
-  return `this edge has no actual targeted state / node because every node is excluded`
+  return `this edge has no actual targeted node because every node is excluded`
 }
 
 const eInvalidStatement = ({got}) => {
@@ -270,9 +270,9 @@ export const formatErrorMessage = (type, params, source) => {
 }
 
 const typeMsgRepr = {
-  [IdentifierType.Machine]: "machine",
-  [IdentifierType.State]: "state",
-  [IdentifierType.Trans]: "trans",
+  [IdentifierType.Machine]: "graph",
+  [IdentifierType.State]: "node",
+  [IdentifierType.Trans]: "edge",
   [IdentifierType.Record]: "record",
   [IdentifierType.Enum]: "enum",
   [IdentifierType.Function]: "function",
@@ -287,9 +287,9 @@ const typeMsgRepr = {
 }
 
 const kindDescription = {
-  [IdentifierKind.State]: "state / node",
-  [IdentifierKind.Machine]: "machine / graph",
-  [IdentifierKind.Trans]: "transition / edge",
+  [IdentifierKind.State]: "node / state",
+  [IdentifierKind.Machine]: "graph / machine",
+  [IdentifierKind.Trans]: "edge / transition",
   [IdentifierKind.Invariant]: "invariant",
   [IdentifierKind.Let]: "path variable",
   [IdentifierKind.Record]: "record",
@@ -349,9 +349,9 @@ export const cycloneCodeMD = code => "```cyclone\n" +
 
 const scopeBlockTypeRepr = {
   [SemanticContextType.ProgramScope]: "program",
-  [SemanticContextType.MachineScope]: "machine",
-  [SemanticContextType.StateScope]: "state",
-  [SemanticContextType.TransScope]: "trans",
+  [SemanticContextType.MachineScope]: "graph",
+  [SemanticContextType.StateScope]: "node",
+  [SemanticContextType.TransScope]: "edge",
   [SemanticContextType.InvariantScope]: "invariant",
   [SemanticContextType.GoalScope]: "goal",
   [SemanticContextType.RecordScope]: "record",

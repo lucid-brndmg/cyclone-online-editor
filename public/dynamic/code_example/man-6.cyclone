@@ -1,26 +1,21 @@
  /* A Simple Graph
   * Demonstrate how to use path conditions.
-  *
   */
-
 graph G{
-
     /* the set of nodes */
     abstract start node S1{}
     abstract node S2{}
-
-
+    
     /* the set of edges */
     edge { S1 -> S1 }
     edge { S1 -> S2 }
     edge { S2 -> S1 }
     edge { S2 -> S2 }
-
+    
     goal{
-
         /*
-         * Find a path (starts from node S1) that
-         *  has a length of 5,
+         * Find a path (starts from node S1) that 
+         *  has a length of 5, 
          *  must not include self-loops,
          *  and eventually reach S2.
          */

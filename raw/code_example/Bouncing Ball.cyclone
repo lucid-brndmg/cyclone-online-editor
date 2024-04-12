@@ -3,31 +3,31 @@
  */
 
 option-trace=true;
-machine Bouncing_Ball_v1{
-    real x where x>=0; //position
+graph Bouncing_Ball_v1{
+    real x where x>=0; //position 
     real v; //velocity
     real t where t>=0; //time
     const real G = 9.81; //earth's gravitational force
     real c where c>=0 && c<=1; //constant (energy loss)
-
-    normal start state Fall{
+    
+    normal start final node Fall{
         x = x + v * t;
         v = v - G * t;
     }
 
-    normal state Bounce{
+    normal final node Bounce{
         v = -c * v;
         x = 0;
     }
 
-    trans {Fall -> Fall}
-    trans {Fall -> Bounce where x==0 && v<=0;}
-    trans {Bounce -> Fall}
+    edge {Fall -> Fall}
+    edge {Fall -> Bounce where x==0 && v<=0;}
+    edge {Bounce -> Fall}
 
     invariant inv {x>=0;}
 
     goal{
-        check for 2,3,4,5 reach (Fall,Bounce)
+        check for 2,3,4,5
     }
 
 }

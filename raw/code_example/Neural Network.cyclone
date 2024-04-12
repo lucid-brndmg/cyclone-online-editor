@@ -3,7 +3,7 @@
  */
 
 option-trace=true;
-machine TinyNeuralNetwork{
+graph TinyNeuralNetwork{
 	/* input */
 	real x0=1;
 	real x1 where x1>=0 && x1<=1;
@@ -51,12 +51,12 @@ machine TinyNeuralNetwork{
 	normal node R21{
 		(w21*y11>=0)=>(y21==w21*y11);
 		(w21*y11<0)=>(y21==0);
-	}
+	}	
 
 	normal node R22{
 		(w22*y11+w23*y12+w25*y13>=0)=>(y22==w22*y11+w23*y12+w25*y13);
 		(w22*y11+w23*y12+w25*y13<0)=>(y22==0);
-	}
+	}	
 
 	normal node R23{
 		(w24*y12+w26*y13>=0) => (y23==w24*y12+w26*y13);
@@ -74,7 +74,7 @@ machine TinyNeuralNetwork{
 	}
 
 	abstract final node F{}
-
+	
 	edge { S -> R11 }
 	edge { R11 -> R12 }
 	edge { R12 -> R13 }
@@ -87,14 +87,14 @@ machine TinyNeuralNetwork{
 
 	goal{
 
-		assert (y11>=0 && y12>=0 && y13>=0 &&
+		assert (y11>=0 && y12>=0 && y13>=0 && 
 			y21>=0 && y22>=0 && y23>=0 && y31>=0 && y32>=0) in (S);
 
 		//Properties to be checked
 		assert !(y31==1);
 		assert !(y32==tent(tent(x1)));
-
-		check for 9
+		
+		check for 9 
 	}
 
 }

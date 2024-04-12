@@ -6,6 +6,7 @@ import {IconDeviceFloppy, IconFile, IconFilePlus} from "@tabler/icons-react";
 import {codeExampleTable} from "@/core/resources/codeExample";
 import {SaveFileModal} from "@/component/modal/saveFileModal";
 import {locateToCode} from "@/core/utils/monaco";
+import {modals} from "@mantine/modals";
 
 export const FileStatusBar = () => {
   const {currentFileId, fileTable} = useEditorPersistentStore()
@@ -18,7 +19,7 @@ export const FileStatusBar = () => {
 
   const filename = useMemo(() => {
     if (!currentFileId) {
-      return "New File"
+      return "New"
     }
 
     if (isManifest(currentFileId)) {
@@ -78,17 +79,36 @@ export const FileSaveButton = () => {
 }
 
 export const NewFileButton = () => {
-  const {setSwitchFileId, currentFileId} = useEditorPersistentStore()
-  const {monacoCtx} = useEditorStore()
+  const {setSwitchFileId, currentFileId, setNewFileCreated} = useEditorPersistentStore()
+  const {monacoCtx, code} = useEditorStore()
+
+  const openClearNewFileModal = () => modals.openConfirmModal({
+    title: "Change Unsaved",
+    children: (
+      <Text size={"sm"}>
+        Changes unsaved, by continue will lost your progress.
+      </Text>
+    ),
+    labels: {confirm: "Continue", cancel: "Cancel"},
+    onConfirm: () => setNewFileCreated(Date.now())
+  })
+
+  const createFile = () => {
+    if (currentFileId !== null) {
+      setSwitchFileId(null)
+    } else {
+      openClearNewFileModal()
+    }
+    locateToCode(monacoCtx.editor, {line: 1, column: 1})
+  }
+
   return (
     <Button
       leftSection={<IconFilePlus />}
       variant={"default"}
-      onClick={() => {
-        setSwitchFileId(null)
-        locateToCode(monacoCtx.editor, {line: 1, column: 1})
-      }}
-      disabled={currentFileId === null}
+      onClick={createFile}
+      // disabled={currentFileId === null}
+      disabled={currentFileId === null && !code.length}
     >
       New File
     </Button>

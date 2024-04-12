@@ -1,56 +1,56 @@
 /**
  * A boolean switch requirements
  * Written by: Hao Wu
- *
+ * 
  * A switch has two buttons: Set and Reset.
  * Pressing Set turns the switch on.
  * Pressing Reset turns the switch off.
- *
- * If both Set and Reset are initially both unpressed, the initial
- * state of the switch is determined by the third signal.
+ * 
+ * If both Set and Reset are initially both unpressed, the initial 
+ * state of the switch is determined by the third signal. 
  */
 
 option-trace=true;
-machine Switch{
-
+graph Switch{
+	
 	enum {set,reset,unpressed} button;
 	/* use int to model the signal and switch */
 	int signal=2;
 	int switch=signal;
+	
+	abstract start node S{}
 
-	abstract start state S{}
-
-	normal final state On {
+	normal final node On {
 		button=#set;
 		switch=1;
 	}
 
-	normal final state Off{
+	normal final node Off{
 		button=#reset;
 		switch=0;
 	}
 
-	normal final state ThirdSignal{
+	normal final node ThirdSignal{
 		button=#unpressed;
 		switch=signal;
 	}
 
-	trans { S -> On where button==#set;}
-	trans { S -> Off where button==#reset;}
-	trans { S -> ThirdSignal where button==#unpressed;}
+	edge { S -> On where button==#set;}
+	edge { S -> Off where button==#reset;}
+	edge { S -> ThirdSignal where button==#unpressed;}
 
-	trans { Off -> On }
-	trans { Off -> Off }
+	edge { Off -> On }
+	edge { Off -> Off }
 
-	trans { On -> Off }
-	trans { On -> On }
+	edge { On -> Off }
+	edge { On -> On }
 
-	trans {ThirdSignal -> ThirdSignal }
-	trans {ThirdSignal -> On }
-	trans {ThirdSignal -> Off }
+	edge {ThirdSignal -> ThirdSignal }
+	edge {ThirdSignal -> On }
+	edge {ThirdSignal -> Off }
 
 	goal{
-
+		
 		/* R0: begin with the button unpressed. */
 		assert (initial(button)==#unpressed);
 
@@ -62,8 +62,7 @@ machine Switch{
 
 		/* R3: make sure a sequence covering all possible states of the switch. */
 		let state_coverage = (On && Off && ThirdSignal);
-
-
+		
 		check for 3 condition (state_coverage)
 	}
 }

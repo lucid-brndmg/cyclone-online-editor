@@ -68,9 +68,9 @@ const genGraphvizStatesDef = (states, options, resultPaths = null) => {
 }
 
 const genAttrs = xs => xs.length ? `[${xs.join(", ")}]` : ""
-const genUndefinedState = (s, opts) => `// WARNING: undefined state: ${s} \n${s}[fontcolor=red, label="${s}${opts.showNodeProps ? "\\n[undefined]" : ""}"];\n`
+const genUndefinedState = (s, opts) => `// WARNING: undefined node: ${s} \n${s}[fontcolor=red, label="${s}${opts.showNodeProps ? "\\n[undefined]" : ""}"];\n`
 
-const genUndefinedInvariant = (s, opts) => `${s}[fontcolor=blue, color=blue, style=dashed, label="invariant ${s}${opts.showNodeProps ? "\\n[every state]" : ""}"];\n`
+const genUndefinedInvariant = (s, opts) => `${s}[fontcolor=blue, color=blue, style=dashed, label="invariant ${s}${opts.showNodeProps ? "\\n[every node]" : ""}"];\n`
 
 export const availableGraphvizEngines = [
   "circo",

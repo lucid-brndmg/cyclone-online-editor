@@ -39,7 +39,6 @@ export const CodeExecutionButton = ({...props}) => {
     setIsPolling,
     setParsedTraces,
     setTraceIsGraphviz,
-    setCompilerOptions,
     isLoading, executionResult, isPolling,
   } = useEditorExecutionStore()
   const isPollingRef = useRef(isPolling)
@@ -110,7 +109,6 @@ export const CodeExecutionButton = ({...props}) => {
     setIsError(false)
     setErrorMessage("")
     setVisualDataCopy(editorCtx.getVisualData())
-    setCompilerOptions(editorCtx.compilerOptions)
     setTraceIsGraphviz(false)
 
     try {

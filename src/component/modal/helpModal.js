@@ -21,14 +21,14 @@ export const HelpModal = ({opened, onOpened}) => {
     {icon: IconFolder, bold: "File Browser", text: "Store all edited cyclone source code in the browser. Also access all official examples instantly."},
     {icon: IconBook2, bold: "Reference", text: "Look up language keywords, build-in functions & operators, compile options instantly."},
     {icon: IconListTree, bold: "Outline", text: "View code structure in a tree and jump to definition in one click just like VSCode. Also view all errors & warnings inside."},
-    {icon: IconEye, bold: "Visualization", text: "Preview cyclone's state & edge (transition) defined in the source code as graph in real-time. View execution result & trace as images."}
+    {icon: IconEye, bold: "Visualization", text: "Preview cyclone's node & edge defined in the source code as graph in real-time. View execution result & trace as images."}
   ]
 
   const codeEditorItems = [
     {bold: "Syntax Highlighting", text: "Display highlighted source code and supports multiple themes."},
     {bold: "Syntactic Analysis", text: "Check cyclone source code by syntax. Errors will be highlighted."},
     // {bold: "Type Checking", text: "Check existing type errors (including self-defined functions & built-in operators) inside source code."},
-    {bold: "Semantic Analysis", text: "Check all kinds of semantic errors (such as type errors, using undefined variables, invalid start state or unreachable code) inside source code"},
+    {bold: "Semantic Analysis", text: "Check all kinds of semantic errors (such as type errors, using undefined variables, invalid start node or unreachable code) inside source code"},
     {bold: "Hover Information", text: "Display type info & reference docs (for built-in functions & keywords) on hover"},
     {bold: "Code Completion & Snippets", text: "Provide auto-completions & snippets when typing. Scoped identifiers could be provided as well."},
   ]

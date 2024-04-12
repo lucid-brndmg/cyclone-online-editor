@@ -122,7 +122,7 @@ const getSyntaxBlockStyle = block => {
     case SyntaxBlockKind.State: {
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>{block.data.attributes?.join(" ") ?? "state"}</Text>
+          <Text fs={"italic"} c={"purple"}>{block.data.attributes?.join(" ") ?? "node"}</Text>
           <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
 
         </SmallGroup>

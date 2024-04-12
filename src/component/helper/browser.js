@@ -20,8 +20,12 @@ export const FileStateWrapper = () => {
     initOnPageLoad,
     fileTable,
     loadOne,
+    newFileCreated,
+    switchFileId,
+    setSwitchFileId,
+    setCurrentFileId
   } = useEditorPersistentStore()
-  const {setIsSaved} = useEditorSaveStatusStore()
+  const {setIsSaved, isSaved} = useEditorSaveStatusStore()
   const [isLoadingCodeExample, setIsLoadingCodeExample] = useState(false)
   const [saveFlag, setSaveFlag] = useState(false)
   const router = useRouter()
@@ -75,7 +79,33 @@ export const FileStateWrapper = () => {
         })
       }
     }
-  }, [currentFileId])
+  }, [currentFileId, newFileCreated])
+
+  const openSwitchUnsavedModal = () => modals.openConfirmModal({
+    title: 'Change Unsaved',
+    children: (
+      <Text size="sm">
+        Changes unsaved, by continue will lost your progress.
+      </Text>
+    ),
+    labels: { confirm: 'Continue', cancel: 'Cancel' },
+    onCancel: () => {
+      setSwitchFileId(undefined)
+    },
+    onConfirm: () => {
+      setCurrentFileId(switchFileId)
+      setSwitchFileId(undefined)
+    },
+  });
+
+  useEffect(() => {
+    if (switchFileId !== undefined && !isSaved) {
+      openSwitchUnsavedModal()
+    } else if (switchFileId !== undefined) {
+      setCurrentFileId(switchFileId)
+      setSwitchFileId(undefined)
+    }
+  }, [switchFileId]);
 
   useEffect(() => {
     setIsSaved(true)
@@ -107,8 +137,6 @@ export const BrowserPanel = () => {
     ...value
   })).sort((a, b) => b - a), [fileTable])
 
-  const {isSaved} = useEditorSaveStatusStore()
-
 
   const openDeletionModal = () => modals.openConfirmModal({
     title: 'Confirm Deletion',
@@ -123,37 +151,11 @@ export const BrowserPanel = () => {
     onConfirm: () => onDelete(),
   });
 
-  const openSwitchUnsavedModal = () => modals.openConfirmModal({
-    title: 'Change Unsaved',
-    children: (
-      <Text size="sm">
-        Changes unsaved, by continue will lost your progress.
-      </Text>
-    ),
-    labels: { confirm: 'Continue', cancel: 'Cancel' },
-    onCancel: () => {
-      setSwitchFileId(undefined)
-    },
-    onConfirm: () => {
-      setCurrentFileId(switchFileId)
-      setSwitchFileId(undefined)
-    },
-  });
-
   useEffect(() => {
     if (deletionId) {
       openDeletionModal()
     }
   }, [deletionId]);
-
-  useEffect(() => {
-    if (switchFileId !== undefined && !isSaved) {
-      openSwitchUnsavedModal()
-    } else if (switchFileId !== undefined) {
-      setCurrentFileId(switchFileId)
-      setSwitchFileId(undefined)
-    }
-  }, [switchFileId]);
 
   // const onDownloadExamples = async () => {
   //   const zip = new JSZip()
