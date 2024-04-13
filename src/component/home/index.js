@@ -22,24 +22,18 @@ import localforage from "localforage";
 import {useRouter} from "next/router";
 import {PublicUrl} from "@/core/utils/resource";
 import logo from '../../../resource/image/logo.png'
+import getConfig from "next/config";
 
 /*
 * Hero section of home page
 * Reference: https://ui.mantine.dev/category/hero/
 * */
 
+const { publicRuntimeConfig } = getConfig()
+
 const HeroSection = () => {
   // const [exampleCode, setExampleCode] = useState("")
   const router = useRouter()
-
-  // useEffect(() => {
-  //   hljs.registerLanguage(CycloneLanguageId, hljsCyclone)
-  //   const highlightedCode = hljs.highlight(
-  //     Config.home.exampleCode,
-  //     { language: CycloneLanguageId }
-  //   ).value
-  //   setExampleCode(highlightedCode)
-  // }, [])
 
   const onTry = async () => {
     await localforage.setItem("tmp_code", Config.home.exampleCode)
@@ -56,7 +50,7 @@ const HeroSection = () => {
             </Title>
           </Group>
           <Text c="dimmed" mt="md">
-            Solve graph-based problems by writing a few lines of code & provide a general solution to problems that can be described as a graph.
+            Code up your verification tasks using a simple graph notation.
           </Text>
 
           <List
@@ -70,13 +64,13 @@ const HeroSection = () => {
             }
           >
             <List.Item>
-              <b>Graph-Based</b> – Describe nodes and edges that connect them. Solve the problem by finding paths
+              <b>Graph Oriented Spec</b> – Visualise problems and exchange ideas using graphs.
             </List.Item>
             <List.Item>
-              <b>Simple & Straightforward</b> – Solve complicated questions by writing a few line of code with a very simple syntax.
+              <b>Simple Notation</b> – No need to learn complex formalisms before writing your specification.
             </List.Item>
             <List.Item>
-              <b>Edit Online</b> – Use the online editor to unlock the full experience of Cyclone. Code lens, reference docs and visualization engine are ready.
+              <b>Online Editor</b> – Use our newly designed online editor to unlock the full experience of Cyclone.
             </List.Item>
           </List>
 
@@ -104,39 +98,32 @@ const HeroSection = () => {
 }
 
 const Copyright = () => {
+  const updatedDate = new Date(publicRuntimeConfig.lastUpdated).toDateString()
+
   return (
     <Container size={"xl"} w={"100%"}>
       <Divider />
       <Group justify={"space-between"} mt={"md"} style={{alignItems: "center"}}>
-        <Group style={{alignItems: "flex-start"}}>
-          <Box fz={"sm"}>
-            <Text c={"dimmed"} size={"sm"} mb={4} fw={500}>
-              Links
-            </Text>
-            <Anchor c={"orange"} fz={"sm"} href={"https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"}>Language Reference</Anchor>
-            <br/>
-            <Anchor c={"orange"} fz={"sm"} href={"https://cyclone4web.cs.nuim.ie/editor/"}>Another Cyclone Editor</Anchor>
-            <br/>
-            <Anchor c={"orange"} fz={"sm"} href={"https://classicwuhao.github.io/cyclone_tutorial/tutorial-content.html"}>Cyclone Homepage</Anchor>
-          </Box>
-          <Box fz={"sm"}>
-            <Text c={"dimmed"} size={"sm"} mb={4} fw={500}>
-              Source Codes
-            </Text>
-            <Anchor c={"orange"} fz={"sm"} href={"https://github.com/lucid-brndmg/cyclone-online-editor"}>This Website</Anchor>
-            <br/>
-            <Anchor c={"orange"} fz={"sm"} href={"https://github.com/classicwuhao/Cyclone"}>Cyclone Language</Anchor>
-          </Box>
-
-        </Group>
+        <Box fz={"sm"}>
+          <Text c={"dimmed"} size={"sm"} mb={4} fw={500}>
+            Links
+          </Text>
+          <Anchor c={"orange"} fz={"sm"} href={"https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"}>Language Reference</Anchor>
+          <br/>
+          <Anchor c={"orange"} fz={"sm"} href={"https://cyclone4web.cs.nuim.ie/editor/"}>Another Cyclone Editor</Anchor>
+          <br/>
+          <Anchor c={"orange"} fz={"sm"} href={"https://classicwuhao.github.io/cyclone_tutorial/tutorial-content.html"}>Cyclone Homepage</Anchor>
+        </Box>
 
         <Stack >
           <Text c={"dimmed"} size={"xs"}>
-            THIS WEBSITE IS CODED BY <Anchor c={"orange"} href={"https://github.com/lucid-brndmg"}>HAOYANG LU</Anchor> AS A FINAL YEAR PROJECT AT MAYNOOTH UNIVERSITY GUIDED BY DR. HAO WU.
+            This website is designed by <Anchor c={"orange"} href={"https://github.com/lucid-brndmg"}>Haoyang Lu</Anchor>.
             <br/>
-            CYCLONE IS A LANGUAGE DESIGNED BY <Anchor c={"orange"} href={"https://classicwuhao.github.io/"}>HAO WU</Anchor>.
+            Cyclone is designed by <Anchor c={"orange"} href={"https://classicwuhao.github.io/"}>Hao Wu</Anchor>.
             <br/>
-            <Anchor c={"orange"} href={"https://www.cs.nuim.ie/research/pop/"}>PRINCIPLES OF PROGRAMMING RESEARCH GROUP</Anchor> © 2023 <Anchor c={"orange"} href={"https://mu.ie"}>MAYNOOTH UNIVERSITY</Anchor>
+            <Anchor c={"orange"} href={"https://www.cs.nuim.ie/research/pop/"}>Principles of Programming Research Group, </Anchor>  <Anchor c={"orange"} href={"https://mu.ie"}>Maynooth University</Anchor>.
+            <br/>
+            Last Updated: {updatedDate}
           </Text>
         </Stack>
 
@@ -157,23 +144,22 @@ const LinkCard = ({title, desc, url, color, shadow, withBorder, size}) => {
 
 const LinksSection = () => {
   const learningLinks = [
-    {title: "Learn", url: PublicUrl.Tutorial, desc: "Learning The Cyclone Language and trying the code inside the tutorials"},
-    {title: "Online Editor", url: PublicUrl.Editor, desc: "Writing Cyclone using the online development environment"},
-    {title: "Installation", url: "https://classicwuhao.github.io/cyclone_tutorial/installation.html", desc: "Install Cyclone on your local machine"}
+    {title: "Online Editor", url: PublicUrl.Editor, desc: "Writing your Cyclone specifications without installing anything on your local machine."},
+    {title: "VSCode Extension", url: "https://github.com/classicwuhao/CycloneVSCodePlugin", desc: "Code up your Cyclone specifications with our VSCode extension."},
+    {title: "Command Line", url: "https://classicwuhao.github.io/cyclone_tutorial/installation.html", desc: "Like running everything in command-line? This is for you."}
   ]
 
   const resourceLinks = [
+    {title: "Tutorial", desc: "A tutorial website for Cyclone", url: "https://classicwuhao.github.io/cyclone_tutorial/tutorial-content.html"},
     {title: "Reference Docs", desc: "Language reference documents", url: "https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"},
-    {title: "Official Tutorials", desc: "Official tutorial website for Cyclone without an online editor", url: "https://classicwuhao.github.io/cyclone_tutorial/tutorial-content.html"},
-    {title: "Cyclone Analyzer", desc: "The static analyzer of Cyclone that this website is using", url: "https://github.com/lucid-brndmg/cyclone-analyzer"},
-    // {title: "Another Online Editor", desc: "A simpler online Cyclone editor", url: "https://cyclone4web.cs.nuim.ie/editor/"},
-    {title: "Source Code", desc: "Source code of this project", url: "https://github.com/lucid-brndmg/cyclone-online-editor"}
+    {title: "Cyclone Analyzer", desc: "A static analyzer for Cyclone", url: "https://github.com/lucid-brndmg/cyclone-analyzer"},
+    {title: "Source Code", desc: "Source code of this website", url: "https://github.com/lucid-brndmg/cyclone-online-editor"}
   ]
   return (
     <Container size={"xl"} w={"100%"} pb={"xl"}>
       <Stack>
         <Stack>
-          <Title order={3}>Learning & Solving</Title>
+          <Title order={3}>Using Cyclone</Title>
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
             {learningLinks.map((props, i) => <LinkCard size={"lg"} shadow={"md"} color={"orange"} {...props} key={i} />)}
           </SimpleGrid>

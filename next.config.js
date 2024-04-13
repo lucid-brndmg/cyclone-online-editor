@@ -24,6 +24,9 @@ const nextConfig = {
 
     return config
   },
+  publicRuntimeConfig: {
+    lastUpdated: new Date().toISOString()
+  }
 }
 
 module.exports = nextConfig
