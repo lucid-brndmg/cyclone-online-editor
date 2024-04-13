@@ -83,12 +83,8 @@ const HeroSection = () => {
             </Button>
           </Group>
         </div>
-        {/* <Image src={image.src} className={classes.image} /> */}
         <ScrollArea className={classes.display}>
           <TypographyStylesProvider fz={"sm"} p={0}>
-            {/* <ExecutableCycloneCode code={Config.home.exampleCode} onTry={onTry}> */}
-            {/*   <pre style={{whiteSpace: "pre-wrap"}} dangerouslySetInnerHTML={{__html: exampleCode}} /> */}
-            {/* </ExecutableCycloneCode> */}
             <ExecutableCycloneCode code={Config.home.exampleCode} onTry={onTry} />
           </TypographyStylesProvider>
         </ScrollArea>
@@ -109,8 +105,6 @@ const Copyright = () => {
             Links
           </Text>
           <Anchor c={"orange"} fz={"sm"} href={"https://classicwuhao.github.io/cyclone_tutorial/expr/reference.html"}>Language Reference</Anchor>
-          <br/>
-          <Anchor c={"orange"} fz={"sm"} href={"https://cyclone4web.cs.nuim.ie/editor/"}>Another Cyclone Editor</Anchor>
           <br/>
           <Anchor c={"orange"} fz={"sm"} href={"https://classicwuhao.github.io/cyclone_tutorial/tutorial-content.html"}>Cyclone Homepage</Anchor>
         </Box>
