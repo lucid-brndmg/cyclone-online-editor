@@ -39,9 +39,9 @@ const PreviewPanel = () => {
   const [definedStatesGraphviz, tip] = useMemo(() => {
     if (visualData?.states.size || visualData?.trans.length) {
       const el = edgeLengths(visualData.trans, [...visualData.states.keys()])
-      return [genGraphvizPreview(visualData, graphviz), <Text c={"dimmed"} maw={"70%"} size={"sm"}><b>Got {visualData.states.size} nodes with {el} edges.</b> Try execute the code by click "run" to see the final result.</Text>]
+      return [genGraphvizPreview(visualData, graphviz), <Text c={"dimmed"} maw={"70%"} size={"sm"}><b>The spec has {visualData.states.size} nodes with {el} edges.</b> Run Cyclone to check this spec by clicking "Run" button.</Text>]
     } else {
-      return ["", <Text size={"sm"} c={"dimmed"}>Got no defined node. Define some in code to see result.</Text>]
+      return ["", <Text size={"sm"} c={"dimmed"}>The spec has no defined node. Define some in code to see result.</Text>]
     }
   }, [visualData, graphviz])
 
@@ -55,7 +55,7 @@ const PreviewPanel = () => {
 
   return (
     <Stack>
-      <Text size={"md"} fw={700}>Realtime Preview</Text>
+      <Text size={"md"} fw={700}>Preview</Text>
       {/* <Text c={"dimmed"} size={"sm"}>{tip}</Text> */}
       {
         definedStatesGraphviz
@@ -178,7 +178,7 @@ const AddTraceTip = ({code, setCode}) => {
   }
   return (
     <>
-      Trace feature is not enabled. Try to add <code>option-trace=true;</code> at the beginning of the code to enable the trace feature.
+      Trace feature is not enabled. Add <code>option-trace=true;</code> at the beginning of the spec to enable the trace feature.
       <Button ml={8} onClick={enableTrace} size={"compact-sm"}>Enable Trace</Button>
     </>
   )
@@ -273,7 +273,7 @@ const TracePanel = () => {
               The following graph was generated from remote server.
               Not all traces are shown on the screen and some of the preview options are currently not available.
               <br/>
-              To view traces in a different view, try set <code>option-output="trace";</code> at the beginning of the code.
+              To view traces in a different view, set <code>option-output="trace";</code> at the beginning of the spec.
             </Text> : <Text size={"sm"} maw={"70%"} c={"dimmed"}>
               Here are the traces of variable mutation in nodes.
             </Text>}

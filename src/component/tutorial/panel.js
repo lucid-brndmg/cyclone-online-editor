@@ -138,7 +138,7 @@ export const TutorialPanel = ({html, id}) => {
 
   const editorCommands = {
     onTransLens: (ctx, states) => {
-      alert(`targeted to ${states.length} nodes: ${states.join(", ")}`)
+      alert(`connected to ${states.length} nodes: ${states.join(", ")}`)
     },
     onStateLens: (ctx, stateCtx) => {
       alert(formatStateTransRelation(stateCtx, false).text)

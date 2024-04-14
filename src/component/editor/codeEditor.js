@@ -259,7 +259,7 @@ export const CycloneCodeEditor = ({
                 case IdentifierKind.Trans: {
                   const targetStates = editorSemanticContextRef.current.findTransition(ident.text)
                   if (targetStates?.size) {
-                    contents.push({value: `targeted to ${targetStates.size} nodes: ${[...targetStates].join(", ")}`})
+                    contents.push({value: `connected to ${targetStates.size} nodes: ${[...targetStates].join(", ")}`})
                   }
                   break
                 }
@@ -318,7 +318,7 @@ export const CycloneCodeEditor = ({
               id: `trans_${i}`,
               command: {
                 id: "onTransLens",
-                title: `${size} nodes targeted: ${allStates.slice(0, 5).join(", ")}${size > 5 ? " ..." : ""}`,
+                title: `connected to ${size} nodes: ${allStates.slice(0, 5).join(", ")}${size > 5 ? " ..." : ""}`,
                 tooltip: allStates.join(", "),
                 arguments: [allStates]
               }

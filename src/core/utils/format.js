@@ -98,11 +98,11 @@ const eWhereFunctionCall = () => {
 
 const eTypeMismatchFunction = ({ident, got, expected}) => {
   const isIdentifier = /\w+/.test(ident)
-  return `type mismatch on ${isIdentifier ? "function" : "operator"} ${ident}, got: ${formatTypes(got)}, expected types are: ${formatSignatureInputs(expected)}`
+  return `type mismatch on ${isIdentifier ? "function" : "operator"} ${ident}: ${formatTypes(got)}, expected types are: ${formatSignatureInputs(expected)}`
 }
 
 const eTypeMismatchVarDecl = ({ident, expected, got}) => {
-  return `type mismatch when declaring variable '${ident}', expected ${formatType(expected)}, got ${formatType(got)}`
+  return `type mismatch when declaring variable '${ident}', expected ${formatType(expected)}, defined ${formatType(got)}`
 }
 
 const eTypeMismatchExpr = ({expected, got, minLength}) => {
@@ -112,7 +112,7 @@ const eTypeMismatchExpr = ({expected, got, minLength}) => {
     ? `(...${formatType(expected[0])})`
     : expected.length > 1 ? formatTypes(expected) : formatType(expected[0])
 
-  return `type mismatch: expecting${minLengthMsg} ${expectedMsg}, got ${got.length > 1 ? formatTypes(got) : formatType(got[0])}`
+  return `type mismatch: expecting${minLengthMsg} ${expectedMsg}, received ${got.length > 1 ? formatTypes(got) : formatType(got[0])}`
 }
 
 const eCompilerOptionDuplicated = ({ident}) => {
@@ -148,7 +148,7 @@ const eReturnExprViolation = () => {
 }
 
 const eTypeMismatchReturn = ({expected, got}) => {
-  return `type mismatch on return expression, function expected to return ${formatType(expected)}, got ${formatType(got)}`
+  return `type mismatch on return expression, function expected to return ${formatType(expected)}, returned ${formatType(got)}`
 }
 
 const eStatementAfterReturn = () => {
@@ -164,7 +164,7 @@ const eEmptyEdge = () => {
 }
 
 const eInvalidStatement = ({got}) => {
-  return `invalid statement: expecting this statement to return nothing or bool, but got ${formatType(got)}`
+  return `invalid statement: expecting this statement to return nothing or bool, but returned ${formatType(got)}`
 }
 
 const eLetBodyUndefined = () => {
@@ -202,7 +202,7 @@ const eOptionTraceNotFound = () => {
 }
 
 const eInvalidCheckForPathLength = ({text}) => {
-  return `invalid path length. path length should be greater than 0, got ${text}`
+  return `invalid path length. path length should be greater than 0, received ${text}`
 }
 
 const eDuplicatedCheckForPathLength = ({text}) => {
@@ -214,7 +214,7 @@ const eAnonymousEdgeIdentifier = () => {
 }
 
 const eAssertModifierInExpr = () => {
-  return `assertion qualifier 'some | always' can not be used with 'in' clause. Try to remove 'in' clause or remove qualifier`
+  return `assertion qualifier 'some | always' can not be used with 'in' clause. Please remove 'in' clause or remove qualifier`
 }
 
 const errorMessageFormatter = {
@@ -364,9 +364,16 @@ export const formatScopeBlockType = t => scopeBlockTypeRepr[t] ?? ""
 export const formatStateTransRelation = ({trans, namedTrans}, max = 5) => {
   const allNamed = [...namedTrans]
   const hasAnon = allNamed.length < trans
-  const ellipses = (max && allNamed.length > max)
+  const ellipses = allNamed.length && ((max && allNamed.length > max) || hasAnon)
+  let text = `connected by ${trans} edges`
+
+  if (allNamed.length) {
+    text += `: ${(max ? allNamed.slice(0, max).join(", ") : allNamed.join(", "))}${ellipses ? " ..." : ""}`
+  }
+
   return {
-    text: `${trans} edges involved: ${(max ? allNamed.slice(0, max).join(", ") : allNamed.join(", "))}${ellipses ? " ..." : ""}${hasAnon ? ` (${trans - allNamed.length} unnamed)` : ""}`,
+    // text: `connected by ${trans} edges: ${(max ? allNamed.slice(0, max).join(", ") : allNamed.join(", "))}${ellipses ? " ..." : ""}`,
+    text,
     named: allNamed
   }
 }
