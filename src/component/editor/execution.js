@@ -2,6 +2,7 @@ import {useEditorStore} from "@/state/editorStore";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import Config from "../../../resource/config.json";
 import {
+  isNoCounterExampleFound,
   parseExecutionResultPaths, parseTrace,
   ResponseCode,
   sanitizeResult,
@@ -26,6 +27,7 @@ import {
 } from "@mantine/core";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {isGraphviz} from "@/core/utils/language";
+import {useHotkeys} from "@mantine/hooks";
 
 export const CodeExecutionButton = ({...props}) => {
   const {code, editorCtx} = useEditorStore()
@@ -179,6 +181,10 @@ export const CodeExecutionButton = ({...props}) => {
   )
 }
 
+const NothingFoundText = ({result}) => isNoCounterExampleFound(result)
+  ? <Text span c={"#74B816"} fw={700}>No Counter-example found.</Text>
+  : <Text span c={"#fa5252"} fw={700}>No path found.</Text>
+
 export const CodeConsoleResultSection = () => {
   // const placeholder = `Code execution result will be presented here ...`
   const [resultMode, setResultMode] = useState("Result")
@@ -267,8 +273,8 @@ export const CodeConsoleResultSection = () => {
                       : ""
                     }
                   </Text>
-                  : <Text fw={500} size={"sm"}>Execution completed, no path found</Text>
-                : <Text fw={500} size={"sm"}>Execution completed, no path found</Text>
+                  : <Text fw={500} size={"sm"}>Checking completed: <NothingFoundText result={executionResult.result} /></Text>
+                : <Text fw={500} size={"sm"}>Checking completed: <NothingFoundText result={executionResult.result} /></Text>
 
               // Trace panel
               : parsedTraces
@@ -294,7 +300,7 @@ export const CodeConsoleResultSection = () => {
               {errorMessage}
             </Text>
             : <Text c={"dimmed"} size={"sm"}>
-              Press 'run' to execute the code and see execution code.
+              Press 'run' to execute the code and see checking results.
             </Text>
       }
 

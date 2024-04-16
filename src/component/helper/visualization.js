@@ -25,6 +25,7 @@ import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import {graphviz} from "d3-graphviz"; // KEEP THIS LINE
 import cycloneAnalyzer from "cyclone-analyzer";
 import {useGraphvizStore} from "@/state/editorGraphvizStore";
+import {isNoCounterExampleFound} from "@/core/execution";
 
 const {
   edgeLengths
@@ -166,6 +167,9 @@ const ExecPanel = () => {
       return "Execution error. Please see the execution panel for details"
     }
     if (executionResult) {
+      if (isNoCounterExampleFound(executionResult.result)) {
+        return "Code executed, no counter-example found."
+      }
       return "Code executed, no path found."
     }
     if (isLoading) {
@@ -176,7 +180,7 @@ const ExecPanel = () => {
 
   return (
     <Stack>
-      <Text size={"md"} fw={700}>Code Execution Result Paths</Text>
+      <Text size={"md"} fw={700}>Checking Results</Text>
       {codes.length
         ? <>
           <MultiSelect

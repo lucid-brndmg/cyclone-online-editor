@@ -7,6 +7,8 @@ const regexFindPathInResult = /\w+->\w+(->\w+)*/g
 const regexFindStateInTrace = /\[\d+\]\.@\w+/
 const regexFindErrorInResult = /(line\s*:\s*\d+)|(position\s*:\d+)/g
 const regexFindLengthInResult = /<\d+>\s*\w+->/g
+const regexNoCounterExample = /no\s+counter[\s-]+example\s+found/i
+const regexNoPath = /no\s+path\s+found/i
 
 export const ResponseCode = {
   InvalidParams: 0,
@@ -145,6 +147,10 @@ export const sanitizeResult = result => {
     } else {
       if (regexFindPathInResultNG.test(trimmed)) {
         sanitized.push(`<b style="color: #61aeee">${trimmed}</b>`)
+      } else if (regexNoPath.test(trimmed)) {
+        sanitized.push(`<b style="color: #fa5252">${trimmed}</b>`)
+      } else if (regexNoCounterExample.test(trimmed)) {
+        sanitized.push(`<b style="color: #74B816">${trimmed}</b>`)
       } else {
         sanitized.push(trimmed)
       }
@@ -152,3 +158,5 @@ export const sanitizeResult = result => {
   }
   return {errors, sanitized: sanitized.join("<br>")}
 }
+
+export const isNoCounterExampleFound = (result) => regexNoCounterExample.test(result)
