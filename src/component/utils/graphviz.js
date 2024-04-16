@@ -17,8 +17,9 @@ import {CopyableCode} from "@/component/utils/code";
 // Graphviz wrapper for React
 const Graphviz = forwardRef(({
   dot, options, animationSpeed, className,
-  onHeightChange, onZoom, // onInit,
-  initHeight, initTransform
+  onHeightChange, // onZoom, // onInit,
+  initHeight, // initTransform,
+  maxWidth, maxHeight
 }, ref) => {
   const {assignGraphvizId} = useGraphvizStore()
   const [assignedId, setAssignedId] = useState(undefined)
@@ -58,25 +59,25 @@ const Graphviz = forwardRef(({
     let g = elem.graphviz({...options, width: "100%", height: "100%"})
     g = prepAnimation(g, animationSpeed)
 
-    if (onZoom || initTransform) {
-      g.on("end", () => {
-        if (initTransform) {
-          const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
-          const [, transX, transY, scale] = regex.exec(initTransform)
-
-          g.zoomSelection().call(
-            d3.zoom().transform,
-            d3.zoomIdentity
-              .translate(parseInt(transX) || 0, parseInt(transY) || 0)
-              .scale(parseInt(scale) || 1)
-          )
-          const e = document.querySelector(`#${id} > svg > g`)
-          e.setAttribute("transform", initTransform)
-        }
-
-        onZoom && g.on("zoom", () => onZoom(id))
-      })
-    }
+    // if (onZoom || initTransform) {
+    //   g.on("end", () => {
+    //     if (initTransform) {
+    //       const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
+    //       const [, transX, transY, scale] = regex.exec(initTransform)
+    //
+    //       g.zoomSelection().call(
+    //         d3.zoom().transform,
+    //         d3.zoomIdentity
+    //           .translate(parseInt(transX) || 0, parseInt(transY) || 0)
+    //           .scale(parseInt(scale) || 1)
+    //       )
+    //       const e = document.querySelector(`#${id} > svg > g`)
+    //       e.setAttribute("transform", initTransform)
+    //     }
+    //
+    //     // onZoom && g.on("zoom", () => onZoom(id))
+    //   })
+    // }
 
     g
       .dot(dot)
@@ -120,6 +121,7 @@ const Graphviz = forwardRef(({
       border: "2px solid var(--mantine-color-orange-filled)",
       cursor: "ns-resize",
       height: initHeight ? initHeight : undefined,
+      maxWidth, maxHeight
     }}
     ref={boxRef}
   >
@@ -133,7 +135,7 @@ const Graphviz = forwardRef(({
 })
 
 // Single graphviz image
-export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHeight, onZoom, initTransform}) => {
+export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHeight, maxWidth, maxHeight}) => {
   const [tab, setTab] = useState("Preview")
   const {graphviz: graphvizOptions} = useEditorSettingsStore()
 
@@ -183,9 +185,9 @@ export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHe
               ref={graphvizRef}
               onHeightChange={onHeightChange}
               // onInit={onInit}
-              onZoom={onZoom}
               initHeight={initHeight}
-              initTransform={initTransform}
+              maxWidth={maxWidth}
+              maxHeight={maxHeight}
             />
             <Group grow>
               <Button onClick={resetZoom} leftSection={<IconZoomIn size={16} />} >Reset Zoom</Button>
@@ -215,7 +217,7 @@ export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHe
 export const GraphvizMultiPreview = ({
   codes,
   leftSection,
-  onZoom,
+  // onZoom,
   onHeightChange,
   visualStates
 }) => {
@@ -290,9 +292,9 @@ export const GraphvizMultiPreview = ({
             const initHeight = visualStates
               ? visualStates[i]?.initHeight
               : undefined
-            const initTransform = visualStates
-              ? visualStates[i]?.initTransform
-              : undefined
+            // const initTransform = visualStates
+            //   ? visualStates[i]?.initTransform
+            //   : undefined
             return (
               <Box key={i}>
                 {title}
@@ -302,10 +304,11 @@ export const GraphvizMultiPreview = ({
                   animationSpeed={graphvizOptions.animationSpeed}
                   className={classes.preview}
                   ref={el => graphvizRef.current[i] = el}
-                  onZoom={onZoom ? id => onZoom(i, id) : undefined}
+                  // onZoom={onZoom ? id => onZoom(i, id) : undefined}
                   onHeightChange={onHeightChange ? h => onHeightChange(i, h) : undefined}
                   initHeight={initHeight}
-                  initTransform={initTransform}
+                  // initTransform={initTransform}
+                  maxHeight={"60vh"}
                 />
               </Box>
             )

@@ -34,7 +34,7 @@ const {
 const PreviewPanel = () => {
   const {editorCtx} = useEditorStore()
   const {graphviz} = useEditorSettingsStore()
-  const {codePreviewLastHeight, setCodePreviewLastHeight, setCodePreviewTrans, codePreviewTrans} = useGraphvizStore()
+  const {codePreviewLastHeight, setCodePreviewLastHeight} = useGraphvizStore()
   const [visualData, setVisualData] = useState(null)
   const [definedStatesGraphviz, tip] = useMemo(() => {
     if (visualData?.states.size || visualData?.trans.length) {
@@ -63,18 +63,18 @@ const PreviewPanel = () => {
     setCodePreviewLastHeight(height)
   }
 
-  const onZoom = (id) => {
-    const elem = document.querySelector(`#${id} > svg > g`)
-    const val = elem.attributes.getNamedItem("transform").value
-    setCodePreviewTrans(val)
-    // const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
-    // console.log(val)
-    // const [, transX, transY, scale] = regex.exec(val)
-    // setCodePreviewTrans({
-    //   transform: [parseInt(transX), parseInt(transY)],
-    //   scale: parseInt(scale)
-    // })
-  }
+  // const onZoom = (id) => {
+  //   const elem = document.querySelector(`#${id} > svg > g`)
+  //   const val = elem.attributes.getNamedItem("transform").value
+  //   setCodePreviewTrans(val)
+  //   // const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
+  //   // console.log(val)
+  //   // const [, transX, transY, scale] = regex.exec(val)
+  //   // setCodePreviewTrans({
+  //   //   transform: [parseInt(transX), parseInt(transY)],
+  //   //   scale: parseInt(scale)
+  //   // })
+  // }
 
   return (
     <Stack>
@@ -89,8 +89,8 @@ const PreviewPanel = () => {
               // onInit={onInit}
               onHeightChange={onHeight}
               initHeight={codePreviewLastHeight === 0 ? `40vh` : `${codePreviewLastHeight}px`}
-              onZoom={onZoom}
-              initTransform={codePreviewTrans}
+              // onZoom={onZoom}
+              // initTransform={codePreviewTrans}
             />
             <Text component={"div"} c={"dimmed"} size={"sm"}>
               <b>Tips:</b>
@@ -297,18 +297,18 @@ const TracePanel = () => {
     insertTraceVisualStates(i, "initHeight", height)
   }
 
-  const onZoom = (i, id) => {
-    const elem = document.querySelector(`#${id} > svg > g`)
-    const val = elem.attributes.getNamedItem("transform").value
-    insertTraceVisualStates(i, "initTransform", val)
-    // const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
-    // console.log(val)
-    // const [, transX, transY, scale] = regex.exec(val)
-    // setCodePreviewTrans({
-    //   transform: [parseInt(transX), parseInt(transY)],
-    //   scale: parseInt(scale)
-    // })
-  }
+  // const onZoom = (i, id) => {
+  //   const elem = document.querySelector(`#${id} > svg > g`)
+  //   const val = elem.attributes.getNamedItem("transform").value
+  //   insertTraceVisualStates(i, "initTransform", val)
+  //   // const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
+  //   // console.log(val)
+  //   // const [, transX, transY, scale] = regex.exec(val)
+  //   // setCodePreviewTrans({
+  //   //   transform: [parseInt(transX), parseInt(transY)],
+  //   //   scale: parseInt(scale)
+  //   // })
+  // }
 
   return (
     <Stack>
@@ -337,7 +337,6 @@ const TracePanel = () => {
               Here are the traces of variable mutation in nodes.
             </Text>}
             visualStates={traceVisualStates}
-            onZoom={onZoom}
             onHeightChange={onHeight}
           />
         </>

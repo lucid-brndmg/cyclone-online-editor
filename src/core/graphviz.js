@@ -110,15 +110,15 @@ export const availableGraphvizEngines = [
 ]
 
 export const graphvizForEditorOptions = {
-  showNodeProps: true,
-  showLabelLiteral: true,
+  showNodeProps: false,
+  showLabelLiteral: false,
   // showWhereExpr: true,
   paddingEdgeText: true,
 
   showInvariant: true,
   showAssertion: true,
   showGoal: true,
-  showDetailedExpressions: true
+  showDetailedExpressions: false
 }
 
 export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef, previewOptions) => {
@@ -380,7 +380,7 @@ export const genGraphvizExecutionResultPaths = ({states, edges}, options, visual
   }
 
   const dir = options.direction === DisplayDirection.Auto
-    ? states.size <= 6 ? "LR" : "TB"
+    ? "LR" // states.size <= 6 ? "LR" : "TB"
     : options.direction
 
   for (let i = 0; i < edges.length; i++) {

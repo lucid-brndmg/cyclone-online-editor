@@ -30,7 +30,6 @@ export const FileStateWrapper = () => {
   const [isLoadingCodeExample, setIsLoadingCodeExample] = useState(false)
   const [saveFlag, setSaveFlag] = useState(false)
   const router = useRouter()
-  const {setCodePreviewTrans} = useGraphvizStore()
 
   useEffect(() => {
     initOnPageLoad()
@@ -81,7 +80,6 @@ export const FileStateWrapper = () => {
         })
       }
     }
-    setCodePreviewTrans(null)
   }, [currentFileId, newFileCreated])
 
   const openSwitchUnsavedModal = () => modals.openConfirmModal({
