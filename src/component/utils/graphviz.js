@@ -15,42 +15,95 @@ import JSZip from "jszip";
 import {CopyableCode} from "@/component/utils/code";
 
 // Graphviz wrapper for React
-const Graphviz = forwardRef(({dot, options, animationSpeed, className}, ref) => {
+const Graphviz = forwardRef(({
+  dot, options, animationSpeed, className,
+  onHeightChange, onZoom, // onInit,
+  initHeight, initTransform
+}, ref) => {
   const {assignGraphvizId} = useGraphvizStore()
-  const id =  useMemo(() => assignGraphvizId(), [])
+  const [assignedId, setAssignedId] = useState(undefined)
+  const boxRef = useRef()
+  // const id =  useMemo(() => assignGraphvizId(), [])
 
-  useEffect(() => {
-    let g = d3
-      .select(`#${id}`)
-      .graphviz(options)
+  // useEffect(() => {
+  //   d3.select(`#${id}`).on("DOMContentLoaded", e => {
+  //     console.log("d3 ready")
+  //   })
+  // }, []);
 
+  // useEffect(() => {
+  //   onInit(ref.current)
+  // }, []);
+
+  const prepAnimation = (g, animationSpeed) => {
     if (animationSpeed !== AnimationSpeed.None) {
       const getTransition = () => {
         return d3.transition().ease(d3.easeLinear).duration(AnimationDuration[animationSpeed])
       }
-      g = g.transition(getTransition)
+      return g.transition(getTransition)
     }
+
+    return g
+  }
+
+  useEffect(() => {
+    if (!assignedId) {
+      const id = assignGraphvizId()
+      setAssignedId(id)
+      return
+    }
+
+    const id = assignedId
+    const elem = d3.select(`#${id}`)
+    let g = elem.graphviz({...options, width: "100%", height: "100%"})
+    g = prepAnimation(g, animationSpeed)
+
+    if (onZoom || initTransform) {
+      g.on("end", () => {
+        if (initTransform) {
+          const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
+          const [, transX, transY, scale] = regex.exec(initTransform)
+          g.zoomSelection().call(
+            d3.zoom().transform,
+            d3.zoomIdentity.translate(parseInt(transX), parseInt(transY)).scale(parseInt(scale))
+          )
+          const e = document.querySelector(`#${id} > svg > g`)
+          e.setAttribute("transform", initTransform)
+        }
+
+        onZoom && g.on("zoom", () => onZoom(id))
+      })
+    }
+
     g
       .dot(dot)
       .render()
-  }, [dot, animationSpeed, options]); // , options, animationSpeed
+  }, [dot, animationSpeed, options, assignedId]); // , options, animationSpeed
 
   const onMouseDown = e => {
     const {height} = e.target.getBoundingClientRect()
     const initY = e.clientY
-    const elem = d3
-      .select(`#${id}`)
-      .selectWithoutDataPropagation("svg")
+    // const elem = d3
+    //   .select(`#${id}`)
+    //   .selectWithoutDataPropagation("svg")
 
     const onMouseMove = e => {
       const incrY = e.clientY - initY
-      elem.attr("height", height + incrY)
+      // console.log("move height")
+      // elem.attr("height", height + incrY)
+      boxRef.current.style.height = `${height + incrY}px`
     }
 
-    const onMouseUp = () => {
+    const onMouseUp = e => {
       window.removeEventListener("mousemove", onMouseMove)
       window.removeEventListener("mouseup", onMouseUp)
       window.removeEventListener('selectstart', disableSelect);
+
+      const incrY = e.clientY - initY
+      const finalHeight = height + incrY
+      // console.log("final height")
+      // elem.attr("height", finalHeight)
+      onHeightChange && onHeightChange(finalHeight)
     }
 
     window.addEventListener("mousemove", onMouseMove)
@@ -58,16 +111,26 @@ const Graphviz = forwardRef(({dot, options, animationSpeed, className}, ref) => 
     window.addEventListener('selectstart', disableSelect);
   }
 
-  return (<Box onMouseDown={onMouseDown} style={{
-    border: "2px solid var(--mantine-color-orange-filled)",
-    cursor: "ns-resize"
-  }}>
-    <div className={className} id={id} ref={ref} style={{cursor: "default"}} />
+  return (<Box
+    onMouseDown={onMouseDown}
+    style={{
+      border: "2px solid var(--mantine-color-orange-filled)",
+      cursor: "ns-resize",
+      height: initHeight ? initHeight : undefined,
+    }}
+    ref={boxRef}
+  >
+    <div
+      className={className}
+      id={assignedId}
+      ref={ref}
+      style={{cursor: "default", width: "100%", height: "100%"}}
+    />
   </Box>)
 })
 
 // Single graphviz image
-export const GraphvizSinglePreview = ({code, leftSection}) => {
+export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHeight, onZoom, initTransform}) => {
   const [tab, setTab] = useState("Preview")
   const {graphviz: graphvizOptions} = useEditorSettingsStore()
 
@@ -115,10 +178,15 @@ export const GraphvizSinglePreview = ({code, leftSection}) => {
               animationSpeed={graphvizOptions.animationSpeed}
               className={classes.preview}
               ref={graphvizRef}
+              onHeightChange={onHeightChange}
+              // onInit={onInit}
+              onZoom={onZoom}
+              initHeight={initHeight}
+              initTransform={initTransform}
             />
             <Group grow>
-              <Button onClick={resetZoom} leftSection={<IconZoomIn size={16} />} variant={"default"}>Reset Zoom</Button>
-              <Button onClick={downloadSvg} leftSection={<IconDownload size={16} />}>Download SVG</Button>
+              <Button onClick={resetZoom} leftSection={<IconZoomIn size={16} />} >Reset Zoom</Button>
+              <Button variant={"default"} onClick={downloadSvg} leftSection={<IconDownload size={16} />}>Download SVG</Button>
             </Group>
 
           </>
@@ -208,8 +276,8 @@ export const GraphvizMultiPreview = ({
       {tab === "Preview"
         ? <>
           <Group grow>
-            <Button onClick={resetZoom} leftSection={<IconZoomIn size={16} />} variant={"default"}>Reset Zoom</Button>
-            <Button  leftSection={<IconDownload size={16} />} onClick={downloadAllSvg}>Download All</Button>
+            <Button onClick={resetZoom} leftSection={<IconZoomIn size={16} />}>Reset Zoom</Button>
+            <Button variant={"default"} leftSection={<IconDownload size={16} />} onClick={downloadAllSvg}>Download All</Button>
           </Group>
 
           {codes.map(({code, title, filename}, i) => {

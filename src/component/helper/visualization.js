@@ -14,10 +14,7 @@ import {
 } from "@mantine/core";
 import {
   IconArrowRightCircle,
-  IconBug,
-  IconChartCircles, IconCopy, IconDownload, IconEye, IconPlayerPlay,
-  IconPlaystationCircle, IconTopologyRing,
-  IconTopologyRing3, IconZoomIn
+  IconPlayerPlay, IconTopologyRing,
 } from "@tabler/icons-react";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useEditorStore} from "@/state/editorStore";
@@ -27,6 +24,7 @@ import {GraphvizMultiPreview, GraphvizSinglePreview} from "@/component/utils/gra
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import {graphviz} from "d3-graphviz"; // KEEP THIS LINE
 import cycloneAnalyzer from "cyclone-analyzer";
+import {useGraphvizStore} from "@/state/editorGraphvizStore";
 
 const {
   edgeLengths
@@ -35,6 +33,7 @@ const {
 const PreviewPanel = () => {
   const {editorCtx} = useEditorStore()
   const {graphviz} = useEditorSettingsStore()
+  const {codePreviewLastHeight, setCodePreviewLastHeight, setCodePreviewTrans, codePreviewTrans} = useGraphvizStore()
   const [visualData, setVisualData] = useState(null)
   const [definedStatesGraphviz, tip] = useMemo(() => {
     if (visualData?.states.size || visualData?.trans.length) {
@@ -53,6 +52,29 @@ const PreviewPanel = () => {
     }
   }, [editorCtx]);
 
+  // const onInit = e => {
+  //   if (codePreviewLastHeight) {
+  //     console.log(e.style.height = `${codePreviewLastHeight}px`)
+  //   }
+  // }
+
+  const onHeight = (height) => {
+    setCodePreviewLastHeight(height)
+  }
+
+  const onZoom = (id) => {
+    const elem = document.querySelector(`#${id} > svg > g`)
+    const val = elem.attributes.getNamedItem("transform").value
+    setCodePreviewTrans(val)
+    // const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
+    // console.log(val)
+    // const [, transX, transY, scale] = regex.exec(val)
+    // setCodePreviewTrans({
+    //   transform: [parseInt(transX), parseInt(transY)],
+    //   scale: parseInt(scale)
+    // })
+  }
+
   return (
     <Stack>
       <Text size={"md"} fw={700}>Preview</Text>
@@ -60,7 +82,15 @@ const PreviewPanel = () => {
       {
         definedStatesGraphviz
           ? <>
-            <GraphvizSinglePreview leftSection={tip} code={definedStatesGraphviz} />
+            <GraphvizSinglePreview
+              leftSection={tip}
+              code={definedStatesGraphviz}
+              // onInit={onInit}
+              onHeightChange={onHeight}
+              initHeight={codePreviewLastHeight === 0 ? `40vh` : `${codePreviewLastHeight}px`}
+              onZoom={onZoom}
+              initTransform={codePreviewTrans}
+            />
             <Text component={"div"} c={"dimmed"} size={"sm"}>
               <b>Tips:</b>
               <ul>
@@ -92,7 +122,7 @@ const ExecPanel = () => {
       ? parsedPaths.edges.map(edge => {
         return genGraphvizPreview(visualDataCopy, graphviz, {states: new Set(edge), edge})
       })
-      : genGraphvizExecutionResultPaths(parsedPaths, graphviz)
+      : genGraphvizExecutionResultPaths(parsedPaths, graphviz, visualDataCopy)
     return graphs.map((code, i) => ({
       filename: `path-${i}`,
       code,
@@ -185,7 +215,7 @@ const AddTraceTip = ({code, setCode}) => {
 }
 
 const TracePanel = () => {
-  const {executionResult, traceIsGraphviz, parsedTraces, isLoading} = useEditorExecutionStore()
+  const {executionResult, traceIsGraphviz, parsedTraces, isLoading, visualDataCopy} = useEditorExecutionStore()
   const {graphviz} = useEditorSettingsStore()
   const {setCode, code, editorCtx} = useEditorStore()
   const [incPath, setIncPath] = useState([])
@@ -213,7 +243,7 @@ const TracePanel = () => {
         }]
       }
     } else if (parsedTraces) {
-      const codes = genGraphvizTrace(parsedTraces, graphviz)
+      const codes = genGraphvizTrace(parsedTraces, graphviz, visualDataCopy)
       return {
         isRemote: false,
         traces: codes.map((code, i) => ({

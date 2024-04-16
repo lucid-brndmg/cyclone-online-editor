@@ -47,21 +47,47 @@ export const animationSpeedOptions = [
   {label: "Slow", value: AnimationSpeed.Slow}
 ]
 
+const getNodeStyle = attrs => {
+  const s = new Set(attrs)
+  let color, isFinal = s.has("final"), isStart = s.has("start"), isAbstract = s.has("abstract")
+  // const nodeAttrs = []
+
+  if (isStart) {
+    if (isAbstract) {
+      color = "deepskyblue"
+    } else {
+      color = "pink"
+    }
+  } else if (isAbstract) {
+    color = "springgreen"
+  } else {
+    color = "orange"
+  }
+
+  // nodeAttrs.push(`fillcolor=${color}`)
+  // if (isFinal) {
+  //   nodeAttrs.push(`peripheries=2`)
+  // }
+
+  return [color, isFinal, isStart]
+}
+
 const genGraphvizStatesDef = (states, options, resultPaths = null) => {
   const codePieces = []
   for (let {identifier, attrs} of states) {
-    // const {isAbstract, isNode, isFinal, isStart, isNormal} = attrs
-    // const labels = []
-    // if (isAbstract) {labels.push("abstract")}
-    // if (isNormal) {labels.push("normal")}
-    // if (isStart) {labels.push("start")}
-    // if (isFinal) {labels.push("final")}
-    // labels.push(isNode ? "node" : "state")
+    const [fill, isFinal, isStart] = getNodeStyle(attrs)
     const props = attrs.join(" ")
-    const color = resultPaths?.states.has(identifier)
-      ? ", color=darkgreen, fontcolor=darkgreen"
+    const isResultMode = resultPaths != null
+    const isResult = isResultMode && resultPaths.states.has(identifier)
+    const shape = isFinal
+      ? ", peripheries=2"
       : ""
-    codePieces.push(`// ${props} ${identifier}\n${identifier}[label=<${options.showNodeProps ? `<font color="gray"><i >${props}</i></font>` : ""} <b>${identifier}</b>>${color}];`)
+    const label = `<${options.showNodeProps ? `<font ><i >${props}</i></font><br />` : ""} <font ${isResult ? `color="red"` : ""}><b>${identifier}</b></font>>`
+
+    codePieces.push(`// ${props} ${identifier}\n${identifier}[label=${label}, style=filled, fillcolor=${fill}${shape}];`)
+    if (isStart) {
+      codePieces.push(`<start> -> ${identifier};`)
+    }
   }
 
   return codePieces
@@ -149,7 +175,10 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
         attrs.push(`dir=both`)
       }
       if (resultEdgesDef.has(`${source},${target}`) || (isBi && resultEdgesDef.has(`${target},${source}`))) {
-        attrs.push(`color=darkgreen`, `fontcolor=darkgreen`)
+        attrs.push(
+          `color=red`,
+          // `fontcolor=darkgreen`
+        )
       }
 
       let descriptions = []
@@ -312,6 +341,7 @@ export const genGraphvizPreview = (
 
   const segments = [
     `rankdir=${dir};`,
+    `<start>[shape=none, label = ""];`,
     statesDef.join("\n"),
     transRelations.map(t => t.join("\n")).join("\n"),
     // invariantsDef.join("\n"),
@@ -330,7 +360,7 @@ export const genGraphvizPreview = (
   return `digraph {\n\n${segments.join("\n\n")}\n\n}`
 }
 
-export const genGraphvizExecutionResultPaths = ({states, edges}, options) => {
+export const genGraphvizExecutionResultPaths = ({states, edges}, options, visualData) => {
   const codes = []
   // const hasOverall = edges.length > 1
   // const overall = hasOverall ? [] : null
@@ -338,6 +368,16 @@ export const genGraphvizExecutionResultPaths = ({states, edges}, options) => {
   //   ? "TB"
   //   : options.direction
   // const statePaths = new Map()
+
+  const stateAttrMap = new Map()
+  const visualStates = [...visualData.states.values()].filter(({identifier}) => states.has(identifier))
+  for (let {identifier, attrs} of visualStates) {
+    const [fill, isFinal, isStart] = getNodeStyle(attrs)
+    const shape = isFinal
+      ? ", peripheries=2"
+      : ""
+    stateAttrMap.set(identifier, `${identifier}[label="${identifier}", style=filled, fillcolor=${fill}${shape}];${isStart ? `<start> -> ${identifier};` : ""}`)
+  }
 
   const dir = options.direction === DisplayDirection.Auto
     ? states.size <= 6 ? "LR" : "TB"
@@ -372,7 +412,10 @@ export const genGraphvizExecutionResultPaths = ({states, edges}, options) => {
     // if (hasOverall) {
     //   overall.push(`${joined}[label=" p${i} "];`)
     // }
-    codes.push(`digraph {\n\nrankdir=${dir};\n${joined}\n\n}`)
+    const statesDef = [...new Set(edge)]
+      .map(s => stateAttrMap.get(s))
+      .join("\n")
+    codes.push(`digraph {\n\nrankdir=${dir};<start>[shape=none, label = ""];\n${statesDef}\n${joined}\n\n}`)
   }
 
   // let stateDef = ""
@@ -393,7 +436,7 @@ export const genGraphvizExecutionResultPaths = ({states, edges}, options) => {
 
 // THE CODE FOR THE <table> ELEMENT'S STYLE REFERENCED https://graphviz.org/Gallery/directed/psg.html
 // OTHER PARTS ARE WRITTEN ON MY OWN
-export const genGraphvizTrace = (traces, options) => {
+export const genGraphvizTrace = (traces, options, visualData) => {
   const codes = []
 
   for (let trace of traces) {
@@ -407,10 +450,11 @@ export const genGraphvizTrace = (traces, options) => {
       raw,
       fields
     } of trace) {
+      const [color] = getNodeStyle(visualData.states.get(state).attrs)
       const id = `s${n++}`
       path.push(id)
-      const bg = fields.length ? "white" : "black"
-      const label = `<table border="0" cellborder="0" cellpadding="3" bgcolor="${bg}"><tr><td bgcolor="black" align="center" colspan="2"><font color="white">${raw}</font></td></tr>${fields.map(({key, value}) => `<tr><td align="left" port="r1">${key} = ${value}</td></tr>`)}</table>`
+      const bg = fields.length ? "white" : color
+      const label = `<table border="0" cellborder="0" cellpadding="3" bgcolor="${bg}"><tr><td bgcolor="${color}" align="center" colspan="2"><font color="black"><b>${raw}</b></font></td></tr>${fields.map(({key, value}) => `<tr><td align="left" port="r1">${key} = ${value}</td></tr>`)}</table>`
       states.push(`${id}[style = "filled" penwidth = 1 fillcolor = "${bg}" fontname = "Courier New" shape = "Mrecord" label =<${label}>];`)
     }
 

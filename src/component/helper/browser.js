@@ -12,6 +12,7 @@ import {modals} from "@mantine/modals";
 import {dynamicCodeExample, PublicUrl} from "@/core/utils/resource";
 import localforage from "localforage";
 import {useRouter} from "next/router";
+import {useGraphvizStore} from "@/state/editorGraphvizStore";
 
 export const FileStateWrapper = () => {
   const {setCode, monacoCtx} = useEditorStore()
@@ -29,6 +30,7 @@ export const FileStateWrapper = () => {
   const [isLoadingCodeExample, setIsLoadingCodeExample] = useState(false)
   const [saveFlag, setSaveFlag] = useState(false)
   const router = useRouter()
+  const {setCodePreviewTrans} = useGraphvizStore()
 
   useEffect(() => {
     initOnPageLoad()
@@ -79,6 +81,7 @@ export const FileStateWrapper = () => {
         })
       }
     }
+    setCodePreviewTrans(null)
   }, [currentFileId, newFileCreated])
 
   const openSwitchUnsavedModal = () => modals.openConfirmModal({
