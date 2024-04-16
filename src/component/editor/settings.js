@@ -309,6 +309,14 @@ export const SettingsPopover = ({children}) => {
                 })}
               />
               <Switch
+                label={"Display expressions using math symbols"}
+                checked={graphviz.preview.showAsMathOperators}
+                onChange={e => setGraphviz({
+                  ...graphviz,
+                  preview: {...graphviz.preview, showAsMathOperators: e.currentTarget.checked}
+                })}
+              />
+              <Switch
                 label={"Performance Mode"}
                 checked={graphviz.performanceMode}
                 onChange={e => setGraphviz({

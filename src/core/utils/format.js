@@ -124,7 +124,7 @@ const eTypeMismatchCompilerOption = ({ident, expected, desc}) => {
 }
 
 const eInvalidNamedExprScope = ({ident, scopes}) => {
-  return `expression '${ident}' can only be used inside ${scopes.map(s => formatScopeBlockType(s)).join(" or ")} scope, and not in constant definitions`
+  return `expression '${ident}' can only be used inside scopes: ${scopes.map(s => formatScopeBlockType(s)).join(" | ")} and not in constant definitions`
 }
 
 const eStartNodeDuplicated = ({ident}) => {

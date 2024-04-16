@@ -11,6 +11,45 @@ const {
   isAnonymousEdge
 } = cycloneAnalyzer.utils.edge
 
+const {
+  replaceOperators
+} = cycloneAnalyzer.blockBuilder.refactorHelper
+
+const exprOperatorReplacerMap = new Map([
+  ["^", "⊕"],
+  ["&&", "∧"],
+  ["||", "∨"],
+  ["->", "→"],
+  ["=>", "⇒"],
+  ["!", "¬"],
+  ["==", "="],
+  ["!=", "≠"],
+  ["<=", "≤"],
+  [">=", "≥"],
+  ["*", "×"]
+
+])
+
+const pathOperatorReplacerMap = new Map([
+  ["&&", "∧"],
+  ["||", "∨"],
+  ["->", "→"],
+  ["=>", "⇒"],
+  ["!", "¬"],
+  ["==", "="],
+  ["!=", "≠"],
+  ["<=", "≤"],
+  [">=", "≥"],
+])
+
+const formatCycloneExpr = (code, entry) => replaceOperators(code, entry, entry === CycloneParsingEntry.Check ? pathOperatorReplacerMap : exprOperatorReplacerMap)
+
+const CycloneParsingEntry = {
+  Expr: "expression",
+  Check: "checkExpr",
+  Assert: "assertExpr",
+}
+
 export const DisplayDirection = {
   Auto: "auto",
   LR: "LR",
@@ -118,7 +157,9 @@ export const graphvizForEditorOptions = {
   showInvariant: true,
   showAssertion: true,
   showGoal: true,
-  showDetailedExpressions: false
+  showDetailedExpressions: false,
+
+  showAsMathOperators: true
 }
 
 export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef, previewOptions) => {
@@ -189,13 +230,15 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
       const showWhere = !!whereExpr // && previewOptions.showWhereExpr
       const showLabel = previewOptions.showLabelLiteral
       if (showWhere && label) {
-        const content = `where ${whereExpr}, ${showLabel ? `${labelKeyword ?? "label"}: ` : ""}${label}`
+        const replacedWhereExpr = previewOptions.showAsMathOperators ? formatCycloneExpr(whereExpr, CycloneParsingEntry.Expr) : whereExpr
+        const content = `where ${replacedWhereExpr}, ${showLabel ? `${labelKeyword ?? "label"}: ` : ""}${label}`
         descriptions.push(identifier
           ? `(${content})`
           : content
         )
       } else if (showWhere) {
-        const content = `${showLabel ? "condition: " : ""}${whereExpr}`
+        const replacedWhereExpr = previewOptions.showAsMathOperators ? formatCycloneExpr(whereExpr, CycloneParsingEntry.Expr) : whereExpr
+        const content = `${showLabel ? "condition: " : ""}${replacedWhereExpr}`
         descriptions.push(identifier
           ? `(${content})`
           : content
@@ -253,7 +296,7 @@ const genGraphvizAssertionsDef = (assertions, statesDef, definedStates, previewO
     const numberId = ++ assertionIdAcc
     const assertionId = `<assertion${numberId}>`
     const cleanExpr = previewOptions.showDetailedExpressions
-      ? dropRegex(expr, /in\s*\(/g).trim()
+      ? dropRegex(previewOptions.showAsMathOperators ? formatCycloneExpr(expr, CycloneParsingEntry.Assert) : expr, /in\s*\(/g).trim()
       : `assertion (${position.startPosition.line}:${position.startPosition.column + 1})`
     statesDef.push(`${assertionId}[label=" ${cleanExpr} ", fontcolor=green, color=green];`)
     for (let ident of identifiers) {
@@ -285,7 +328,7 @@ const genGraphvizGoalDef = ({invariants, states, expr, finalPosition}, statesDef
     goalLabel = reachMatch[1] ?? "reach"
   }
   if (opts.showDetailedExpressions) {
-    cleanExpr = dropRegexes(expr, cleanRes).trim() + ` ${goalLabel}`
+    cleanExpr = dropRegexes(opts.showAsMathOperators ? formatCycloneExpr(expr, CycloneParsingEntry.Check) : expr, cleanRes).trim() + ` ${goalLabel}`
   } else {
     cleanExpr = `${expr.split(" ").slice(0, 2).join(" ") ?? "check"} ${finalPosition ? `(${finalPosition.startPosition.line}:${finalPosition.startPosition.column + 1})` : ""} ${goalLabel}`
   }
