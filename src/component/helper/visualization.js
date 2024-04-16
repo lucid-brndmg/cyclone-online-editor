@@ -150,6 +150,10 @@ const ExecPanel = () => {
     return codes.filter((_, i) => selectedPath.includes(i.toString()))
   }, [codes, selectedPath])
 
+  const isCounter = useMemo(() => {
+    return executionResult && isNoCounterExampleFound(executionResult.result)
+  }, [executionResult])
+
   const leftSection = (
     <Switch
       label={"Blend-In Mode"}
@@ -164,18 +168,21 @@ const ExecPanel = () => {
       return null
     }
     if (isError) {
-      return "Execution error. Please see the execution panel for details"
+      return <Text c={"red"} size={"sm"}>Execution error. Please see the execution panel for details</Text>
     }
     if (executionResult) {
-      if (isNoCounterExampleFound(executionResult.result)) {
-        return "Code executed, no counter-example found."
+      let msg
+      if (isCounter) {
+        msg = <Text c={"#74B816"} size={"sm"}>Check completed, no counter-example found.</Text>
+      } else {
+        msg = <Text c={"#fa5252"} size={"sm"}>Code executed, no path found.</Text>
       }
-      return "Code executed, no path found."
+      return msg
     }
     if (isLoading) {
-      return "Code executing, please wait..."
+      return <Text c={"dimmed"} size={"sm"}>Code executing, please wait...</Text>
     }
-    return "Press \"Run\" button to preview the paths found by Cyclone."
+    return <Text c={"dimmed"} size={"sm"}>Press "Run" button to preview the paths found by Cyclone.</Text>
   }, [codes, executionResult, isError])
 
   return (
@@ -196,7 +203,7 @@ const ExecPanel = () => {
             leftSection={leftSection}
           />
         </>
-        : <Text c={"dimmed"} size={"sm"}>{noPathMessage}</Text>
+        : noPathMessage
       }
     </Stack>
   )

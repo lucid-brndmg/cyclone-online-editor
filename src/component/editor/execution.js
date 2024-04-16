@@ -9,7 +9,7 @@ import {
   translateErrorResponse
 } from "@/core/execution";
 import {useEffect, useMemo, useRef, useState} from "react";
-import {IconArrowsMaximize, IconCopy, IconTerminal2} from "@tabler/icons-react";
+import {IconArrowsMaximize, IconCopy, IconTerminal2, IconX} from "@tabler/icons-react";
 import {
   Box,
   Button,
@@ -188,7 +188,21 @@ const NothingFoundText = ({result}) => isNoCounterExampleFound(result)
 export const CodeConsoleResultSection = () => {
   // const placeholder = `Code execution result will be presented here ...`
   const [resultMode, setResultMode] = useState("Result")
-  const { executionResult, isError, isLoading , errorMessage, isPolling, setIsPolling, parsedPaths, parsedTraces, traceIsGraphviz} = useEditorExecutionStore()
+  const {
+    executionResult,
+    isError, isLoading , errorMessage,
+    isPolling, setIsPolling,
+    parsedPaths, parsedTraces, traceIsGraphviz,
+
+    setIsError,
+    setVisualDataCopy,
+    setExecutionResult,
+    setParsedPaths,
+    setErrorMessage,
+    setParsedTraces,
+    setTraceIsGraphviz,
+
+  } = useEditorExecutionStore()
   const {resultHeight, executionServer} = useEditorSettingsStore()
   const {setErrors} = useEditorStore()
   const viewport = useRef(null)
@@ -215,6 +229,17 @@ export const CodeConsoleResultSection = () => {
 
   const cancelPoll = () => {
     setIsPolling(false)
+  }
+
+  const onClear = () => {
+    setIsError(false)
+    setExecutionResult(null)
+    setVisualDataCopy(null)
+    setIsError(false)
+    setParsedPaths(null)
+    setParsedTraces(null)
+    setTraceIsGraphviz(false)
+    setErrorMessage("")
   }
 
   return (
@@ -248,8 +273,11 @@ export const CodeConsoleResultSection = () => {
                     </Button>
                   )}
                 </CopyButton>
-                <Button onClick={() => setExamineOpened(true)} leftSection={<IconArrowsMaximize />} size={"compact-sm"} variant={"subtle"} color={"gray"}>
+                <Button onClick={() => setExamineOpened(true)} leftSection={<IconArrowsMaximize size={16} />} size={"compact-sm"} variant={"subtle"} color={"gray"}>
                   Examine
+                </Button>
+                <Button onClick={onClear} leftSection={<IconX size={16} />} size={"compact-sm"} variant={"subtle"} color={"gray"}>
+                  Clear
                 </Button>
               </>
               : null
