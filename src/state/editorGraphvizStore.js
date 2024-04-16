@@ -12,5 +12,18 @@ export const useGraphvizStore = create((set, get) => ({
   setCodePreviewLastHeight: codePreviewLastHeight => set({codePreviewLastHeight}),
 
   codePreviewTrans: null,
-  setCodePreviewTrans: codePreviewTrans => set({codePreviewTrans})
+  setCodePreviewTrans: codePreviewTrans => set({codePreviewTrans}),
+
+  traceVisualStates: [],
+  insertTraceVisualStates: (i, k, v) => {
+    const {traceVisualStates} = get()
+    if (traceVisualStates[i]) {
+      traceVisualStates[i][k] = v
+    } else {
+      const s = {}
+      s[k] = v
+      traceVisualStates[i] = s
+    }
+    set({traceVisualStates: [...traceVisualStates]})
+  },
 }))

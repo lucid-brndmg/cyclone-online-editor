@@ -218,6 +218,7 @@ const TracePanel = () => {
   const {executionResult, traceIsGraphviz, parsedTraces, isLoading, visualDataCopy} = useEditorExecutionStore()
   const {graphviz} = useEditorSettingsStore()
   const {setCode, code, editorCtx} = useEditorStore()
+  const {traceVisualStates, insertTraceVisualStates} = useGraphvizStore()
   const [incPath, setIncPath] = useState([])
   const [selectedPath, setSelectedPath] = useState([])
   const compilerOptions = editorCtx?.compilerOptions
@@ -281,6 +282,23 @@ const TracePanel = () => {
     return traceCtx?.traces.filter((_, i) => selectedPath.includes(i.toString()))
   }, [traceCtx, selectedPath])
 
+  const onHeight = (i, height) => {
+    insertTraceVisualStates(i, "initHeight", height)
+  }
+
+  const onZoom = (i, id) => {
+    const elem = document.querySelector(`#${id} > svg > g`)
+    const val = elem.attributes.getNamedItem("transform").value
+    insertTraceVisualStates(i, "initTransform", val)
+    // const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
+    // console.log(val)
+    // const [, transX, transY, scale] = regex.exec(val)
+    // setCodePreviewTrans({
+    //   transform: [parseInt(transX), parseInt(transY)],
+    //   scale: parseInt(scale)
+    // })
+  }
+
   return (
     <Stack>
       <Text size={"md"} fw={700}>Trace</Text>
@@ -307,6 +325,9 @@ const TracePanel = () => {
             </Text> : <Text size={"sm"} maw={"70%"} c={"dimmed"}>
               Here are the traces of variable mutation in nodes.
             </Text>}
+            visualStates={traceVisualStates}
+            onZoom={onZoom}
+            onHeightChange={onHeight}
           />
         </>
         : executionResult

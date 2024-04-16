@@ -26,5 +26,22 @@ export const useEditorExecutionStore = create((set, get) => ({
   setTraceIsGraphviz: traceIsGraphviz => set({traceIsGraphviz}),
 
   errorMessage: "",
-  setErrorMessage: errorMessage => set({errorMessage})
+  setErrorMessage: errorMessage => set({errorMessage}),
+
+  // resultVizStates: new Map(),
+  // traceVizStates: new Map(),
+  // resetVizStates: () => set({resultVizStates: new Map(), traceVizStates: new Map()}),
+  //
+  // insertResultVizState: (filename, state) => {
+  //   const {resultVizStates} = get()
+  //   resultVizStates.set(filename, state)
+  //   set({resultVizStates: new Map(resultVizStates)})
+  // },
+  //
+  // insertTraceVizState: (filename, state) => {
+  //   const {traceVizStates} = get()
+  //   traceVizStates.set(filename, state)
+  //   set({resultVizStates: new Map(traceVizStates)})
+  // }
+
 }))

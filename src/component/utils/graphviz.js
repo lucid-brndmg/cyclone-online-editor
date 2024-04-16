@@ -63,9 +63,12 @@ const Graphviz = forwardRef(({
         if (initTransform) {
           const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
           const [, transX, transY, scale] = regex.exec(initTransform)
+
           g.zoomSelection().call(
             d3.zoom().transform,
-            d3.zoomIdentity.translate(parseInt(transX), parseInt(transY)).scale(parseInt(scale))
+            d3.zoomIdentity
+              .translate(parseInt(transX) || 0, parseInt(transY) || 0)
+              .scale(parseInt(scale) || 1)
           )
           const e = document.querySelector(`#${id} > svg > g`)
           e.setAttribute("transform", initTransform)
@@ -211,7 +214,10 @@ export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHe
 // multi graphviz images
 export const GraphvizMultiPreview = ({
   codes,
-  leftSection
+  leftSection,
+  onZoom,
+  onHeightChange,
+  visualStates
 }) => {
   const [tab, setTab] = useState("Preview")
   const {graphviz: graphvizOptions} = useEditorSettingsStore()
@@ -281,6 +287,12 @@ export const GraphvizMultiPreview = ({
           </Group>
 
           {codes.map(({code, title, filename}, i) => {
+            const initHeight = visualStates
+              ? visualStates[i]?.initHeight
+              : undefined
+            const initTransform = visualStates
+              ? visualStates[i]?.initTransform
+              : undefined
             return (
               <Box key={i}>
                 {title}
@@ -290,6 +302,10 @@ export const GraphvizMultiPreview = ({
                   animationSpeed={graphvizOptions.animationSpeed}
                   className={classes.preview}
                   ref={el => graphvizRef.current[i] = el}
+                  onZoom={onZoom ? id => onZoom(i, id) : undefined}
+                  onHeightChange={onHeightChange ? h => onHeightChange(i, h) : undefined}
+                  initHeight={initHeight}
+                  initTransform={initTransform}
                 />
               </Box>
             )
