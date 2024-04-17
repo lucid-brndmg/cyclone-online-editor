@@ -1,4 +1,4 @@
-import {Accordion, ActionIcon, Button, LoadingOverlay, NavLink, Stack, Text} from "@mantine/core";
+import {Accordion, ActionIcon, Button, Checkbox, Group, LoadingOverlay, NavLink, Stack, Text} from "@mantine/core";
 import examples from "../../../resource/code_example_manifest.json"
 import {useEditorStore} from "@/state/editorStore";
 import {locateToCode} from "@/core/utils/monaco";
@@ -13,6 +13,7 @@ import {dynamicCodeExample, PublicUrl} from "@/core/utils/resource";
 import localforage from "localforage";
 import {useRouter} from "next/router";
 import {useGraphvizStore} from "@/state/editorGraphvizStore";
+import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 
 export const FileStateWrapper = () => {
   const {setCode, monacoCtx} = useEditorStore()
@@ -124,13 +125,15 @@ export const BrowserPanel = () => {
     currentFileId,
     fileTable,
     deleteOne,
-    exportAll,
+    exportFiles,
     switchFileId,
+    deleteMulti,
     setSwitchFileId,
   } = useEditorPersistentStore()
 
   const {editorReady} = useEditorStore()
-
+  const {fileBrowserExpanded, setFileBrowserExpanded} = useEditorSettingsStore()
+  const [selectedFiles, setSelectedFiles] = useState(new Set())
   const now = Date.now()
 
   const fileList = useMemo(() => Object.entries(fileTable ?? {}).map(([id, value]) => ({
@@ -139,7 +142,7 @@ export const BrowserPanel = () => {
   })).sort((a, b) => b - a), [fileTable])
 
 
-  const openDeletionModal = () => modals.openConfirmModal({
+  const openDeletionOneModal = () => modals.openConfirmModal({
     title: 'Confirm Deletion',
     children: (
       <Text size="sm">
@@ -149,37 +152,60 @@ export const BrowserPanel = () => {
     labels: { confirm: 'Confirm', cancel: 'Cancel' },
     confirmProps: { color: 'red' },
     onCancel: () => setDeletionId(null),
-    onConfirm: () => onDelete(),
+    onConfirm: () => onDeleteOne(),
+  });
+
+  const openMultiDeletionModal = () => modals.openConfirmModal({
+    title: 'Confirm Deletion',
+    children: (
+      <Text size="sm">
+        Are you sure to delete {selectedFiles.size ? selectedFiles.size : "all"} Files ?
+      </Text>
+    ),
+    labels: { confirm: 'Confirm', cancel: 'Cancel' },
+    confirmProps: { color: 'red' },
+    onCancel: () => {},
+    onConfirm: () => onDeleteFiles(),
   });
 
   useEffect(() => {
     if (deletionId) {
-      openDeletionModal()
+      openDeletionOneModal()
     }
   }, [deletionId]);
 
-  // const onDownloadExamples = async () => {
-  //   const zip = new JSZip()
-  //   for (let {title, code} of examples) {
-  //     zip.file(`${title}.cyclone`, code)
-  //   }
-  //
-  //   const zipFile = await zip.generateAsync({type: "blob"})
-  //   downloadBlobFile(zipFile, "files.zip")
-  // }
-
   const onExportFiles = async () => {
-    const zip = await exportAll()
+    const zip = await exportFiles(selectedFiles)
     await downloadBlobFile(zip, "files.zip")
   }
 
-  const onDelete = async () => {
+  const onDeleteOne = async () => {
     if (deletionId === currentFileId) {
       setCurrentFileId(null)
     }
 
     await deleteOne(deletionId)
     setDeletionId(null)
+  }
+
+  const onDeleteFiles = async () => {
+    const ids = selectedFiles.size ? [...selectedFiles] : Object.keys(fileTable)
+    if (currentFileId != null && ids.some(id => currentFileId === id)) {
+      setCurrentFileId(null)
+    }
+
+    await deleteMulti(ids)
+
+    setDeletionId(null)
+  }
+
+  const onSelectFile = (e, id) => {
+    if (selectedFiles.has(id)) {
+      selectedFiles.delete(id)
+    } else {
+      selectedFiles.add(id)
+    }
+    setSelectedFiles(new Set(selectedFiles))
   }
 
   const files = fileList.map(({id, title, time}) => {
@@ -190,10 +216,16 @@ export const BrowserPanel = () => {
         label={
           <div>
             <Text size={"sm"}>{title}</Text>
-            <Text c={"dimmed"} size={"xs"}>Last edit: {timeDifference(now, time)}</Text>
+            <Text c={"dimmed"} size={"xs"}>Edited: {timeDifference(now, time)}</Text>
           </div>
         }
-        leftSection={<IconFile />}
+        // <IconFile />
+        leftSection={<Checkbox
+          size={"lg"}
+          onClick={e => e.stopPropagation()}
+          onChange={e => onSelectFile(e, id)}
+          checked={selectedFiles.has(id)}
+        />}
         rightSection={<ActionIcon
           size={"sm"}
           color={"red"}
@@ -214,10 +246,31 @@ export const BrowserPanel = () => {
     <Stack>
       {/* <LoadingOverlay visible={isLoadingCodeExample} /> */}
 
-      <Accordion chevronPosition={"right"} multiple={true} defaultValue={["examples", "saved"]}>
+      <Accordion chevronPosition={"right"} multiple={true} value={fileBrowserExpanded} onChange={setFileBrowserExpanded}>
+        <Accordion.Item value={"saved"}>
+          <Accordion.Control >
+            <Text fw={500}>Saved Codes</Text>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <Stack>
+              {
+                files.length ? <>
+                  <Group grow>
+                    <Button size={"sm"} leftSection={<IconDownload size={16} />} variant={"default"} onClick={onExportFiles}>Export {selectedFiles.size ? `${selectedFiles.size} Files` : "All"}</Button>
+                    <Button onClick={e => {
+                      e.stopPropagation()
+                      openMultiDeletionModal()
+                    }} size={"sm"} variant={"outline"} leftSection={<IconTrash size={16} />} color={"red"}>Delete {selectedFiles.size ? `${selectedFiles.size} Files` : "All"}</Button>
+                  </Group>
+                  {files}
+                </> : <Text c={"dimmed"} size={"sm"}>No files saved yet. Save editing code by clicking 'save' button.</Text>
+              }
+            </Stack>
+          </Accordion.Panel>
+        </Accordion.Item>
         <Accordion.Item value={"examples"}>
           <Accordion.Control >
-            <Text fw={500}>Code Examples</Text>
+            <Text fw={500}>Cyclone Examples</Text>
           </Accordion.Control>
           <Accordion.Panel>
             <Stack>
@@ -235,21 +288,6 @@ export const BrowserPanel = () => {
                     />
                   )
                 })
-              }
-            </Stack>
-          </Accordion.Panel>
-        </Accordion.Item>
-        <Accordion.Item value={"saved"}>
-          <Accordion.Control >
-            <Text fw={500}>Saved Codes</Text>
-          </Accordion.Control>
-          <Accordion.Panel>
-            <Stack>
-              {
-                files.length ? <>
-                  <Button size={"compact-sm"} leftSection={<IconDownload size={16} />} variant={"default"} onClick={onExportFiles}>Export All</Button>
-                  {files}
-                </> : <Text c={"dimmed"} size={"sm"}>No files saved yet, try to save the code by clicking 'save' button.</Text>
               }
             </Stack>
           </Accordion.Panel>

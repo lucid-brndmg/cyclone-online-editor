@@ -69,9 +69,9 @@ export const useEditorPersistentStore = create((set, get) => ({
     }
   },
 
-  exportAll: async () => {
+  exportFiles: async (selected) => {
     const {fileTable} = get()
-    const ids = Object.keys(fileTable)
+    const ids = selected?.size ? [...selected] : Object.keys(fileTable)
     if (ids.length) {
       const tasks = []
       const zip = new JSZip()
@@ -107,6 +107,17 @@ export const useEditorPersistentStore = create((set, get) => ({
     }
 
     return false
+  },
+
+  deleteMulti: async ids => {
+    const {fileTable} = get()
+    const newFileTable = {...fileTable}
+    await Promise.all(ids.filter(id => newFileTable.hasOwnProperty(id)).map(async id => {
+      delete newFileTable[id]
+      await localforage.removeItem(id)
+    }))
+    await localforage.setItem("saved_code_table", newFileTable)
+    set({fileTable: newFileTable})
   },
 
   loadOne: async id => await localforage.getItem(id)

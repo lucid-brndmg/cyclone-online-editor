@@ -7,7 +7,7 @@
     "deleteAfterExec": false,
     "extension": ".cyclone",
     "disabledOptions": ["debug", "log"],
-    "mandatoryTimeoutMs": 2000,
+    "mandatoryTimeoutMs": 10000,
     "appendEnvPath": true,
     "idLength": 8
   },

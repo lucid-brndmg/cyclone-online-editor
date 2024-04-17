@@ -326,7 +326,7 @@ In the source code of the server there is a configuration file named `config.jso
     "disabledOptions": ["debug", "log"],
     // A mandatory timeout for cyclone's execution in ms
     // Set this to 0 to disable this feature
-    "mandatoryTimeoutMs": 2000,
+    "mandatoryTimeoutMs": 10000,
     // Add cyclone.path into environment PATH temporarily when executing program
     // Recommended, otherwise cyclone.path should be manually set to PATH
     "appendEnvPath": true,

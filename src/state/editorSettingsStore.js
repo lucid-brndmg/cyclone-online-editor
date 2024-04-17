@@ -57,6 +57,9 @@ export const useEditorSettingsStore = create((set, get) => ({
   },
   setGraphviz: graphviz => set({graphviz}),
 
+  fileBrowserExpanded: ["examples", "saved"],
+  setFileBrowserExpanded: fileBrowserExpanded => set({fileBrowserExpanded}),
+
 
   initOnLoad: async () => {
     const settings = await localforage.getItem("editor_settings")
@@ -78,7 +81,8 @@ export const useEditorSettingsStore = create((set, get) => ({
       graphviz,
       executionServer,
       execPollWait,
-      init
+      init,
+      fileBrowserExpanded
     } = get()
 
     if (!init) {
@@ -94,13 +98,14 @@ export const useEditorSettingsStore = create((set, get) => ({
       monacoTheme,
       graphviz,
       executionServer,
-      execPollWait
+      execPollWait,
+      fileBrowserExpanded
     }
 
     await localforage.setItem("editor_settings", save)
   },
 
-  setSettings: ({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait}) => {
-    set({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait})
+  setSettings: ({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait, fileBrowserExpanded}) => {
+    set({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait, fileBrowserExpanded})
   }
 }))
