@@ -17,7 +17,7 @@ import {CycloneLanguageId, CycloneMonacoConfig, CycloneMonacoTokens} from "@/cor
 import {getDefaultCompletionItems} from "@/core/monaco/completion";
 import {getKeywordHoverDocument} from "@/core/resources/referenceDocs";
 import {getErrorLevel} from "@/core/monaco/error";
-import {pos} from "@/lib/position";
+import {pos, posRangeIncludes, posStopBefore} from "@/lib/position";
 import {LoadingOverlay} from "@mantine/core";
 import {ErrorSource} from "@/core/definitions";
 import {PublicUrl} from "@/core/utils/resource";
@@ -36,6 +36,11 @@ const MonacoSetup = ({children, ready, onReady}) => {
     ? children
     : <LoadingOverlay visible={true} />
 }
+
+const findClosestValue = (line, column, xs) => xs?.findLast(v => {
+  const {startPosition} = v.position
+  return line > startPosition.line || (line === startPosition.line && column >= startPosition.column)
+})
 
 export const CycloneCodeEditor = ({
   code,
@@ -153,14 +158,16 @@ export const CycloneCodeEditor = ({
         const defaultItems = getDefaultCompletionItems(monaco)
 
         if (editorSemanticContextRef.current) {
-          const found = editorSemanticContextRef.current.findAvailableIdentifiers(position.lineNumber, startColumn ?? position.column)
+          const line = position.lineNumber, column = startColumn ?? position.column
+          const found = editorSemanticContextRef.current.findAvailableIdentifiers(line, column)
 
           if (found) {
             if (word.includes(".")) {
               const [pre] = word.split(".")
-              const ident = found.value.identifiers.get(pre)
-              if (ident && ident.recordChild) {
-                for (let {text} of ident.recordChild) {
+              const identStack = found.value.identifiers.get(pre)
+              const rec = identStack?.findLast(it => it.kind === IdentifierKind.Record && posStopBefore({line, column}, it.position.stopPosition))?.recordChild
+              if (rec) {
+                for (let {text} of rec) {
                   const v = `${pre}.${text}`
                   defaultItems.suggestions.push({
                     label: v,
@@ -170,10 +177,10 @@ export const CycloneCodeEditor = ({
                 }
               }
             } else {
-              for (let ident of found.value.identifiers.values()) {
+              for (let identKey of found.value.identifiers.keys()) {
                 defaultItems.suggestions.push({
-                  label: ident.text,
-                  insertText: ident.text,
+                  label: identKey,
+                  insertText: identKey,
                   kind: monaco.languages.CompletionItemKind.Variable,
                 })
               }
@@ -214,11 +221,12 @@ export const CycloneCodeEditor = ({
           if (!editorSemanticContextRef.current) {
             return
           }
+          const line = position.lineNumber
+          const column = word.startColumn ?? position.column
           const found = editorSemanticContextRef
             .current
             .findAvailableIdentifiers(
-              position.lineNumber,
-              word.startColumn ?? position.column
+              line, column
             )
           if (!found) {
             return
@@ -236,8 +244,13 @@ export const CycloneCodeEditor = ({
             }
           } else if (text.includes(".")) {
             const [pre, post] = text.split(".")
-            const ident = found.value.identifiers.get(pre)
-            if (ident && ident.type === IdentifierType.Record) {
+            const identStack = found.value.identifiers.get(pre)
+            const ident = identStack?.findLast(it => {
+              const {position, type} = it
+              const {stopPosition} = position
+              return type === IdentifierType.Record && posStopBefore({line, column}, stopPosition)
+            })
+            if (ident) {
               const child = ident.recordChild.find(({text}) => text === post)
               if (child) {
                 return {
@@ -252,7 +265,8 @@ export const CycloneCodeEditor = ({
 
             }
           } else {
-            const ident = found.value.identifiers.get(text)
+            const identStack = found.value.identifiers.get(text)
+            const ident = findClosestValue(line, column, identStack)
             if (ident) {
               const contents = [{value: cycloneCodeMD(formatIdentifier(ident))}, { value: formatKindDescription(ident.kind) }]
               switch (ident.kind) {

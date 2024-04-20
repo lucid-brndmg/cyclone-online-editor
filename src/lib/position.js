@@ -21,6 +21,14 @@ export const posRangeIncludes = ({line, column}, targetPair) => {
     // && ( line === startPosition.line && column <= stopPosition.column || )
 }
 
+export const posStopBefore = ({line, column}, stopPosition) => {
+  return line >= stopPosition.line
+    && (
+      (line > stopPosition.line)
+      || (line === stopPosition.line && column >= stopPosition.column)
+    )
+}
+
 export const positionComparator = (a, b) => {
   if (a.startPosition.line === b.startPosition.line) {
     return a.startPosition.column - b.startPosition.column

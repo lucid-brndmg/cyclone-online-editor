@@ -7,59 +7,59 @@ const {
   SemanticContextType
 } = cycloneAnalyzer.language.definitions
 
-const errorTypeDescription = {
-  // [ErrorKind.SyntaxError]: "Syntax Error",
-  // [ErrorKind.TypeError]: "Type Error",
-  // [ErrorKind.SemanticError]: "Semantic Error",
-  // [ErrorKind.SemanticWarning]: "Semantic Warning",
-  // [ErrorKind.UndefinedIdentifier]: "Undefined Identifier",
-  // [ErrorKind.RedeclaredIdentifier]: "Redeclared Identifier"
-
-  [ExtendedErrorType.SyntaxError]: "Syntax Error",
-
-  [ExtendedErrorType.UndefinedIdentifier]: "Undefined Identifier",
-  [ExtendedErrorType.IdentifierRedeclaration]: "Identifier Redeclaration",
-  [ExtendedErrorType.RecursiveFunction]: "Invalid Function",
-  [ExtendedErrorType.WhereFreeVariable]: "Invalid Where Condition",
-  [ExtendedErrorType.WhereFunctionCall]: "Invalid Where Condition",
-  [ExtendedErrorType.CompilerOptionDuplicated]: "Invalid Compiler Option",
-  [ExtendedErrorType.StartNodeDuplicated]: "Invalid Node Modifier",
-  [ExtendedErrorType.ReturnExprViolation]: "Invalid Statement",
-  [ExtendedErrorType.StatementAfterReturn]: "Invalid Statement",
-  [ExtendedErrorType.InvalidNamedExprScope]: "Invalid Expression",
-  [ExtendedErrorType.InvalidStatement]: "Invalid Statement",
-  [ExtendedErrorType.LetBodyUndefined]: "Path Condition Undefined",
-  // [ErrorType.LocalVariableEnum]: "Enum Type In Local Variables",
-  [ExtendedErrorType.InvalidNodeModifier]: "Invalid Node Modifier",
-  [ExtendedErrorType.EnumNotAllowedInVariable]: "Enum Not Allowed Here",
-  [ExtendedErrorType.WhereInlineVariable]: "Where Clause In Local Variables",
-  [ExtendedErrorType.InvalidCheckForPathLength]: "Invalid Path Length",
-  [ExtendedErrorType.AnonymousEdgeIdentifier]: "Identifier On Anonymous Edge",
-  [ExtendedErrorType.AssertModifierInExpr]: "Invalid Assert Expression",
-
-  [ExtendedErrorType.TypeMismatchFunction]: "Type Mismatch",
-  [ExtendedErrorType.TypeMismatchReturn]: "Type Mismatch",
-  [ExtendedErrorType.TypeMismatchCompilerOption]: "Type Mismatch",
-  [ExtendedErrorType.TypeMismatchVarDecl]: "Type Mismatch",
-  [ExtendedErrorType.TypeMismatchVarRef]: "Type Mismatch",
-  [ExtendedErrorType.TypeMismatchExpr]: "Type Mismatch",
-
-  [ExtendedErrorType.CodeInsideAbstractNode]: "Redundant Code",
-  [ExtendedErrorType.NoGoalDefined]: "Ill-Formed Graph",
-  [ExtendedErrorType.NoStartNodeDefined]: "Ill-Formed Graph",
-  [ExtendedErrorType.DuplicatedEdge]: "Redundant Edge",
-  [ExtendedErrorType.EmptyEdge]: "Empty Edge",
-  [ExtendedErrorType.DuplicatedEnumField]: "Duplicated Enum",
-  [ExtendedErrorType.DuplicatedEdgeTarget]: "Duplicated Edge Target",
-  [ExtendedErrorType.OptionTraceNotFound]: "Option Output Ignored",
-  [ExtendedErrorType.DuplicatedCheckForPathLength]: "Duplicated Path Length",
-
-  [ExtendedErrorType.RemoteError]: "Remote Execution Error"
-}
-
-export const formatErrorDescription = (type) => {
-  return errorTypeDescription[type] ?? "Error"
-}
+// const errorTypeDescription = {
+//   // [ErrorKind.SyntaxError]: "Syntax Error",
+//   // [ErrorKind.TypeError]: "Type Error",
+//   // [ErrorKind.SemanticError]: "Semantic Error",
+//   // [ErrorKind.SemanticWarning]: "Semantic Warning",
+//   // [ErrorKind.UndefinedIdentifier]: "Undefined Identifier",
+//   // [ErrorKind.RedeclaredIdentifier]: "Redeclared Identifier"
+//
+//   [ExtendedErrorType.SyntaxError]: "Syntax Error",
+//
+//   [ExtendedErrorType.UndefinedIdentifier]: "Undefined Identifier",
+//   [ExtendedErrorType.IdentifierRedeclaration]: "Identifier Redeclaration",
+//   [ExtendedErrorType.RecursiveFunction]: "Invalid Function",
+//   [ExtendedErrorType.WhereFreeVariable]: "Invalid Where Condition",
+//   [ExtendedErrorType.WhereFunctionCall]: "Invalid Where Condition",
+//   [ExtendedErrorType.CompilerOptionDuplicated]: "Invalid Compiler Option",
+//   [ExtendedErrorType.StartNodeDuplicated]: "Invalid Node Modifier",
+//   [ExtendedErrorType.ReturnExprViolation]: "Invalid Statement",
+//   [ExtendedErrorType.StatementAfterReturn]: "Invalid Statement",
+//   [ExtendedErrorType.InvalidNamedExprScope]: "Invalid Expression",
+//   [ExtendedErrorType.InvalidStatement]: "Invalid Statement",
+//   [ExtendedErrorType.LetBodyUndefined]: "Path Condition Undefined",
+//   // [ErrorType.LocalVariableEnum]: "Enum Type In Local Variables",
+//   [ExtendedErrorType.InvalidNodeModifier]: "Invalid Node Modifier",
+//   [ExtendedErrorType.EnumNotAllowedInVariable]: "Enum Not Allowed Here",
+//   [ExtendedErrorType.WhereInlineVariable]: "Where Clause In Local Variables",
+//   [ExtendedErrorType.InvalidCheckForPathLength]: "Invalid Path Length",
+//   [ExtendedErrorType.AnonymousEdgeIdentifier]: "Identifier On Anonymous Edge",
+//   [ExtendedErrorType.AssertModifierInExpr]: "Invalid Assert Expression",
+//
+//   [ExtendedErrorType.TypeMismatchFunction]: "Type Mismatch",
+//   [ExtendedErrorType.TypeMismatchReturn]: "Type Mismatch",
+//   [ExtendedErrorType.TypeMismatchCompilerOption]: "Type Mismatch",
+//   [ExtendedErrorType.TypeMismatchVarDecl]: "Type Mismatch",
+//   [ExtendedErrorType.TypeMismatchVarRef]: "Type Mismatch",
+//   [ExtendedErrorType.TypeMismatchExpr]: "Type Mismatch",
+//
+//   [ExtendedErrorType.CodeInsideAbstractNode]: "Redundant Code",
+//   [ExtendedErrorType.NoGoalDefined]: "Ill-Formed Graph",
+//   [ExtendedErrorType.NoStartNodeDefined]: "Ill-Formed Graph",
+//   [ExtendedErrorType.DuplicatedEdge]: "Redundant Edge",
+//   [ExtendedErrorType.EmptyEdge]: "Empty Edge",
+//   [ExtendedErrorType.DuplicatedEnumField]: "Duplicated Enum",
+//   [ExtendedErrorType.DuplicatedEdgeTarget]: "Duplicated Edge Target",
+//   [ExtendedErrorType.OptionTraceNotFound]: "Option Output Ignored",
+//   [ExtendedErrorType.DuplicatedCheckForPathLength]: "Duplicated Path Length",
+//
+//   [ExtendedErrorType.RemoteError]: "Remote Execution Error"
+// }
+//
+// export const formatErrorDescription = (type) => {
+//   return errorTypeDescription[type] ?? "Error"
+// }
 
 const errorSourceToText = {
   [ErrorSource.Semantic]: "Semantic Problem",
@@ -78,10 +78,6 @@ const eUndefinedIdentifier = ({desc, ident}) => {
 
 const eIdentifierRedeclaration = ({ident}) => {
   return `redeclaration of identifier '${ident}'`
-}
-
-const eTypeMismatchVarRef = ({ident, expected}) => {
-  return `type mismatch: ${ident} expected to have type ${formatType(expected)}`
 }
 
 const eRecursiveFunction = ({ident}) => {
@@ -217,6 +213,14 @@ const eAssertModifierInExpr = () => {
   return `assertion qualifier 'some | always' can not be used with 'in' clause. Please remove 'in' clause or remove qualifier`
 }
 
+const eInvalidValueMutation = () => {
+  return "this value can not be updated via value mutation operators"
+}
+
+const eOperatingDifferentEnumSources = () => {
+  return "operating enum values from different sources is not allowed"
+}
+
 const errorMessageFormatter = {
   [ExtendedErrorType.RemoteError]: eMsgBased,
   [ExtendedErrorType.SyntaxError]: eMsgBased,
@@ -234,7 +238,6 @@ const errorMessageFormatter = {
   [ExtendedErrorType.TypeMismatchReturn]: eTypeMismatchReturn,
   [ExtendedErrorType.TypeMismatchCompilerOption]: eTypeMismatchCompilerOption,
   [ExtendedErrorType.TypeMismatchVarDecl]: eTypeMismatchVarDecl,
-  [ExtendedErrorType.TypeMismatchVarRef]: eTypeMismatchVarRef,
   [ExtendedErrorType.TypeMismatchExpr]: eTypeMismatchExpr,
   [ExtendedErrorType.CodeInsideAbstractNode]: eCodeInsideAbstractNode,
   [ExtendedErrorType.NoGoalDefined]: eNoGoalDefined,
@@ -252,10 +255,12 @@ const errorMessageFormatter = {
   [ExtendedErrorType.InvalidCheckForPathLength]: eInvalidCheckForPathLength,
   [ExtendedErrorType.DuplicatedCheckForPathLength]: eDuplicatedCheckForPathLength,
   [ExtendedErrorType.AnonymousEdgeIdentifier]: eAnonymousEdgeIdentifier,
-  [ExtendedErrorType.AssertModifierInExpr]: eAssertModifierInExpr
+  [ExtendedErrorType.AssertModifierInExpr]: eAssertModifierInExpr,
+  [ExtendedErrorType.InvalidValueMutation]: eInvalidValueMutation,
+  [ExtendedErrorType.OperatingDifferentEnumSources]: eOperatingDifferentEnumSources
 }
 
-export const formatErrorMessage = (type, params, source) => {
+export const formatErrorMessage = (type, params, source = null) => {
   // switch (source) {
   //   case ErrorSource.Parser:
   //   case ErrorSource.Lexer: return `Syntax error: ${msg}`
@@ -268,6 +273,8 @@ export const formatErrorMessage = (type, params, source) => {
 
   return `${pref}${errorMessageFormatter[type](params)}`
 }
+
+export const formatErrorSource = source => errorSourceToText[source]
 
 const typeMsgRepr = {
   [IdentifierType.Machine]: "graph",

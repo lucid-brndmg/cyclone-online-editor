@@ -37,10 +37,10 @@ import {useEditorStore} from "@/state/editorStore";
 import {useEditorHelperStore} from "@/state/editorHelperStore";
 import {eliminateVarGroup, filterText} from "@/core/utils/outline";
 import {
-  formatErrorDescription, formatErrorMessage,
-  formatKindDescription,
-  formatScopeBlockType,
-  formatType
+    formatErrorMessage, formatErrorSource,
+    formatKindDescription,
+    formatScopeBlockType,
+    formatType
 } from "@/core/utils/format";
 import {locateToCode} from "@/core/utils/monaco";
 import {isWarning} from "@/core/specification";
@@ -470,15 +470,23 @@ const getErrorStyle = e => {
   return {
     icon,
     text: <Box>
-      <Group justify={"space-between"}>
-        <Text size={"sm"} fw={500}>
-          {formatErrorDescription(e.type)}
-        </Text>
-        <Text size={"sm"} c={"dimmed"} px={"sm"}>{e.startPosition.line}:{e.startPosition.column + 1}</Text>
-      </Group>
-      <Text size={"sm"}>
-        {formatErrorMessage(e.type, e.params)}
-      </Text>
+       <Group justify={"space-between"}>
+         <Text size={"sm"} fw={500}>
+           {formatErrorSource(e.source)}
+         </Text>
+         <Text size={"sm"} c={"dimmed"} px={"sm"}>{e.startPosition.line}:{e.startPosition.column + 1}</Text>
+       </Group>
+       <Text size={"sm"}>
+         {formatErrorMessage(e.type, e.params)}
+       </Text>
+
+        {/*<Group justify={"space-between"}>*/}
+        {/*    <Text size={"sm"}>*/}
+        {/*        {formatErrorMessage(e.type, e.params)}*/}
+        {/*    </Text>*/}
+        {/*    <Text size={"sm"} c={"dimmed"} px={"sm"}>{e.startPosition.line}:{e.startPosition.column + 1}</Text>*/}
+        {/*</Group>*/}
+
     </Box>
   }
 }

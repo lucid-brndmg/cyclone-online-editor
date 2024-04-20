@@ -23,9 +23,9 @@ const EditorMainContent = () => {
       <Flex
         px={"md"}
         w={"100%"}
-        direction={{ base: 'column', lg: 'row' }}
+        direction={{ base: 'column', md: 'row' }}
         gap={4}
-        justify={{ md: 'center', lg: "space-between" }}
+        justify={{ base: 'center', md: "space-between" }}
         // align={{base: "center", md: "flex-start"}}
       >
         <EditorHelperPanel miw={"280px"} />

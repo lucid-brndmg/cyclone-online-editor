@@ -150,9 +150,9 @@ export const TutorialPanel = ({html, id}) => {
       <Flex
         px={"md"}
         w={"100%"}
-        direction={{ base: 'column', lg: 'row' }}
+        direction={{ base: 'column', md: 'row' }}
         gap={4}
-        justify={{ md: 'center', lg: "space-between" }}
+        justify={{ base: 'center', md: "space-between" }}
       >
         <Paper miw={"280px"} shadow="none" withBorder={false} w={"100%"} radius={"md"}>
           <Stack gap={"4px"}>

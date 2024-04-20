@@ -16,24 +16,6 @@ class PositionTable {
     })
 
     this.context.sort(positionComparator)
-
-    // const content = {
-    //   startPosition,
-    //   stopPosition,
-    //   value
-    // }
-    // const ctxLength = this.context.length
-    // if (ctxLength) {
-    //   let i
-    //   for (i = ctxLength - 1; i >= 0; i-- ) {
-    //     if (positionComparator(content, this.context[i]) < 0) {
-    //       this.context[i + 1] = this.context[i]
-    //     } else break;
-    //   }
-    //   this.context[i + 1] = content
-    // } else {
-    //   this.context.push(content)
-    // }
   }
 
   find(line, column) {
@@ -42,9 +24,16 @@ class PositionTable {
     // const candidates = this.context.filter(pair => posRangeIncludes({line, column}, pair) )
     // return candidates[candidates.length - 1]
 
-    return this.context.findLast(pair => posRangeIncludes({line, column}, pair) )
+    return this.context.findLast(pair => posRangeIncludes({line, column}, pair))
   }
 }
+
+// class PropertyLocator {
+//   context = []
+//
+//   constructor(enums, identifiers) {
+//   }
+// }
 
 export default class EditorSemanticContext {
   scopePosition = new PositionTable()
@@ -68,29 +57,6 @@ export default class EditorSemanticContext {
   findAvailableIdentifiers(line, col) {
     return this.scopePosition.find(line, col)
   }
-
-  setSortIdentifier(pos, value) {
-    this.scopePosition.set(pos, value)
-  }
-
-  // pushScopeLayerScope(layer, type, position) {
-  //   this.scopeLayers.push({layer, outlineKind: OutlineKind.Group, type, position})
-  // }
-  //
-  // pushScopeLayerIdent(text, type, position, kind, blockType, currentLayer) {
-  //   this.scopeLayers.push({text, type, position, kind, blockType, outlineKind: OutlineKind.Identifier, currentLayer})
-  // }
-
-  // getScopeLayers() {
-  //   return this.scopeLayers
-  // }
-
-  // defineState(identifier, attrs) {
-  //   this.stateTable.set(identifier, {
-  //     identifier,
-  //     attrs,
-  //   })
-  // }
 
   registerTransInState(state, transIdent, expr) {
     if (this.stateTable.has(state)) {
@@ -145,11 +111,11 @@ export default class EditorSemanticContext {
     if (!machineCtx) {
       return
     }
-    const enums = machineCtx.enumFields
-    const identifiers = machineCtx.identifierStack
-    this.setSortIdentifier(block.position, {
+    const enums = machineCtx.enumFields.keys()
+    const identifiers = machineCtx.identifierStack.copy()
+    this.scopePosition.set(block.position, {
       type: block.type,
-      identifiers: identifiers.extractLatestToMap(ident => ident.text),
+      identifiers,// : identifiers.extractLatestToMap(ident => ident.text),
       enums: new Set(enums)
     })
   }

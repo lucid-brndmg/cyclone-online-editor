@@ -15,6 +15,8 @@ const {
   replaceOperators
 } = cycloneAnalyzer.blockBuilder.refactorHelper
 
+const CycloneParser = cycloneAnalyzer.generated.antlr.CycloneParser
+
 const exprOperatorReplacerMap = new Map([
   ["^", "⊕"],
   ["&&", "∧"],
@@ -27,22 +29,30 @@ const exprOperatorReplacerMap = new Map([
   ["<=", "≤"],
   [">=", "≥"],
   ["*", "×"]
-
 ])
 
-const pathOperatorReplacerMap = new Map([
-  ["&&", "∧"],
-  ["||", "∨"],
-  ["->", "→"],
-  ["=>", "⇒"],
-  ["!", "¬"],
-  ["==", "="],
-  ["!=", "≠"],
-  ["<=", "≤"],
-  [">=", "≥"],
-])
+// const pathOperatorReplacerMap = new Map([
+//   ["&&", "∧"],
+//   ["||", "∨"],
+//   ["->", "→"],
+//   ["=>", "⇒"],
+//   ["!", "¬"],
+//   ["==", "="],
+//   ["!=", "≠"],
+//   ["<=", "≤"],
+//   [">=", "≥"],
+// ])
 
-const formatCycloneExpr = (code, entry) => replaceOperators(code, entry, entry === CycloneParsingEntry.Check ? pathOperatorReplacerMap : exprOperatorReplacerMap)
+const operatorReplacerFn = (symbol, ctx, index) => {
+  const text = symbol.text
+  if ((ctx instanceof CycloneParser.StateIncExprContext || ctx instanceof CycloneParser.PathPrimaryExprContext) && text === "^") {
+    return null
+  }
+
+  return exprOperatorReplacerMap.get(text)
+}
+
+const formatCycloneExpr = (code, entry) => replaceOperators(code, entry, null, operatorReplacerFn)
 
 const CycloneParsingEntry = {
   Expr: "expression",
