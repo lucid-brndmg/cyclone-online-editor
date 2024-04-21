@@ -2,7 +2,8 @@ import {useEditorStore} from "@/state/editorStore";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import Config from "../../../resource/config.json";
 import {
-  isNoCounterExampleFound,
+  extractGenCondMessage,
+  isNoCounterExampleFound, isNoPathFound, isUnknownResult,
   parseExecutionResultPaths, parseTrace,
   ResponseCode,
   sanitizeResult,
@@ -181,9 +182,13 @@ export const CodeExecutionButton = ({...props}) => {
   )
 }
 
-const NothingFoundText = ({result}) => isNoCounterExampleFound(result)
-  ? <Text span c={"#74B816"} fw={700}>No Counter-example found.</Text>
-  : <Text span c={"#fa5252"} fw={700}>No path found.</Text>
+// const NothingFoundText = ({result}) => isNoCounterExampleFound(result)
+//   ? <Text span c={"#74B816"} fw={700}>No Counter-example found.</Text>
+//   : isNoPathFound(result)
+//     ? <Text span c={"#fa5252"} fw={700}>No path found.</Text>
+//     : isUnknownResult(result)
+//       ? <Text span c={"#fa5252"} fw={700}>Unknown Result</Text>
+//       : <Text span  fw={700}>Unknown result, see message for details</Text>
 
 export const CodeConsoleResultSection = () => {
   // const placeholder = `Code execution result will be presented here ...`
@@ -210,11 +215,58 @@ export const CodeConsoleResultSection = () => {
 
   const sanitized = useMemo(() => {
     if (executionResult) {
-      return sanitizeResult(executionResult.result)
+      const sanitized = sanitizeResult(executionResult.result)
+      let title = ""
+      if (parsedPaths?.total > 0) {
+        title = <Text fw={500} size={"sm"}>
+          Found {parsedPaths.total} paths
+          {parsedPaths.lengths.length
+            ? ", with lengths of: " + parsedPaths.lengths.join(", ")
+            : ""
+          }
+        </Text>
+      } else if (sanitized.errors.length) {
+        title = <Text fw={500} size={"sm"}>
+          Errors occurred. Please check the spec.
+        </Text>
+      } else if (sanitized.generatedConditionMessage) {
+          title = <Text size={"sm"} fw={500}>
+              No checking is performed due to:{' '}
+              <Text span c={"#fa5252"} fw={700}>{sanitized.generatedConditionMessage}</Text>
+              {' '} The result is unknown
+          </Text>
+      } else if (sanitized.noCounter) {
+        title = <Text fw={500} size={"sm"}>
+          Checking completed:{' '}
+          <Text span c={"#74B816"} fw={700}>No Counter-example found.</Text>
+        </Text>
+      } else if (sanitized.noPath) {
+        title = <Text fw={500} size={"sm"}>
+          Checking completed:{' '}
+          <Text span c={"#fa5252"} fw={700}>No path found.</Text>
+        </Text>
+      } else if (sanitized.unknownResult) {
+        title = <Text fw={500} size={"sm"}>
+          Checking completed:{' '}
+          <Text span c={"#fa5252"} fw={700}>Unknown Result</Text>
+        </Text>
+      } else if (sanitized.condUnsuccessful) {
+        title = <Text size={"sm"} fw={500}>
+          No checking is performed due to{' '}
+          <Text span c={"#fa5252"} fw={700}>unsuccessful code generation.</Text>
+          {' '} See message for details.
+        </Text>
+      } else  {
+          title = <Text fw={500} size={"sm"}>
+            Execution completed:{' '}
+            <Text span fw={700}>Unknown execution result, see message for details</Text>
+          </Text>
+      }
+      return {...sanitized, title}
     } else {
-      return {errors: [], sanitized: null}
+      return {errors: [], sanitized: null, title: null}
     }
-  }, [executionResult])
+  }, [executionResult, parsedPaths])
 
   useEffect(() => {
     setErrors(sanitized.errors)
@@ -232,7 +284,6 @@ export const CodeConsoleResultSection = () => {
   }
 
   const onClear = () => {
-    setIsError(false)
     setExecutionResult(null)
     setVisualDataCopy(null)
     setIsError(false)
@@ -292,18 +343,7 @@ export const CodeConsoleResultSection = () => {
           ? <Box>
             {resultMode === "Result"
               // Result panel
-              ? parsedPaths
-                ? parsedPaths.total > 0
-                  ? <Text fw={500} size={"sm"}>
-                    Found {parsedPaths.total} paths
-                    {parsedPaths.lengths.length
-                      ? ", with lengths of: " + parsedPaths.lengths.join(", ")
-                      : ""
-                    }
-                  </Text>
-                  : <Text fw={500} size={"sm"}>Checking completed: <NothingFoundText result={executionResult.result} /></Text>
-                : <Text fw={500} size={"sm"}>Checking completed: <NothingFoundText result={executionResult.result} /></Text>
-
+              ? sanitized.title
               // Trace panel
               : parsedTraces
                 ? parsedTraces.length

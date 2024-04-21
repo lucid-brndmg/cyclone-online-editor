@@ -4,10 +4,24 @@
 
 import {createRef, forwardRef, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
-import {Box, Button, Code, CopyButton, Group, ScrollArea, SegmentedControl} from "@mantine/core";
+import {Box, Button, Code, CopyButton, Group, Menu, ScrollArea, SegmentedControl} from "@mantine/core";
 import classes from "@/styles/modules/GraphvizPreview.module.css";
-import {IconCopy, IconDownload, IconZoomIn} from "@tabler/icons-react";
-import {disableSelect, downloadBlobFile, downloadTextFile, serializeSvg} from "@/lib/dom";
+import {
+  IconCopy,
+  IconDownload,
+  IconFileTypeJpg,
+  IconFileTypePng,
+  IconFileTypeSvg,
+  IconZoomIn
+} from "@tabler/icons-react";
+import {
+  disableSelect,
+  downloadBlobFile,
+  downloadTextFile,
+  getSvgString,
+  serializeSvg,
+  svgString2Image
+} from "@/lib/dom";
 import * as d3 from "d3";
 import {useGraphvizStore} from "@/state/editorGraphvizStore";
 import {AnimationDuration, AnimationSpeed} from "@/core/graphviz";
@@ -19,7 +33,8 @@ const Graphviz = forwardRef(({
   dot, options, animationSpeed, className,
   onHeightChange, // onZoom, // onInit,
   initHeight, // initTransform,
-  maxWidth, maxHeight
+  maxWidth, maxHeight,
+  onInitTransform
 }, ref) => {
   const {assignGraphvizId} = useGraphvizStore()
   const [assignedId, setAssignedId] = useState(undefined)
@@ -58,6 +73,12 @@ const Graphviz = forwardRef(({
     const elem = d3.select(`#${id}`)
     let g = elem.graphviz({...options, width: "100%", height: "100%"})
     g = prepAnimation(g, animationSpeed)
+
+    g.on("end", () => {
+      if (onInitTransform) {
+        onInitTransform(document.querySelector(`#${assignedId} > svg > g`).getAttribute("transform"))
+      }
+    })
 
     // if (onZoom || initTransform) {
     //   g.on("end", () => {
@@ -134,10 +155,22 @@ const Graphviz = forwardRef(({
   </Box>)
 })
 
+const graphToSvg = (svg, initTrans, removeBg = true) => {
+  const copy = svg.cloneNode(true)
+  if (initTrans) {
+    copy.children[0].setAttribute("transform", initTrans)
+  }
+  if (removeBg) {
+    copy.children[0].children[0].remove()
+  }
+  return getSvgString(copy)
+}
+
 // Single graphviz image
 export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHeight, maxWidth, maxHeight}) => {
   const [tab, setTab] = useState("Preview")
   const {graphviz: graphvizOptions} = useEditorSettingsStore()
+  const [svgTrans, setSvgTrans] = useState(null)
 
   const graphvizRef = useRef(null)
 
@@ -150,14 +183,27 @@ export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHe
 
   const downloadSvg = useCallback(() => {
     if (graphvizRef.current) {
-      const svg = graphvizRef.current.innerHTML
+      const svg = graphvizRef.current.childNodes[0]
       if (!svg) {
         return
       }
-
-      downloadTextFile(serializeSvg(svg), "graph.svg")
+      downloadTextFile(graphToSvg(svg, svgTrans), "graph.svg")
     }
-  }, [graphvizRef])
+  }, [graphvizRef, svgTrans])
+
+  const downloadImage = async (type, name, removeBg) => {
+    if (!graphvizRef.current) {
+      return
+    }
+    const node = graphvizRef.current.childNodes[0]
+    if (!node) {
+      return
+    }
+
+    const svg = graphToSvg(node, svgTrans, removeBg)
+    const blob = await svgString2Image(svg, node.width.baseVal.value, node.height.baseVal.value, type)
+    return downloadBlobFile(blob, name)
+  }
 
   const d3Options = useMemo(() => ({
     fit: true,
@@ -188,10 +234,26 @@ export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHe
               initHeight={initHeight}
               maxWidth={maxWidth}
               maxHeight={maxHeight}
+              onInitTransform={setSvgTrans}
             />
             <Group grow>
               <Button onClick={resetZoom} leftSection={<IconZoomIn size={16} />} >Reset Zoom</Button>
-              <Button variant={"default"} onClick={downloadSvg} leftSection={<IconDownload size={16} />}>Download SVG</Button>
+
+              <Menu
+                withinPortal
+                withArrow={true}
+                width={300}
+              >
+                <Menu.Target>
+                  <Button variant={"default"} leftSection={<IconDownload size={16} />}>Download as Image</Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item onClick={downloadSvg}><b>SVG</b> Format</Menu.Item>
+                  <Menu.Item onClick={() => downloadImage("image/png", "graph.png", true)}><b>PNG</b> Format (Transparent)</Menu.Item>
+                  <Menu.Item onClick={() => downloadImage("image/png", "graph.png", false)}><b>PNG</b> Format (White Background)</Menu.Item>
+                  <Menu.Item onClick={() => downloadImage("image/jpeg", "graph.jpg", false)}><b>JPG</b> Format</Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
             </Group>
 
           </>
@@ -233,6 +295,13 @@ export const GraphvizMultiPreview = ({
     convertEqualSidedPolygons: !graphvizOptions.performanceMode,
   }), [graphvizOptions])
 
+  const [svgTrans, setSvgTrans] = useState([])
+
+  const updateSvgTrans = (idx, trans) => {
+    svgTrans[idx] = trans
+    setSvgTrans([...svgTrans])
+  }
+
   const downloadAllCode = useCallback(async () => {
     if (!codes.length) {
       return
@@ -252,7 +321,7 @@ export const GraphvizMultiPreview = ({
     if (!graphvizRef.current) {return}
     const svgGraphs = graphvizRef
       .current
-      .map(ref => serializeSvg(ref.innerHTML))
+      .map((ref, i) => graphToSvg(ref.childNodes[0], svgTrans[i]))
     if (svgGraphs.length) {
       const zip = new JSZip()
       svgGraphs.forEach((svg, i) => {
@@ -261,7 +330,33 @@ export const GraphvizMultiPreview = ({
       const final = await zip.generateAsync({type: "blob"})
       await downloadBlobFile(final, "graphs.zip")
     }
-  }, [graphvizRef, codes])
+  }, [graphvizRef, codes, svgTrans])
+
+  const downloadAllImage = async (type, removeBg) => {
+    if (!graphvizRef.current) {
+      return
+    }
+    let ext
+    switch (type) {
+      case "image/png": ext = ".png"; break;
+      case "image/jpeg": ext = ".jpg"; break;
+    }
+    const images = await Promise.all(graphvizRef
+      .current
+      .map((ref, i) => {
+        const node = ref.childNodes[0]
+        const svg = graphToSvg(node, svgTrans[i], removeBg)
+        return svgString2Image(svg, node.width.baseVal.value, node.height.baseVal.value, type)
+      }))
+    if (images.length) {
+      const zip = new JSZip()
+      images.forEach((image, i) => {
+        zip.file(`${codes[i].filename || `graph-${i}`}${ext}`, image)
+      })
+      const final = await zip.generateAsync({type: "blob"})
+      await downloadBlobFile(final, "graphs.zip")
+    }
+  }
 
 
   const resetZoom = useCallback(() => {
@@ -285,7 +380,22 @@ export const GraphvizMultiPreview = ({
         ? <>
           <Group grow>
             <Button onClick={resetZoom} leftSection={<IconZoomIn size={16} />}>Reset Zoom</Button>
-            <Button variant={"default"} leftSection={<IconDownload size={16} />} onClick={downloadAllSvg}>Download All</Button>
+            {/*<Button variant={"default"} leftSection={<IconDownload size={16} />} onClick={downloadAllSvg}>Download All</Button>*/}
+            <Menu
+              withinPortal
+              withArrow={true}
+              width={300}
+            >
+              <Menu.Target>
+                <Button variant={"default"} leftSection={<IconDownload size={16} />}>Download All</Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item onClick={downloadAllSvg}><b>SVG</b> Format</Menu.Item>
+                <Menu.Item onClick={() => downloadAllImage("image/png", true)}><b>PNG</b> Format (Transparent)</Menu.Item>
+                <Menu.Item onClick={() => downloadAllImage("image/png", false)}><b>PNG</b> Format (White Background)</Menu.Item>
+                <Menu.Item onClick={() => downloadAllImage("image/jpeg",  false)}><b>JPG</b> Format</Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
           </Group>
 
           {codes.map(({code, title, filename}, i) => {
@@ -309,6 +419,7 @@ export const GraphvizMultiPreview = ({
                   initHeight={initHeight}
                   // initTransform={initTransform}
                   maxHeight={"60vh"}
+                  onInitTransform={t => updateSvgTrans(i, t)}
                 />
               </Box>
             )

@@ -25,7 +25,13 @@ import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import {graphviz} from "d3-graphviz"; // KEEP THIS LINE
 import cycloneAnalyzer from "cyclone-analyzer";
 import {useGraphvizStore} from "@/state/editorGraphvizStore";
-import {isNoCounterExampleFound} from "@/core/execution";
+import {
+    extractGenCondMessage,
+    isErrorInResult,
+    isNoCounterExampleFound,
+    isNoPathFound,
+    isUnknownResult
+} from "@/core/execution";
 
 const {
   edgeLengths
@@ -150,10 +156,6 @@ const ExecPanel = () => {
     return codes.filter((_, i) => selectedPath.includes(i.toString()))
   }, [codes, selectedPath])
 
-  const isCounter = useMemo(() => {
-    return executionResult && isNoCounterExampleFound(executionResult.result)
-  }, [executionResult])
-
   const leftSection = (
     <Switch
       label={"Blend-In Mode"}
@@ -172,10 +174,24 @@ const ExecPanel = () => {
     }
     if (executionResult) {
       let msg
-      if (isCounter) {
-        msg = <Text c={"#74B816"} size={"sm"}>Check completed, no counter-example found.</Text>
+      if (isNoCounterExampleFound(executionResult.result)) {
+        msg = <Text c={"#74B816"} size={"sm"}>Check completed. No counter-example found.</Text>
+      } else if (isErrorInResult(executionResult.result)) {
+        msg = <Text size={"sm"}>Specification is not checked:
+            {' '} <Text span c={"#fa5252"}>Errors occurred in source code.</Text>
+            <br/>See execution result panel for details.</Text>
+      } else if (isNoPathFound(executionResult.result)) {
+        msg = <Text size={"sm"}>Check completed. <b>No path found.</b></Text>
+      } else if (isUnknownResult(executionResult.result)) {
+        msg = <Text size={"sm"}>Check completed. No visualization result is available due to <b>the result is unknown</b></Text>
       } else {
-        msg = <Text c={"#fa5252"} size={"sm"}>Code executed, no path found.</Text>
+        const genCond = extractGenCondMessage(executionResult.result)
+        if (genCond) {
+          msg = <Text  size={"sm"}>Specification is not checked: <b>{genCond}</b>
+              <br/>See execution result panel for details.</Text>
+        } else {
+          msg = <Text size={"sm"}>Code executed, no visualization available. See messages in execution result panel for details.</Text>
+        }
       }
       return msg
     }

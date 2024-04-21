@@ -5,10 +5,14 @@ import {ErrorSource, ExtendedErrorType} from "@/core/definitions";
 const regexFindPathInResultNG = /\w+->\w+(->\w+)*/
 const regexFindPathInResult = /\w+->\w+(->\w+)*/g
 const regexFindStateInTrace = /\[\d+\]\.@\w+/
-const regexFindErrorInResult = /(line\s*:\s*\d+)|(position\s*:\d+)/g
+const regexFindErrorInResult = /(line\s*:\s*\d+)|(position\s*:\d+)/gi
 const regexFindLengthInResult = /<\d+>\s*\w+->/g
 const regexNoCounterExample = /no\s+counter[\s-]+example\s+found/i
 const regexNoPath = /no\s+path\s+found/i
+const regexGeneratedCondition = /generated\s+conditions:\s+(.*)/i
+const regexUnknownResult = /unknown\s+result:/i
+const regexIsError = /(line\s*:\s*\d+)|(position\s*:\d+)/i
+const regexCondUnsuccessful = /generation\s+is\s+unsuccessful/i
 
 export const ResponseCode = {
   InvalidParams: 0,
@@ -123,6 +127,7 @@ export const sanitizeResult = result => {
   const lines = result.split(/[\r\n]+/)
   const sanitized = []
   const errors = []
+  let generatedConditionMessage = null, noPath = false, unknownResult = false, noCounter = false, condUnsuccessful = false
   for (let line of lines) {
     const trimmed = line.trim()
     const errLineCol = trimmed
@@ -148,15 +153,62 @@ export const sanitizeResult = result => {
       if (regexFindPathInResultNG.test(trimmed)) {
         sanitized.push(`<b style="color: #61aeee">${trimmed}</b>`)
       } else if (regexNoPath.test(trimmed)) {
+        noPath = true
         sanitized.push(`<b style="color: #fa5252">${trimmed}</b>`)
       } else if (regexNoCounterExample.test(trimmed)) {
+        noCounter = true
         sanitized.push(`<b style="color: #74B816">${trimmed}</b>`)
+      } else if (regexUnknownResult.test(trimmed)) {
+        unknownResult = true
+        sanitized.push(`<b style="color: #fa5252">${trimmed}</b>`)
+      } else if (regexCondUnsuccessful.test(trimmed)) {
+        condUnsuccessful = true
+        sanitized.push(`<b style="color: #fa5252">${trimmed}</b>`)
       } else {
-        sanitized.push(trimmed)
+        let push = true
+        const genCond = extractGenCondMessage(trimmed)
+        if (genCond) {
+          push = false
+          generatedConditionMessage = genCond
+          sanitized.push(`Generated Conditions: <b>${genCond}</b>`)
+        }
+        // const genCond = regexGeneratedCondition.exec(trimmed)
+        // const genCondMsgLength = genCond ? genCond[0].length : 0
+        // if (genCondMsgLength) {
+        //   const msg = trimmed.slice(genCondMsgLength)
+        //   if (isNaN(parseInt(msg))) {
+        //     push = false
+        //     sanitized.push(`Generated Conditions: <b>${msg}</b>`)
+        //   }
+        // }
+        if (push) {
+          sanitized.push(trimmed)
+        }
       }
     }
   }
-  return {errors, sanitized: sanitized.join("<br>")}
+  return {
+    errors, sanitized: sanitized.join("<br>"),
+    generatedConditionMessage,
+    noCounter, noPath, unknownResult, condUnsuccessful
+  }
 }
 
+export const extractGenCondMessage = (result) => {
+  const genCond = regexGeneratedCondition.exec(result)
+  if (genCond) {
+    const msg = genCond[1]
+    if (isNaN(parseInt(msg))) {
+      return msg
+    }
+  }
+
+  return null
+}
+
+export const isErrorInResult = result => regexIsError.test(result)
+
 export const isNoCounterExampleFound = (result) => regexNoCounterExample.test(result)
+
+export const isNoPathFound = result => regexNoPath.test(result)
+export const isUnknownResult = result => regexUnknownResult.test(result)

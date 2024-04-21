@@ -7,6 +7,12 @@ const {
   SemanticContextType
 } = cycloneAnalyzer.language.definitions
 
+const {
+  literalBounds
+} = cycloneAnalyzer.language.specifications
+
+const {typeToString} = cycloneAnalyzer.utils.type
+
 // const errorTypeDescription = {
 //   // [ErrorKind.SyntaxError]: "Syntax Error",
 //   // [ErrorKind.TypeError]: "Type Error",
@@ -73,15 +79,16 @@ const eMsgBased = ({msg}) => {
 }
 
 const eUndefinedIdentifier = ({desc, ident}) => {
-  return `use of undefined ${desc} '${ident}'`
+  return `no ${desc} '${ident}' is defined in current spec`
 }
 
-const eIdentifierRedeclaration = ({ident}) => {
-  return `redeclaration of identifier '${ident}'`
+const eIdentifierRedeclaration = ({ident, recordIdent, kind}) => {
+  const id = recordIdent ? `${recordIdent}.${ident}` : ident
+  return `'${id}' is already defined previously`
 }
 
 const eRecursiveFunction = ({ident}) => {
-  return `recursion function call to '${ident}' is not allowed in Cyclone`
+  return `recursive function call to '${ident}' is not allowed in Cyclone`
 }
 
 const eWhereFreeVariable = ({ident, freeVariable}) => {
@@ -132,15 +139,18 @@ const eCodeInsideAbstractNode = () => {
 }
 
 const eNoGoalDefined = () => {
-  return `no goal defined in current graph`
+  return `no goal is defined in current graph`
 }
 
 const eNoStartNodeDefined = () => {
-  return `no start node defined in current graph`
+  return `no start node is defined in current graph`
 }
 
-const eReturnExprViolation = () => {
-  return `'return' expression can only be used inside function body`
+const eReturnExprViolation = ({isOutOfFunction, isOutOfStatement}) => {
+  if (isOutOfFunction) {
+    return `'return' expression can only define at the end of function body`
+  }
+  return `'return' keyword must be defined at the beginning of a statement`
 }
 
 const eTypeMismatchReturn = ({expected, got}) => {
@@ -166,10 +176,6 @@ const eInvalidStatement = ({got}) => {
 const eLetBodyUndefined = () => {
   return `path expression not defined in a path variable. Expecting a concrete definition. For example: let path_var = S0->S1;`
 }
-
-// const eLocalVariableEnum = () => {
-//   return `enum types are not allowed in local variables`
-// }
 
 const eDuplicatedEnumField = ({text}) => {
   return `duplicated enum definition: ${text}`
@@ -213,12 +219,30 @@ const eAssertModifierInExpr = () => {
   return `assertion qualifier 'some | always' can not be used with 'in' clause. Please remove 'in' clause or remove qualifier`
 }
 
-const eInvalidValueMutation = () => {
-  return "this value can not be updated via value mutation operators"
+const eInvalidValueMutation = ({ident, action}) => {
+  if (ident) {
+    return `constant '${ident}' can not be operated via operator '${action}'`
+  }
+  return `this expression can not be used together with value mutation operators: '${action}'`
 }
 
-const eOperatingDifferentEnumSources = () => {
-  return "operating enum values from different sources is not allowed"
+const eOperatingDifferentEnumSources = ({lhs, rhs}) => {
+  if (!lhs || !rhs) {
+    return `enum values are defined in different sources, which can not be operated together.`
+  }
+  const l = [...lhs].slice(0, 3).join(", ") + (lhs?.size > 3 ? "..." : "")
+  const r = [...rhs].slice(0, 3).join(", ") + (rhs?.size > 3 ? "..." : "")
+  return `enum values '${l}' and '${r}' are defined in different sources, which can not be operated together.`
+  // return `operating enum values from different sources is not allowed: ${l} and ${r}`
+}
+
+const eLiteralOutOfBoundary = ({type}) => {
+  let bound
+  const [lo, hi] = literalBounds[type]
+  if (lo != null && hi != null) {
+    bound = `Valid range is ${lo} to ${hi}`
+  }
+  return `${formatType(type)} value is out of range. ${bound}`
 }
 
 const errorMessageFormatter = {
@@ -257,7 +281,8 @@ const errorMessageFormatter = {
   [ExtendedErrorType.AnonymousEdgeIdentifier]: eAnonymousEdgeIdentifier,
   [ExtendedErrorType.AssertModifierInExpr]: eAssertModifierInExpr,
   [ExtendedErrorType.InvalidValueMutation]: eInvalidValueMutation,
-  [ExtendedErrorType.OperatingDifferentEnumSources]: eOperatingDifferentEnumSources
+  [ExtendedErrorType.OperatingDifferentEnumSources]: eOperatingDifferentEnumSources,
+  [ExtendedErrorType.LiteralOutOfBoundary]: eLiteralOutOfBoundary
 }
 
 export const formatErrorMessage = (type, params, source = null) => {
@@ -342,7 +367,7 @@ export const formatIdentifier = ident => {
   return `${formatType(ident.type)} ${identText}`
 }
 
-export const formatType = (t, fallback = null) => typeMsgRepr[t] ?? (fallback || "(undefined type)")
+export const formatType = (t) => typeToString(t)
 
 export const formatTypes = types => types.length ? `(${types.map(t => formatType(t)).join(", ")})` : `(no-parameter)`
 
