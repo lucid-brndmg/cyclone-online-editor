@@ -76,7 +76,7 @@ const Graphviz = forwardRef(({
 
     g.on("end", () => {
       if (onInitTransform) {
-        onInitTransform(document.querySelector(`#${assignedId} > svg > g`).getAttribute("transform"))
+        onInitTransform(document.querySelector(`#${assignedId} > svg > g`).getAttribute("transform"), document.querySelector(`#${assignedId} > svg`).getBBox())
       }
     })
 
@@ -171,6 +171,7 @@ export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHe
   const [tab, setTab] = useState("Preview")
   const {graphviz: graphvizOptions} = useEditorSettingsStore()
   const [svgTrans, setSvgTrans] = useState(null)
+  const [svgWH, setSvgWH] = useState(null)
 
   const graphvizRef = useRef(null)
 
@@ -199,9 +200,14 @@ export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHe
     if (!node) {
       return
     }
+    let width = node.width.baseVal.value
+    let height = node.height.baseVal.value
+    if (svgWH) {
+      [width, height] = svgWH
+    }
 
     const svg = graphToSvg(node, svgTrans, removeBg)
-    const blob = await svgString2Image(svg, node.width.baseVal.value, node.height.baseVal.value, type)
+    const blob = await svgString2Image(svg, width, height, type)
     return downloadBlobFile(blob, name)
   }
 
@@ -234,7 +240,10 @@ export const GraphvizSinglePreview = ({code, leftSection, onHeightChange, initHe
               initHeight={initHeight}
               maxWidth={maxWidth}
               maxHeight={maxHeight}
-              onInitTransform={setSvgTrans}
+              onInitTransform={(t, box) => {
+                setSvgTrans(t)
+                setSvgWH([box.width, box.height])
+              }}
             />
             <Group grow>
               <Button onClick={resetZoom} leftSection={<IconZoomIn size={16} />} >Reset Zoom</Button>
@@ -296,10 +305,13 @@ export const GraphvizMultiPreview = ({
   }), [graphvizOptions])
 
   const [svgTrans, setSvgTrans] = useState([])
+  const [svgWH, setSvgWH] = useState([])
 
-  const updateSvgTrans = (idx, trans) => {
+  const updateSvgTransWH = (idx, trans, wh) => {
     svgTrans[idx] = trans
     setSvgTrans([...svgTrans])
+    svgWH[idx] = wh
+    setSvgWH([...svgWH])
   }
 
   const downloadAllCode = useCallback(async () => {
@@ -346,7 +358,11 @@ export const GraphvizMultiPreview = ({
       .map((ref, i) => {
         const node = ref.childNodes[0]
         const svg = graphToSvg(node, svgTrans[i], removeBg)
-        return svgString2Image(svg, node.width.baseVal.value, node.height.baseVal.value, type)
+        let width = node.width.baseVal.value, height = node.height.baseVal.value
+        if (svgWH[i]) {
+          [width, height] = svgWH[i]
+        }
+        return svgString2Image(svg, width, height, type)
       }))
     if (images.length) {
       const zip = new JSZip()
@@ -402,9 +418,6 @@ export const GraphvizMultiPreview = ({
             const initHeight = visualStates
               ? visualStates[i]?.initHeight
               : undefined
-            // const initTransform = visualStates
-            //   ? visualStates[i]?.initTransform
-            //   : undefined
             return (
               <Box key={i}>
                 {title}
@@ -419,7 +432,7 @@ export const GraphvizMultiPreview = ({
                   initHeight={initHeight}
                   // initTransform={initTransform}
                   maxHeight={"60vh"}
-                  onInitTransform={t => updateSvgTrans(i, t)}
+                  onInitTransform={(t, wh) => updateSvgTransWH(i, t, [wh.width, wh.height])}
                 />
               </Box>
             )
