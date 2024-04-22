@@ -7,9 +7,9 @@ export const MIN_H = 10
 
 export const MIN_RESULT_H = 27
 
-export const MIN_POLL_WAIT = 5
-export const MAX_POLL_WAIT = 60
-const DEFAULT_POLL_WAIT = 30
+export const MIN_POLL_WAIT = 60
+export const MAX_POLL_WAIT = 1800
+const DEFAULT_POLL_WAIT = 60
 
 
 export const useEditorSettingsStore = create((set, get) => ({

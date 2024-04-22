@@ -13,6 +13,7 @@ const regexGeneratedCondition = /generated\s+conditions:\s+(.*)/i
 const regexUnknownResult = /unknown\s+result:/i
 const regexIsError = /(line\s*:\s*\d+)|(position\s*:\d+)/i
 const regexCondUnsuccessful = /generation\s+is\s+unsuccessful/i
+const regexGenerationError = /generation\s+error/i
 
 export const ResponseCode = {
   InvalidParams: 0,
@@ -127,7 +128,7 @@ export const sanitizeResult = result => {
   const lines = result.split(/[\r\n]+/)
   const sanitized = []
   const errors = []
-  let generatedConditionMessage = null, noPath = false, unknownResult = false, noCounter = false, condUnsuccessful = false
+  let generatedConditionMessage = null, noPath = false, unknownResult = false, noCounter = false, condUnsuccessful = false, generationErrorMessage = null
   for (let line of lines) {
     const trimmed = line.trim()
     const errLineCol = trimmed
@@ -161,9 +162,16 @@ export const sanitizeResult = result => {
       } else if (regexUnknownResult.test(trimmed)) {
         unknownResult = true
         sanitized.push(`<b style="color: #fa5252">${trimmed}</b>`)
+      } else if (regexGenerationError.test(trimmed)) {
+        generationErrorMessage = trimmed
+        sanitized.push(`<b style="color: #fa5252">${trimmed}</b>`)
       } else if (regexCondUnsuccessful.test(trimmed)) {
         condUnsuccessful = true
-        sanitized.push(`<b style="color: #fa5252">${trimmed}</b>`)
+        if (generationErrorMessage) {
+          sanitized.push(trimmed)
+        } else {
+          sanitized.push(`<b style="color: #fa5252">${trimmed}</b>`)
+        }
       } else {
         let push = true
         const genCond = extractGenCondMessage(trimmed)
@@ -190,7 +198,8 @@ export const sanitizeResult = result => {
   return {
     errors, sanitized: sanitized.join("<br>"),
     generatedConditionMessage,
-    noCounter, noPath, unknownResult, condUnsuccessful
+    noCounter, noPath, unknownResult, condUnsuccessful,
+    generationErrorMessage
   }
 }
 

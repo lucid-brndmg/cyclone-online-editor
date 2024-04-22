@@ -181,16 +181,16 @@ const ExecPanel = () => {
             {' '} <Text span c={"#fa5252"}>Errors occurred in source code.</Text>
             <br/>See execution result panel for details.</Text>
       } else if (isNoPathFound(executionResult.result)) {
-        msg = <Text size={"sm"}>Check completed. <b>No path found.</b></Text>
+        msg = <Text size={"sm"} c={"dimmed"}>Check completed. <b>No path found.</b></Text>
       } else if (isUnknownResult(executionResult.result)) {
-        msg = <Text size={"sm"}>Check completed. No visualization result is available due to <b>the result is unknown</b></Text>
+        msg = <Text size={"sm"} c={"dimmed"}>Check completed. No visualization result is available due to <b>the result is unknown</b></Text>
       } else {
         const genCond = extractGenCondMessage(executionResult.result)
         if (genCond) {
-          msg = <Text  size={"sm"}>Specification is not checked: <b>{genCond}</b>
+          msg = <Text  size={"sm"} c={"#fa5252"}>Specification is not checked: <b>{genCond}</b>
               <br/>See execution result panel for details.</Text>
         } else {
-          msg = <Text size={"sm"}>Code executed, no visualization available. See messages in execution result panel for details.</Text>
+          msg = <Text size={"sm"} c={"dimmed"}>Code executed, no visualization available. See messages in execution result panel for details.</Text>
         }
       }
       return msg

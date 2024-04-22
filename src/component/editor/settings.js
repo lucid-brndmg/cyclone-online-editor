@@ -211,16 +211,19 @@ export const SettingsPopover = ({children}) => {
               </Group>
 
               <div>
-                <Text size={"sm"}>Execution Timeout</Text>
+                <Text size={"sm"}>Queue Mode Polling Timeout</Text>
                 <Slider
                   disabled={isExec}
                   maw={220}
                   value={execPollWait}
                   onChange={setExecPollWait}
-                  label={(value) => `${value} Sec`}
+                  label={(value) => `${value} Sec (${Math.round(value / 60)} min)`}
                   min={MIN_POLL_WAIT}
                   max={MAX_POLL_WAIT}
                 />
+                <Text size={"xs"} c={"dimmed"}>
+                  Timeout for polling result from execution under queue mode. Will have no effect if the server isn't under queue mode.
+                </Text>
               </div>
 
             </Stack>

@@ -250,6 +250,11 @@ export const CodeConsoleResultSection = () => {
           Checking completed:{' '}
           <Text span c={"#fa5252"} fw={700}>Unknown Result</Text>
         </Text>
+      } else if (sanitized.generationErrorMessage) {
+        title = <Text size={"sm"} fw={500}>
+          No checking is performed due to {' '}
+          <Text span c={"#fa5252"} fw={700}>{sanitized.generationErrorMessage}</Text>
+        </Text>
       } else if (sanitized.condUnsuccessful) {
         title = <Text size={"sm"} fw={500}>
           No checking is performed due to{' '}
