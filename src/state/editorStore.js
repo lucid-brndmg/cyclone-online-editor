@@ -18,5 +18,8 @@ export const useEditorStore = create((set, get) => ({
   setMonacoCtx: monacoCtx => set(() => ({monacoCtx})),
 
   editorReady: false,
-  setEditorReady: editorReady => set({editorReady})
+  setEditorReady: editorReady => set({editorReady}),
+
+  isAnalyzerError: false,
+  setIsAnalyzerError: isAnalyzerError => set({isAnalyzerError})
 }))

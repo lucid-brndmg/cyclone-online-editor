@@ -15,7 +15,7 @@ export const CycloneEditorForm = ({
   commands,
   onClickErrorDisplay
 }) => {
-  const {code, setCode, errors, setErrors, setPosition, setEditorCtx, setMonacoCtx, editorReady, setEditorReady} = useEditorStore()
+  const {code, setCode, errors, setErrors, setPosition, setEditorCtx, setMonacoCtx, editorReady, setEditorReady, setIsAnalyzerError} = useEditorStore()
   const [debouncedCode] = useDebouncedValue(code, 200)
 
   const {height, width, monacoOptions, setWidth, setHeight, editorCodeOptions} = useEditorSettingsStore()
@@ -103,6 +103,7 @@ export const CycloneEditorForm = ({
           externalCommands={commands}
           buildSyntaxBlockTree={!light}
           enableCDN={Config.editor.monacoEnableCDN}
+          onAnalyzerError={(e, isE) => setIsAnalyzerError(isE)}
         />
         <StatusBar onClickErrors={onClickErrorDisplay}/>
       </Stack>

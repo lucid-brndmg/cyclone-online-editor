@@ -1,7 +1,7 @@
 import {useEditorStore} from "@/state/editorStore";
 import {useRouter} from "next/router";
 import localforage from "localforage";
-import {Button, FileButton, Group, NumberInput, Popover, Space, Stack} from "@mantine/core";
+import {Button, FileButton, Group, NumberInput, Popover, Space, Stack, Text} from "@mantine/core";
 import {
   IconAlertCircleFilled,
   IconAlertTriangleFilled,
@@ -171,8 +171,17 @@ const ErrorsDisplay = ({onClick}) => {
 }
 
 export const StatusBar = ({onClickErrors}) => {
+  const {isAnalyzerError} = useEditorStore()
   return (
     <Group justify={"space-between"}>
+      {isAnalyzerError
+        ? <Text size={"sm"} c={"red"}>
+          An error occurred while analyzing the specification.
+          <br/>
+          Please report this error on Github if possible.
+        </Text>
+        : null
+      }
       <ErrorsDisplay onClick={onClickErrors} />
       <PositionLocator />
     </Group>

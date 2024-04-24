@@ -56,6 +56,7 @@ export const CycloneCodeEditor = ({
   externalCommands = {},
   buildSyntaxBlockTree = false,
   enableCDN = true,
+  onAnalyzerError,
   ready,
   onReady,
   ...props
@@ -95,6 +96,8 @@ export const CycloneCodeEditor = ({
       return
     }
 
+    onAnalyzerError && onAnalyzerError(null, false)
+
     // const maxLine = monacoCtx.model.getLineCount()
     const editorCtx = new EditorSemanticContext(buildSyntaxBlockTree)
     const analyzer = new cycloneAnalyzer.analyzer.SemanticAnalyzer() // semanticAnalyzerRef.current
@@ -118,14 +121,19 @@ export const CycloneCodeEditor = ({
     })
 
     if (result.syntaxErrorsCount === 0) {
-      // ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
-      cycloneAnalyzer.utils.antlr.listenerWalk(
-        new cycloneAnalyzer.analyzer.SemanticParserListener(analyzer),
-        result.tree
-      )
-      // console.log(graphBuilder.context)
-      editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
-      onEditorContext && onEditorContext(editorSemanticContextRef.current)
+      try {
+        // ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
+        cycloneAnalyzer.utils.antlr.listenerWalk(
+          new cycloneAnalyzer.analyzer.SemanticParserListener(analyzer),
+          result.tree
+        )
+        // console.log(graphBuilder.context)
+        editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
+        onEditorContext && onEditorContext(editorSemanticContextRef.current)
+      } catch (e) {
+        console.log("An error occurred when analyzing:", e)
+        onAnalyzerError && onAnalyzerError(e, true)
+      }
     }
   }
 

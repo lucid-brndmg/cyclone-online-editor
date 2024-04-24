@@ -18,10 +18,11 @@ const {
 const CycloneParser = cycloneAnalyzer.generated.antlr.CycloneParser
 
 const exprOperatorReplacerMap = new Map([
-  ["^", "⊕"],
+  ["^", "⊕"], // xor
   ["&&", "∧"],
   ["||", "∨"],
   ["->", "→"],
+  ["<->", "↔"],
   ["=>", "⇒"],
   ["!", "¬"],
   ["==", "="],
@@ -30,18 +31,6 @@ const exprOperatorReplacerMap = new Map([
   [">=", "≥"],
   ["*", "×"]
 ])
-
-// const pathOperatorReplacerMap = new Map([
-//   ["&&", "∧"],
-//   ["||", "∨"],
-//   ["->", "→"],
-//   ["=>", "⇒"],
-//   ["!", "¬"],
-//   ["==", "="],
-//   ["!=", "≠"],
-//   ["<=", "≤"],
-//   [">=", "≥"],
-// ])
 
 const operatorReplacerFn = (symbol, ctx, index) => {
   const text = symbol.text
