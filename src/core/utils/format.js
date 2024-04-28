@@ -245,6 +245,26 @@ const eLiteralOutOfBoundary = ({type}) => {
   return `${formatType(type)} value is out of range. ${bound}`
 }
 
+const eCheckUptoMultiLengths = ({length}) => {
+  return `range mode (upto) can not specify multiple path lengths. expecting 1 length specified, received: ${length}`
+}
+
+const eInvalidCheckForModes = ({keywords}) => {
+  return `enumeration does not support range mode: (upto | each), please use check`
+}
+
+const eNoFinalStateOrReachSpecified = () => {
+  return `no final node or reach / stop clause specified in this graph`
+}
+
+const eUnreachableCheckForPathLength = ({length, unreachableLengths}) => {
+  return `unreachable path length in check: specified ${unreachableLengths.join(", ")}. Maximum valid path length of this graph is: ${length}`
+}
+
+const eNodeUnconnected = () => {
+  return `this node is not connected to any other node in this graph`
+}
+
 const errorMessageFormatter = {
   [ExtendedErrorType.RemoteError]: eMsgBased,
   [ExtendedErrorType.SyntaxError]: eMsgBased,
@@ -282,7 +302,12 @@ const errorMessageFormatter = {
   [ExtendedErrorType.AssertModifierInExpr]: eAssertModifierInExpr,
   [ExtendedErrorType.InvalidValueMutation]: eInvalidValueMutation,
   [ExtendedErrorType.OperatingDifferentEnumSources]: eOperatingDifferentEnumSources,
-  [ExtendedErrorType.LiteralOutOfBoundary]: eLiteralOutOfBoundary
+  [ExtendedErrorType.LiteralOutOfBoundary]: eLiteralOutOfBoundary,
+  [ExtendedErrorType.CheckUptoMultiLengths]: eCheckUptoMultiLengths,
+  [ExtendedErrorType.InvalidCheckForModes]: eInvalidCheckForModes,
+  [ExtendedErrorType.NoFinalStateOrReachSpecified]: eNoFinalStateOrReachSpecified,
+  [ExtendedErrorType.UnreachableCheckForPathLength]: eUnreachableCheckForPathLength,
+  [ExtendedErrorType.NodeUnconnected]: eNodeUnconnected
 }
 
 export const formatErrorMessage = (type, params, source = null) => {

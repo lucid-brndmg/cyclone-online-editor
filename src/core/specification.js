@@ -32,7 +32,10 @@ const errorTypeWarnings = new Set([
   ExtendedErrorType.DuplicatedEnumField,
   ExtendedErrorType.DuplicatedEdgeTarget,
   ExtendedErrorType.OptionTraceNotFound,
-  ExtendedErrorType.DuplicatedCheckForPathLength
+  ExtendedErrorType.DuplicatedCheckForPathLength,
+  ExtendedErrorType.NoFinalStateOrReachSpecified,
+  ExtendedErrorType.UnreachableCheckForPathLength,
+  ExtendedErrorType.NodeUnconnected
 ])
 
 export const isWarning = errorType => errorTypeWarnings.has(errorType)

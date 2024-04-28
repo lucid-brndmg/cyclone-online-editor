@@ -7,7 +7,6 @@ import cycloneAnalyzer from "cyclone-analyzer";
 * */
 
 const {
-  expandAnonymousEdge,
   isAnonymousEdge
 } = cycloneAnalyzer.utils.edge
 
@@ -175,8 +174,9 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
       label,
       whereExpr,
       fromState,
-      toStates,
-      labelKeyword
+      // toStates,
+      labelKeyword,
+      involvedRelations
     } = t
 
     if (!definedStates.has(fromState)) {
@@ -185,14 +185,14 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
     }
     const transPieces = []
     const isAnon = isAnonymousEdge(t)
-    const rawRelations = isAnon
-      ? expandAnonymousEdge(t, [...definedStates])
-      : [{source: fromState, target: toStates[0]}]
+    // const rawRelations = isAnon
+    //   ? expandAnonymousEdge(t, [...definedStates])
+    //   : [{source: fromState, target: toStates[0]}]
     const relations = []
 
     if (isAnon) {
       const s = new Map()
-      for (let {source, target} of rawRelations) {
+      for (let {source, target} of involvedRelations) {
         const e = [source, target].sort().join(":")
         if (s.has(e)) {
           s.get(e).isBi = true
@@ -202,7 +202,7 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
       }
       relations.push(...s.values())
     } else {
-      relations.push(...rawRelations)
+      relations.push(...involvedRelations)
     }
     for (let {source, target, isBi} of relations) {
       let attrs = []
