@@ -246,7 +246,7 @@ const eLiteralOutOfBoundary = ({type}) => {
 }
 
 const eCheckUptoMultiLengths = ({length}) => {
-  return `range mode (upto) can not specify multiple path lengths. expecting 1 length specified, received: ${length}`
+  return `upto can not specify multiple path lengths. expecting 1 length specified, received: ${length} path lengths`
 }
 
 const eInvalidCheckForModes = ({keywords}) => {
