@@ -265,6 +265,10 @@ const eNodeUnconnected = () => {
   return `this node is not connected to any other node in this graph`
 }
 
+const eIdentifierNeverUsed = ({kind, text}) => {
+  return `${formatKindDescription(kind)} '${text}' defined but never used`
+}
+
 const errorMessageFormatter = {
   [ExtendedErrorType.RemoteError]: eMsgBased,
   [ExtendedErrorType.SyntaxError]: eMsgBased,
@@ -307,7 +311,8 @@ const errorMessageFormatter = {
   [ExtendedErrorType.InvalidCheckForModes]: eInvalidCheckForModes,
   [ExtendedErrorType.NoFinalStateOrReachSpecified]: eNoFinalStateOrReachSpecified,
   [ExtendedErrorType.UnreachableCheckForPathLength]: eUnreachableCheckForPathLength,
-  [ExtendedErrorType.NodeUnconnected]: eNodeUnconnected
+  [ExtendedErrorType.NodeUnconnected]: eNodeUnconnected,
+  [ExtendedErrorType.IdentifierNeverUsed]: eIdentifierNeverUsed
 }
 
 export const formatErrorMessage = (type, params, source = null) => {

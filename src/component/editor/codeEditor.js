@@ -12,14 +12,13 @@ import {
   formatType
 } from "@/core/utils/format";
 import {cycloneFullKeywordsSet} from "@/core/specification";
-import {parseCycloneSyntax} from "@/core/utils/parse";
 import {CycloneLanguageId, CycloneMonacoConfig, CycloneMonacoTokens} from "@/core/monaco/language";
 import {getDefaultCompletionItems} from "@/core/monaco/completion";
 import {getKeywordHoverDocument} from "@/core/resources/referenceDocs";
 import {getErrorLevel} from "@/core/monaco/error";
 import {pos, posRangeIncludes, posStopBefore} from "@/lib/position";
 import {LoadingOverlay} from "@mantine/core";
-import {ErrorSource} from "@/core/definitions";
+import {ErrorSource, ExtendedErrorType} from "@/core/definitions";
 import {PublicUrl} from "@/core/utils/resource";
 
 const {IdentifierKind, IdentifierType} = cycloneAnalyzer.language.definitions
@@ -77,10 +76,10 @@ export const CycloneCodeEditor = ({
     codeOptionsRef.current = codeOptions
   }, [codeOptions]);
 
-  const onCodeError = e => {
-    errorsRef.current.setError(e)
-    // setErrorUpdated(!errorUpdated)
-  }
+  // const onCodeError = e => {
+  //   errorsRef.current.setError(e)
+  //   // setErrorUpdated(!errorUpdated)
+  // }
 
   useEffect(() => {
     return () => {
@@ -98,43 +97,75 @@ export const CycloneCodeEditor = ({
 
     onAnalyzerError && onAnalyzerError(null, false)
 
-    // const maxLine = monacoCtx.model.getLineCount()
-    const editorCtx = new EditorSemanticContext(buildSyntaxBlockTree)
-    const analyzer = new cycloneAnalyzer.analyzer.SemanticAnalyzer() // semanticAnalyzerRef.current
-    // const graphBuilder = new cycloneAnalyzer.blockBuilder.SyntaxBlockBuilder() // SyntaxBlockBuilder()
-    // const endPos = pos(maxLine, monacoCtx.model.getLineMaxColumn(maxLine))
 
     errorsRef.current.clear()
-    editorCtx.attach(analyzer)
-    // graphBuilder.attach(analyzer)
-    analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es.map(e => ({...e, source: ErrorSource.Semantic}))))
-    // analyzer.ready(endPos)
-
     if (debouncedCode.trim().length === 0) {
       editorSemanticContextRef.current = null
       onEditorContext && onEditorContext(null)
       return
     }
-    const result = parseCycloneSyntax({
-      input: debouncedCode,
-      onError: onCodeError
-    })
+    const editorCtx = new EditorSemanticContext(buildSyntaxBlockTree)
+    try {
+      const result = cycloneAnalyzer.analyzer.analyzeCycloneSpec(debouncedCode, {
+        analyzerExtensions: [editorCtx]
+      })
+      if (result.hasSyntaxError()) {
+        for (let {line, column, msg} of result.lexerErrors) {
+          errorsRef.current.setError({
+            source: ErrorSource.Lexer,
+            startPosition: pos(line, column),
+            type: ExtendedErrorType.SyntaxError,
+            params: {msg}
+          })
+        }
+        for (let {line, column, msg} of result.parserErrors) {
+          errorsRef.current.setError({
+            source: ErrorSource.Parser,
+            startPosition: pos(line, column),
+            type: ExtendedErrorType.SyntaxError,
+            params: {msg}
+          })
+        }
+      } else {
+        if (result.semanticErrors.length) {
+          errorsRef.current.setErrors(result.semanticErrors.map(e => ({...e, source: ErrorSource.Semantic})))
+        }
 
-    if (result.syntaxErrorsCount === 0) {
-      try {
-        // ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
-        cycloneAnalyzer.utils.antlr.listenerWalk(
-          new cycloneAnalyzer.analyzer.SemanticParserListener(analyzer),
-          result.tree
-        )
         // console.log(graphBuilder.context)
         editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
         onEditorContext && onEditorContext(editorSemanticContextRef.current)
-      } catch (e) {
-        console.log("An error occurred when analyzing:", e)
-        onAnalyzerError && onAnalyzerError(e, true)
       }
+    } catch (e) {
+      console.log("An error occurred when analyzing:", e)
+      onAnalyzerError && onAnalyzerError(e, true)
     }
+
+    // const analyzer = new cycloneAnalyzer.analyzer.SemanticAnalyzer()
+    //
+    // // editorCtx.attach(analyzer)
+    // // analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es.map(e => ({...e, source: ErrorSource.Semantic}))))
+    //
+    //
+    // const result = parseCycloneSyntax({
+    //   input: debouncedCode,
+    //   onError: onCodeError
+    // })
+    //
+    // if (result.syntaxErrorsCount === 0) {
+    //   try {
+    //     // ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
+    //     cycloneAnalyzer.utils.antlr.listenerWalk(
+    //       new cycloneAnalyzer.analyzer.SemanticParserListener(analyzer),
+    //       result.tree
+    //     )
+    //     // console.log(graphBuilder.context)
+    //     editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
+    //     onEditorContext && onEditorContext(editorSemanticContextRef.current)
+    //   } catch (e) {
+    //     console.log("An error occurred when analyzing:", e)
+    //     onAnalyzerError && onAnalyzerError(e, true)
+    //   }
+    // }
   }
 
   useEffect(analyzeCode, [debouncedCode]);

@@ -12,22 +12,44 @@ import {
 } from "@mantine/core";
 import {
   IconAlertCircleFilled,
-  IconAlertTriangleFilled, IconArrowNarrowRight,
-  IconArrowRightCircle, IconArrowsHorizontal,
+  IconAlertTriangleFilled,
+  IconArrowNarrowRight,
+  IconArrowRightCircle,
+  IconArrowsHorizontal,
   IconBook2,
   IconBraces,
   IconBug,
-  IconChartCircles, IconCheckbox,
+  IconChartCircles,
+  IconCheckbox,
   IconChevronRight,
-  IconCircleDot, IconCircleLetterC, IconCircleLetterE, IconCircleLetterG,
-  IconCircleLetterI, IconCircleLetterP, IconCircleLetterR, IconCircleLetterV,
+  IconCircleDot,
+  IconCircleLetterC,
+  IconCircleLetterE,
+  IconCircleLetterG,
+  IconCircleLetterI,
+  IconCircleLetterP,
+  IconCircleLetterR,
+  IconCircleLetterV,
   IconCircleX,
-  IconFolder, IconGolf, IconLetterC, IconLetterE, IconLetterG, IconLetterI, IconLetterP, IconLetterR, IconLetterV,
+  IconFolder,
+  IconGolf,
+  IconInfoCircleFilled,
+  IconLetterC,
+  IconLetterE,
+  IconLetterG,
+  IconLetterI,
+  IconLetterP,
+  IconLetterR,
+  IconLetterV,
   IconListTree,
   IconMathFunction,
-  IconPlaystationCircle, IconRoute2, IconRouteX,
-  IconSearch, IconSettings,
-  IconTopologyRing3, IconVariable,
+  IconPlaystationCircle,
+  IconRoute2,
+  IconRouteX,
+  IconSearch,
+  IconSettings,
+  IconTopologyRing3,
+  IconVariable,
   IconVariableMinus,
   IconVector,
   IconViewfinder
@@ -43,9 +65,10 @@ import {
     formatType
 } from "@/core/utils/format";
 import {locateToCode} from "@/core/utils/monaco";
-import {isWarning} from "@/core/specification";
+import {isInfo, isWarning} from "@/core/specification";
 import cycloneAnalyzer from "cyclone-analyzer";
 import {useDebouncedValue} from "@mantine/hooks";
+import {ErrorSource} from "@/core/definitions";
 
 const {IdentifierKind, SemanticContextType, SyntaxBlockKind} = cycloneAnalyzer.language.definitions
 
@@ -460,10 +483,21 @@ const StructureOutlineTree = () => {
 }
 
 const getErrorStyle = e => {
-  let icon
+  let icon, text = formatErrorSource(e.source)
   if (isWarning(e.type)) {
+    if (e.source === ErrorSource.Semantic) {
+      text = "Semantic Warning"
+    }
     icon = <Box c={"orange"}><IconAlertTriangleFilled size={24} /></Box>
+  } else if (isInfo(e.type)) {
+    if (e.source === ErrorSource.Semantic) {
+      text = "Semantic Problem"
+    }
+    icon = <Box c={"blue"}><IconAlertCircleFilled size={24} /></Box>
   } else {
+    if (e.source === ErrorSource.Semantic) {
+      text = "Semantic Error"
+    }
     icon = <Box c={"red"}><IconAlertCircleFilled size={24} /></Box>
   }
 
@@ -472,7 +506,7 @@ const getErrorStyle = e => {
     text: <Box>
        <Group justify={"space-between"}>
          <Text size={"sm"} fw={500}>
-           {formatErrorSource(e.source)}
+           {text}
          </Text>
          <Text size={"sm"} c={"dimmed"} px={"sm"}>{e.startPosition.line}:{e.startPosition.column + 1}</Text>
        </Group>

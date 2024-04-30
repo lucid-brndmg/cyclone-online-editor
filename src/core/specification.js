@@ -35,7 +35,14 @@ const errorTypeWarnings = new Set([
   ExtendedErrorType.DuplicatedCheckForPathLength,
   ExtendedErrorType.NoFinalStateOrReachSpecified,
   ExtendedErrorType.UnreachableCheckForPathLength,
-  ExtendedErrorType.NodeUnconnected
+
+])
+
+const errorTypeInfos = new Set([
+  ExtendedErrorType.NodeUnconnected,
+  ExtendedErrorType.IdentifierNeverUsed
 ])
 
 export const isWarning = errorType => errorTypeWarnings.has(errorType)
+
+export const isInfo = errorType => errorTypeInfos.has(errorType)

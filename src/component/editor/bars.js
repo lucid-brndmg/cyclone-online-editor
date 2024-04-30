@@ -7,7 +7,7 @@ import {
   IconAlertTriangleFilled,
   IconCursorText,
   IconDownload,
-  IconFolderOpen, IconPencil,
+  IconFolderOpen, IconInfoCircle, IconInfoCircleFilled, IconPencil,
   IconPlayerPlay,
   IconSettings, IconShare2,
   IconShare3
@@ -20,7 +20,7 @@ import {locateToCode} from "@/core/utils/monaco";
 import {pos} from "@/lib/position";
 import {sieveCount} from "@/lib/list";
 import {useMemo, useState} from "react";
-import {isWarning} from "@/core/specification";
+import {isInfo, isWarning} from "@/core/specification";
 import {SharePopover} from "@/component/share/popover";
 import {PublicUrl} from "@/core/utils/resource";
 
@@ -152,9 +152,23 @@ const PositionLocator = () => {
 
 const ErrorsDisplay = ({onClick}) => {
   const {errors} = useEditorStore()
-  const [errorCount, warningCount] = useMemo(() => sieveCount(errors, e => !isWarning(e.type)), [errors])
+  const [errorCount, warningCount, infoCount] = useMemo(() => {
+    let e = 0, w =  0, i = 0
+    for (let error of errors) {
+      // sieveCount(errors, e => !isWarning(e.type))
+      if (isWarning(error.type)) {
+        w ++
+      } else if (isInfo(error.type)) {
+        i ++
+      } else {
+        e ++
+      }
+    }
 
-  return errorCount || warningCount
+    return [e, w, i]
+  }, [errors])
+
+  return errorCount || warningCount || infoCount
     ? (
       <Group style={{userSelect: "none", cursor: onClick ? "pointer" : undefined}} onClick={onClick}>
         <Group fz={"sm"} style={{display: errorCount > 0 ? "" : "none"}} gap={"4px"} c={"red"}>
@@ -164,6 +178,10 @@ const ErrorsDisplay = ({onClick}) => {
         <Group fz={"sm"} style={{display: warningCount > 0 ? "" : "none"}} gap={"4px"} c={"orange"}>
           <IconAlertTriangleFilled size={16}/>
           {warningCount} Warnings
+        </Group>
+        <Group fz={"sm"} style={{display: infoCount > 0 ? "" : "none"}} gap={"4px"} c={"blue"}>
+          <IconAlertCircleFilled size={16}/>
+          {infoCount} Problems
         </Group>
       </Group>
     )

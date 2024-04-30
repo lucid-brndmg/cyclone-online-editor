@@ -231,7 +231,7 @@ export const SettingsPopover = ({children}) => {
             {/* <Divider orientation={"vertical"} /> */}
 
             <Stack>
-              <Text fw={700}>Preview & Graphviz</Text>
+              <Text fw={700}>Visualization</Text>
 
               <NativeSelect
                 label={"Engine"}
