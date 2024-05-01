@@ -142,7 +142,8 @@ const Graphviz = forwardRef(({
       border: "2px solid var(--mantine-color-orange-filled)",
       cursor: "ns-resize",
       height: initHeight ? initHeight : undefined,
-      maxWidth, maxHeight
+      maxWidth, maxHeight,
+      overflow: "hidden"
     }}
     ref={boxRef}
   >
