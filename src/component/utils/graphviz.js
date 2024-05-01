@@ -143,7 +143,8 @@ const Graphviz = forwardRef(({
       cursor: "ns-resize",
       height: initHeight ? initHeight : undefined,
       maxWidth, maxHeight,
-      overflow: "hidden"
+      overflow: "hidden",
+      borderRadius: "4px"
     }}
     ref={boxRef}
   >
@@ -151,7 +152,7 @@ const Graphviz = forwardRef(({
       className={className}
       id={assignedId}
       ref={ref}
-      style={{cursor: "default", width: "100%", height: "100%"}}
+      style={{cursor: "default", width: "100%", height: "100%", backgroundColor: "white"}}
     />
   </Box>)
 })
