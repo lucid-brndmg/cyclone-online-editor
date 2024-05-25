@@ -139,12 +139,15 @@ export const execCycloneProgram = async (program, id) => {
     }
 
     let sanitizedResult = result, sanitizedTrace = traceContent
-    const paths = [...tmpFiles, config.cyclone.path, config.cyclone.sourcePath, path.resolve(config.cyclone.path), path.resolve(config.cyclone.sourcePath), path.normalize(config.cyclone.path)]
 
-    for (let p of paths) {
-      sanitizedResult = sanitizedResult.replaceAll(p, "<censored-path>")
-      if (sanitizedTrace) {
-        sanitizedTrace = sanitizedTrace.replaceAll(p, "<censored-path>")
+    if (config.cyclone.censorSystemPaths) {
+      const paths = [...tmpFiles, config.cyclone.path, config.cyclone.sourcePath, path.resolve(config.cyclone.path), path.resolve(config.cyclone.sourcePath), path.normalize(config.cyclone.path)]
+
+      for (let p of paths) {
+        sanitizedResult = sanitizedResult.replaceAll(p, "<censored-path>")
+        if (sanitizedTrace) {
+          sanitizedTrace = sanitizedTrace.replaceAll(p, "<censored-path>")
+        }
       }
     }
 

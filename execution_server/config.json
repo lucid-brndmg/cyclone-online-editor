@@ -9,7 +9,8 @@
     "disabledOptions": ["debug", "log"],
     "mandatoryTimeoutMs": 10000,
     "appendEnvPath": true,
-    "idLength": 8
+    "idLength": 8,
+    "censorSystemPaths": true
   },
   "queue": {
     "enabled": false,

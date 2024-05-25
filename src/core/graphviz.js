@@ -1,4 +1,4 @@
-import {map2elems} from "@/lib/list";
+import {map2elems, searchIndices} from "@/lib/list";
 import {dropRegex, dropRegexes, simplify} from "@/lib/string";
 import cycloneAnalyzer from "cyclone-analyzer";
 
@@ -28,7 +28,7 @@ const exprOperatorReplacerMap = new Map([
   ["!=", "≠"],
   ["<=", "≤"],
   [">=", "≥"],
-  ["*", "×"]
+  // ["*", "×"]
 ])
 
 const operatorReplacerFn = (symbol, ctx, index) => {
@@ -115,11 +115,18 @@ const genGraphvizStatesDef = (states, options, resultPaths = null) => {
     const [fill, isFinal, isStart] = getNodeStyle(attrs)
     const props = attrs.join(" ")
     const isResultMode = resultPaths != null
-    const isResult = isResultMode && resultPaths.states.has(identifier)
+    let isResult = false, pathExpr = ''
+    if (isResultMode) {
+      isResult = resultPaths.states.has(identifier)
+      const paths = searchIndices(resultPaths.edge, identifier, 1)
+      if (paths.length) {
+        pathExpr = `<br/><font >step ${paths.join(", ")}</font>`
+      }
+    }
     const shape = isFinal
       ? ", peripheries=2"
       : ""
-    const label = `<${options.showNodeProps ? `<font ><i >${props}</i></font><br />` : ""} <font ${isResult ? `color="red"` : ""}><b>${identifier}</b></font>>`
+    const label = `<${options.showNodeProps ? `<font ><i >${props}</i></font><br />` : ""} <font ${isResult ? `color="crimson"` : ""}><b>${identifier}</b></font> ${pathExpr}>`
 
     codePieces.push(`// ${props} ${identifier}\n${identifier}[label=${label}, style=filled, fillcolor=${fill}${shape}];`)
     if (isStart) {

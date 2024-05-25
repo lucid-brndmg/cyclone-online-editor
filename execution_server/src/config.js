@@ -42,6 +42,7 @@ Object
       case "CYCLONE_DEL_AFTER_EXEC": config.cyclone.deleteAfterExec = parseBool(value); break;
       case "CYCLONE_EXTENSION": config.cyclone.extension = value; break;
       case "CYCLONE_DISABLED_OPTIONS": config.cyclone.disabledOptions = value.split(/\s*,\s*/); break;
+      case "CYCLONE_CENSOR_SYSTEM_PATHS": config.cyclone.censorSystemPaths = parseBool(value); break;
 
       case "QUEUE_ENABLED": config.queue.enabled = parseBool(value);  break;
       case "QUEUE_CONCURRENCY": config.queue.concurrency = parseInt(value); break;

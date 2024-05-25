@@ -332,7 +332,10 @@ In the source code of the server there is a configuration file named `config.jso
     "appendEnvPath": true,
     // the length of each request id
     // depends on the amount of users
-    "idLength": 8
+    "idLength": 8,
+    // If true, system paths (i.e: /usr/local/.../id.cyclone) would be replaced to <censored-path> in both result and trace in the response
+    // Recommended in production for security reasons (knowing the server's real path is dangerous, unless deployed locally for debug)
+    "censorSystemPaths": true
   },
   // Config for queue mode
   "queue": {
@@ -422,31 +425,32 @@ The execution server supports using `.env` file. This file would override some o
 
 In the root of the server, a `.env.example` file exists as an example to the `.env` configuration. If you wish to use `.env`, please rename `.env.example` to `.env` and edit its content. Each key in `.env` represents a config option in `config.json`. For each key's JSON path please see the following table: 
 
-| `.env` Key                     | Config's Json path |
-|--------------------------------|--------------------|
-| CYCLONE_ES_CYCLONE_PATH        | cyclone.path       |
-| CYCLONE_ES_CYCLONE_EXECUTABLE  | cyclone.executable |
-| CYCLONE_ES_CYCLONE_APPEND_ENV  | cyclone.appendEnvPath|
-| CYCLONE_ES_CYCLONE_SOURCE_PATH |cyclone.sourcePath|
-| CYCLONE_ES_CYCLONE_TIMEOUT_MS  |cyclone.mandatoryTimeoutMs|
-|CYCLONE_ES_CYCLONE_ID_LENGTH|cyclone.idLength|
-|CYCLONE_ES_CYCLONE_TRACE_KEYWORD|cyclone.traceKeyword|
-|CYCLONE_ES_CYCLONE_DEL_AFTER_EXEC|cyclone.deleteAfterExec|
-|CYCLONE_ES_CYCLONE_EXTENSION|cyclone.extension|
-|CYCLONE_ES_CYCLONE_DISABLED_OPTIONS|cyclone.disabledOptions|
-|CYCLONE_ES_QUEUE_ENABLED|queue.enabled|
-|CYCLONE_ES_QUEUE_CONCURRENCY|queue.concurrency|
-|CYCLONE_ES_QUEUE_RESULT_TTL_SECS|queue.resultTTLSecs|
-|CYCLONE_ES_QUEUE_AUTO_CLEAR_FILE_MS|queue.autoClearFileIntervalMs|
-|CYCLONE_ES_REDIS_URL|redis.url|
-|CYCLONE_ES_SERVER_HOST|server.host|
-|CYCLONE_ES_SERVER_PORT|server.port|
-|CYCLONE_ES_SERVER_PROXY|server.isProxy|
-|CYCLONE_ES_SERVER_PROXY_HEADER|server.proxyIpHeader|
-|CYCLONE_ES_LOGGER_SERVICE_CONSOLE|logger.service.console|
-|CYCLONE_ES_LOGGER_SERVICE_LEVEL|logger.service.level|
-|CYCLONE_ES_LOGGER_EXECUTION_CONSOLE|logger.execution.console|
-|CYCLONE_ES_LOGGER_EXECUTION_LEVEL|logger.execution.level|
+| `.env` Key                             | Config's Json path            |
+|----------------------------------------|-------------------------------|
+| CYCLONE_ES_CYCLONE_PATH                | cyclone.path                  |
+| CYCLONE_ES_CYCLONE_EXECUTABLE          | cyclone.executable            |
+| CYCLONE_ES_CYCLONE_APPEND_ENV          | cyclone.appendEnvPath         |
+| CYCLONE_ES_CYCLONE_SOURCE_PATH         | cyclone.sourcePath            |
+| CYCLONE_ES_CYCLONE_TIMEOUT_MS          | cyclone.mandatoryTimeoutMs    |
+| CYCLONE_ES_CYCLONE_ID_LENGTH           | cyclone.idLength              |
+| CYCLONE_ES_CYCLONE_TRACE_KEYWORD       | cyclone.traceKeyword          |
+| CYCLONE_ES_CYCLONE_DEL_AFTER_EXEC      | cyclone.deleteAfterExec       |
+| CYCLONE_ES_CYCLONE_EXTENSION           | cyclone.extension             |
+| CYCLONE_ES_CYCLONE_DISABLED_OPTIONS    | cyclone.disabledOptions       |
+| CYCLONE_ES_CYCLONE_CENSOR_SYSTEM_PATHS | cyclone.censorSystemPaths     |
+| CYCLONE_ES_QUEUE_ENABLED               | queue.enabled                 |
+| CYCLONE_ES_QUEUE_CONCURRENCY           | queue.concurrency             |
+| CYCLONE_ES_QUEUE_RESULT_TTL_SECS       | queue.resultTTLSecs           |
+| CYCLONE_ES_QUEUE_AUTO_CLEAR_FILE_MS    | queue.autoClearFileIntervalMs |
+| CYCLONE_ES_REDIS_URL                   | redis.url                     |
+| CYCLONE_ES_SERVER_HOST                 | server.host                   |
+| CYCLONE_ES_SERVER_PORT                 | server.port                   |
+| CYCLONE_ES_SERVER_PROXY                | server.isProxy                |
+| CYCLONE_ES_SERVER_PROXY_HEADER         | server.proxyIpHeader          |
+| CYCLONE_ES_LOGGER_SERVICE_CONSOLE      | logger.service.console        |
+| CYCLONE_ES_LOGGER_SERVICE_LEVEL        | logger.service.level          |
+| CYCLONE_ES_LOGGER_EXECUTION_CONSOLE    | logger.execution.console      |
+| CYCLONE_ES_LOGGER_EXECUTION_LEVEL      | logger.execution.level        |
 
 Please note that all keys in `.env` starts with the `CYCLONE_ES_` prefix.
 

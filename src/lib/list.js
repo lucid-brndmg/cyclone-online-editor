@@ -75,3 +75,15 @@ export const map2elems = (xs, f) => {
 
   return result
 }
+
+export const searchIndices = (xs, elem, add = 0) => {
+  const r = []
+  for (let i=0;i<xs.length;i++) {
+    const x = xs[i]
+    if (x === elem) {
+      r.push(i + add)
+    }
+  }
+
+  return r
+}
