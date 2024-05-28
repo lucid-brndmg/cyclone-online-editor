@@ -2,9 +2,9 @@
   "literals": [
     "true", "false"
   ],
-  "types": ["int","bool","real","char","string","enum","record"],
-  "options": ["global","native","debug","log","output","trace","precision","timeout","detect"],
+  "types": ["int","bool","real","char","string","enum","record", "bv"],
+  "options": ["global","native","debug","log","output","trace","precision","timeout","detect", "bvdisplay"],
   "keywords": ["state","node","machine","graph","transition","trans","edge","const","on","label","invariant","where","start","final","abstract","normal","prev","goal","check","for","stop","at","via","condition","reach","with","enumerate","let","each","assert","initial","in","fresh","option","always","some","one","upto","function","return","if","else"],
 
-  "operators": ["->","<->","@","|",":","::",":=",",",".","..","=",">",">=","#","{","[","<","<=","(","-","!=","}","]",")",";","/","*","+","=>","!","^","_","++","--","**","%","||","&&","+=","-=","*=","/=","<<",">>","=="]
+  "operators": ["->","<->","@","|",":","::",":=",",",".","..","=",">",">=","#","{","[","<","<=","(","-","!=","}","]",")",";","/","*","+","=>","!","^","_","++","--","**","%","||","&&","+=","-=","*=","/=","<<",">>","==", "&", "~"]
 }

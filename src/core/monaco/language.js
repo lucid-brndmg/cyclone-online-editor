@@ -48,6 +48,8 @@ export const CycloneMonacoTokens = {
   symbols: /[=><!~?:&|+\-*\/\^%]+/,
   escapes: /\\([abfnrtv\\"'])/,
   digits: /\d+/,
+  hexdigits: /[[0-9a-fA-F]+/,
+  binarydigits: /[0-1]+/,
 
   // The main tokenizer for our languages
   tokenizer: {
@@ -77,8 +79,10 @@ export const CycloneMonacoTokens = {
       [/@\s*[a-zA-Z_][\w]*/, 'annotation'],
 
       // numbers
-      [/(@digits)/, 'number'],
       [/(@digits)\.(@digits)/, 'number.float'],
+      [/0x(@hexdigits)/, 'number.hex'],
+      [/(@binarydigits)[bB]/, 'number.binary'],
+      [/(@digits)/, 'number'],
 
       // delimiter: after number because of .\d floats
       [/[;,.]/, 'delimiter'],
