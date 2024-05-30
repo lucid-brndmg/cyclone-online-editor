@@ -269,6 +269,10 @@ const eIdentifierNeverUsed = ({kind, text}) => {
   return `${formatKindDescription(kind)} '${text}' defined but never used`
 }
 
+const eInvalidBitVectorOperation = ({lhs, rhs}) => {
+  return `BitVector of different sizes (bv[${lhs}], bv[${rhs}]) can not be used together`
+}
+
 const errorMessageFormatter = {
   [ExtendedErrorType.RemoteError]: eMsgBased,
   [ExtendedErrorType.SyntaxError]: eMsgBased,
@@ -312,7 +316,8 @@ const errorMessageFormatter = {
   [ExtendedErrorType.NoFinalStateOrReachSpecified]: eNoFinalStateOrReachSpecified,
   [ExtendedErrorType.UnreachableCheckForPathLength]: eUnreachableCheckForPathLength,
   [ExtendedErrorType.NodeUnconnected]: eNodeUnconnected,
-  [ExtendedErrorType.IdentifierNeverUsed]: eIdentifierNeverUsed
+  [ExtendedErrorType.IdentifierNeverUsed]: eIdentifierNeverUsed,
+  [ExtendedErrorType.InvalidBitVectorOperation]: eInvalidBitVectorOperation
 }
 
 export const formatErrorMessage = (type, params, source = null) => {
@@ -330,23 +335,6 @@ export const formatErrorMessage = (type, params, source = null) => {
 }
 
 export const formatErrorSource = source => errorSourceToText[source]
-
-const typeMsgRepr = {
-  [IdentifierType.Machine]: "graph",
-  [IdentifierType.State]: "node",
-  [IdentifierType.Trans]: "edge",
-  [IdentifierType.Record]: "record",
-  [IdentifierType.Enum]: "enum",
-  [IdentifierType.Function]: "function",
-  [IdentifierType.Invariant]: "invariant",
-  [IdentifierType.Int]: "int",
-  [IdentifierType.String]: "string",
-  [IdentifierType.Char]: "char",
-  [IdentifierType.Real]: "real",
-  [IdentifierType.Bool]: "bool",
-  // [IdentifierType.Unknown]: "unknown_type", // void ???
-  [IdentifierType.Hole]: "unknown"
-}
 
 const kindDescription = {
   [IdentifierKind.State]: "node / state",
