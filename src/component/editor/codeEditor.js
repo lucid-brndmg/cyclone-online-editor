@@ -9,7 +9,6 @@ import {
   formatErrorMessage,
   formatIdentifier,
   formatKindDescription, formatStateTransRelation,
-  formatType
 } from "@/core/utils/format";
 import {cycloneFullKeywordsSet} from "@/core/specification";
 import {CycloneLanguageId, CycloneMonacoConfig, CycloneMonacoTokens} from "@/core/monaco/language";
@@ -22,6 +21,7 @@ import {ErrorSource, ExtendedErrorType} from "@/core/definitions";
 import {PublicUrl} from "@/core/utils/resource";
 
 const {IdentifierKind, IdentifierType} = cycloneAnalyzer.language.definitions
+const {typeToString} = cycloneAnalyzer.utils.type
 
 const MonacoSetup = ({children, ready, onReady}) => {
   // const [ready, setReady] = useState(false)
@@ -295,7 +295,7 @@ export const CycloneCodeEditor = ({
                 return {
                   contents: [
                     {
-                      value: cycloneCodeMD(`${formatType(child.type)} ${pre}.${child.text}`),
+                      value: cycloneCodeMD(`${typeToString(child.type, child.typeParams)} ${pre}.${child.text}`),
                     },
                     { value: formatKindDescription(child.kind) },
                   ],

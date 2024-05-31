@@ -13,60 +13,6 @@ const {
 
 const {typeToString} = cycloneAnalyzer.utils.type
 
-// const errorTypeDescription = {
-//   // [ErrorKind.SyntaxError]: "Syntax Error",
-//   // [ErrorKind.TypeError]: "Type Error",
-//   // [ErrorKind.SemanticError]: "Semantic Error",
-//   // [ErrorKind.SemanticWarning]: "Semantic Warning",
-//   // [ErrorKind.UndefinedIdentifier]: "Undefined Identifier",
-//   // [ErrorKind.RedeclaredIdentifier]: "Redeclared Identifier"
-//
-//   [ExtendedErrorType.SyntaxError]: "Syntax Error",
-//
-//   [ExtendedErrorType.UndefinedIdentifier]: "Undefined Identifier",
-//   [ExtendedErrorType.IdentifierRedeclaration]: "Identifier Redeclaration",
-//   [ExtendedErrorType.RecursiveFunction]: "Invalid Function",
-//   [ExtendedErrorType.WhereFreeVariable]: "Invalid Where Condition",
-//   [ExtendedErrorType.WhereFunctionCall]: "Invalid Where Condition",
-//   [ExtendedErrorType.CompilerOptionDuplicated]: "Invalid Compiler Option",
-//   [ExtendedErrorType.StartNodeDuplicated]: "Invalid Node Modifier",
-//   [ExtendedErrorType.ReturnExprViolation]: "Invalid Statement",
-//   [ExtendedErrorType.StatementAfterReturn]: "Invalid Statement",
-//   [ExtendedErrorType.InvalidNamedExprScope]: "Invalid Expression",
-//   [ExtendedErrorType.InvalidStatement]: "Invalid Statement",
-//   [ExtendedErrorType.LetBodyUndefined]: "Path Condition Undefined",
-//   // [ErrorType.LocalVariableEnum]: "Enum Type In Local Variables",
-//   [ExtendedErrorType.InvalidNodeModifier]: "Invalid Node Modifier",
-//   [ExtendedErrorType.EnumNotAllowedInVariable]: "Enum Not Allowed Here",
-//   [ExtendedErrorType.WhereInlineVariable]: "Where Clause In Local Variables",
-//   [ExtendedErrorType.InvalidCheckForPathLength]: "Invalid Path Length",
-//   [ExtendedErrorType.AnonymousEdgeIdentifier]: "Identifier On Anonymous Edge",
-//   [ExtendedErrorType.AssertModifierInExpr]: "Invalid Assert Expression",
-//
-//   [ExtendedErrorType.TypeMismatchFunction]: "Type Mismatch",
-//   [ExtendedErrorType.TypeMismatchReturn]: "Type Mismatch",
-//   [ExtendedErrorType.TypeMismatchCompilerOption]: "Type Mismatch",
-//   [ExtendedErrorType.TypeMismatchVarDecl]: "Type Mismatch",
-//   [ExtendedErrorType.TypeMismatchVarRef]: "Type Mismatch",
-//   [ExtendedErrorType.TypeMismatchExpr]: "Type Mismatch",
-//
-//   [ExtendedErrorType.CodeInsideAbstractNode]: "Redundant Code",
-//   [ExtendedErrorType.NoGoalDefined]: "Ill-Formed Graph",
-//   [ExtendedErrorType.NoStartNodeDefined]: "Ill-Formed Graph",
-//   [ExtendedErrorType.DuplicatedEdge]: "Redundant Edge",
-//   [ExtendedErrorType.EmptyEdge]: "Empty Edge",
-//   [ExtendedErrorType.DuplicatedEnumField]: "Duplicated Enum",
-//   [ExtendedErrorType.DuplicatedEdgeTarget]: "Duplicated Edge Target",
-//   [ExtendedErrorType.OptionTraceNotFound]: "Option Output Ignored",
-//   [ExtendedErrorType.DuplicatedCheckForPathLength]: "Duplicated Path Length",
-//
-//   [ExtendedErrorType.RemoteError]: "Remote Execution Error"
-// }
-//
-// export const formatErrorDescription = (type) => {
-//   return errorTypeDescription[type] ?? "Error"
-// }
-
 const errorSourceToText = {
   [ErrorSource.Semantic]: "Semantic Problem",
   [ErrorSource.Remote]: "Execution Error",
@@ -105,17 +51,17 @@ const eTypeMismatchFunction = ({ident, got, expected}) => {
 }
 
 const eTypeMismatchVarDecl = ({ident, expected, got}) => {
-  return `type mismatch when declaring variable '${ident}', expected ${formatType(expected)}, defined ${formatType(got)}`
+  return `type mismatch when declaring variable '${ident}', expected ${typeToString(expected)}, defined ${typeToString(got)}`
 }
 
 const eTypeMismatchExpr = ({expected, got, minLength}) => {
   const hasMinLength = minLength != null
   const minLengthMsg = hasMinLength ? ` at least ${minLength}` : ""
   const expectedMsg = hasMinLength
-    ? `(...${formatType(expected[0])})`
-    : expected.length > 1 ? formatTypes(expected) : formatType(expected[0])
+    ? `(...${typeToString(expected[0])})`
+    : expected.length > 1 ? formatTypes(expected) : typeToString(expected[0])
 
-  return `type mismatch: expecting${minLengthMsg} ${expectedMsg}, received ${got.length > 1 ? formatTypes(got) : formatType(got[0])}`
+  return `type mismatch: expecting${minLengthMsg} ${expectedMsg}, received ${got.length > 1 ? formatTypes(got) : typeToString(got[0])}`
 }
 
 const eCompilerOptionDuplicated = ({ident}) => {
@@ -154,7 +100,7 @@ const eReturnExprViolation = ({isOutOfFunction, isOutOfStatement}) => {
 }
 
 const eTypeMismatchReturn = ({expected, got}) => {
-  return `type mismatch on return expression, function expected to return ${formatType(expected)}, returned ${formatType(got)}`
+  return `type mismatch on return expression, function expected to return ${typeToString(expected)}, returned ${typeToString(got)}`
 }
 
 const eStatementAfterReturn = () => {
@@ -170,7 +116,7 @@ const eEmptyEdge = () => {
 }
 
 const eInvalidStatement = ({got}) => {
-  return `invalid statement: expecting this statement to return nothing or bool, but returned ${formatType(got)}`
+  return `invalid statement: expecting this statement to return nothing or bool, but returned ${typeToString(got)}`
 }
 
 const eLetBodyUndefined = () => {
@@ -242,7 +188,7 @@ const eLiteralOutOfBoundary = ({type}) => {
   if (lo != null && hi != null) {
     bound = `Valid range is ${lo} to ${hi}`
   }
-  return `${formatType(type)} value is out of range. ${bound}`
+  return `${typeToString(type)} value is out of range. ${bound}`
 }
 
 const eCheckUptoMultiLengths = ({length}) => {
@@ -271,6 +217,10 @@ const eIdentifierNeverUsed = ({kind, text}) => {
 
 const eInvalidBitVectorOperation = ({lhs, rhs}) => {
   return `BitVector of different sizes (bv[${lhs}], bv[${rhs}]) can not be used together`
+}
+
+const eInvalidBitVectorSize = () => {
+  return `Invalid bv size. Size of bv should between: 0 < size < 2147483648.`
 }
 
 const errorMessageFormatter = {
@@ -317,7 +267,8 @@ const errorMessageFormatter = {
   [ExtendedErrorType.UnreachableCheckForPathLength]: eUnreachableCheckForPathLength,
   [ExtendedErrorType.NodeUnconnected]: eNodeUnconnected,
   [ExtendedErrorType.IdentifierNeverUsed]: eIdentifierNeverUsed,
-  [ExtendedErrorType.InvalidBitVectorOperation]: eInvalidBitVectorOperation
+  [ExtendedErrorType.InvalidBitVectorOperation]: eInvalidBitVectorOperation,
+  [ExtendedErrorType.InvalidBitVectorSize]: eInvalidBitVectorSize
 }
 
 export const formatErrorMessage = (type, params, source = null) => {
@@ -363,31 +314,29 @@ const formatFunctionIdent = ident => {
 
   if (fnParams.length && fnParams.length === ident.fnSignature.input.length) {
     for (let i = 0; i < fnParams.length; i++) {
-      params.push(`${fnParams[i]}:${formatType(fnSigns.input[i])}`)
+      params.push(`${fnParams[i]}:${typeToString(fnSigns.input[i], fnSigns.inputParams[i])}`)
     }
   }
 
-  return `function ${ident.text}: ${formatType(ident.fnSignature.output)} (${params.join(", ")})`
+  return `function ${ident.text}: ${typeToString(ident.fnSignature.output, ident.fnSignature.outputParams)} (${params.join(", ")})`
 }
 
 export const formatIdentifier = ident => {
   const identText = ident.text
 
   switch (ident.kind) {
-    case IdentifierKind.Record: return `record ${identText} { ${ident.recordChild.map(({text, type}) => `${formatType(type)} ${text}`).join(", ")} }`
+    case IdentifierKind.Record: return `record ${identText} { ${ident.recordChild.map(({text, type, typeParams}) => `${typeToString(type, typeParams)} ${text}`).join(", ")} }`
     case IdentifierKind.FnName: return formatFunctionIdent(ident)
     case IdentifierKind.EnumField: return `enum #${identText}`
     case IdentifierKind.Let: return `let ${identText}`
-    case IdentifierKind.GlobalConst: return `const ${formatType(ident.type)} ${identText}`
+    case IdentifierKind.GlobalConst: return `const ${typeToString(ident.type, ident.typeParams)} ${identText}`
     case IdentifierKind.Annotation: return `@${identText}`
   }
 
-  return `${formatType(ident.type)} ${identText}`
+  return `${typeToString(ident.type, ident.typeParams)} ${identText}`
 }
 
-export const formatType = (t) => typeToString(t)
-
-export const formatTypes = types => types.length ? `(${types.map(t => formatType(t)).join(", ")})` : `(no-parameter)`
+export const formatTypes = types => types.length ? `(${types.map(t => typeToString(t)).join(", ")})` : `(no-parameter)`
 
 export const formatSignatureInputs = signatures => signatures
   .map(({input}) => formatTypes(input))

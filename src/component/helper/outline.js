@@ -60,9 +60,6 @@ import {useEditorHelperStore} from "@/state/editorHelperStore";
 import {eliminateVarGroup, filterText} from "@/core/utils/outline";
 import {
     formatErrorMessage, formatErrorSource,
-    formatKindDescription,
-    formatScopeBlockType,
-    formatType
 } from "@/core/utils/format";
 import {locateToCode} from "@/core/utils/monaco";
 import {isInfo, isWarning} from "@/core/specification";
@@ -71,27 +68,7 @@ import {useDebouncedValue} from "@mantine/hooks";
 import {ErrorSource} from "@/core/definitions";
 
 const {IdentifierKind, SemanticContextType, SyntaxBlockKind} = cycloneAnalyzer.language.definitions
-
-// const outlineBlockTypeIcons = {
-//   [SemanticContextType.MachineScope]: IconVector,
-//   [SemanticContextType.StateScope]: IconPlaystationCircle,
-//   [SemanticContextType.TransScope]: IconArrowRightCircle,
-//   [SemanticContextType.GoalScope]: IconViewfinder,
-//   [SemanticContextType.RecordScope]: IconBraces,
-//   [SemanticContextType.EnumDecl]: IconBraces,
-//   [SemanticContextType.FnBodyScope]: IconMathFunction,
-//   [SemanticContextType.InvariantScope]: IconVariableMinus,
-// }
-//
-// const outlineIdentKindIcons = {
-//   [IdentifierKind.FnParam]: IconLetterP,
-//   [IdentifierKind.Let]: IconRoute2,
-//   [IdentifierKind.EnumField]: IconLetterE,
-//   [IdentifierKind.GlobalVariable]: IconLetterG,
-//   [IdentifierKind.GlobalConst]: IconLetterC,
-//   [IdentifierKind.RecordField]: IconLetterR,
-//   [IdentifierKind.LocalVariable]: IconLetterV,
-// }
+const {typeToString} = cycloneAnalyzer.utils.type
 
 const syntaxBlockIcons = {
   [SyntaxBlockKind.CompilerOption]: IconSettings,
@@ -179,14 +156,14 @@ const getSyntaxBlockStyle = block => {
 
     case SyntaxBlockKind.Variable: {
       const {
-        identifier, type, kind
+        identifier, type, kind, typeParams
       } = block.data
 
       switch (kind) {
         case IdentifierKind.GlobalConst:
           text = (
             <SmallGroup>
-              <Text fs={"italic"} c={"purple"}>const {formatType(type)}</Text>
+              <Text fs={"italic"} c={"purple"}>const {typeToString(type, typeParams)}</Text>
               <IdentifierText identifier={`${identifier}`} isSearched={block.isSearched} />
             </SmallGroup>
           )
@@ -196,7 +173,7 @@ const getSyntaxBlockStyle = block => {
           text = (
             <SmallGroup>
               <IdentifierText identifier={`${identifier}:`} isSearched={block.isSearched} />
-              <Text fs={"italic"} c={"purple"}>{formatType(type)}</Text>
+              <Text fs={"italic"} c={"purple"}>{typeToString(type, typeParams)}</Text>
             </SmallGroup>
           )
           Icon = IconVariable // IconLetterP
@@ -214,7 +191,7 @@ const getSyntaxBlockStyle = block => {
       if (!text) {
         text = (
           <SmallGroup>
-            <Text fs={"italic"} c={"purple"}>{formatType(type)}</Text>
+            <Text fs={"italic"} c={"purple"}>{typeToString(type, typeParams)}</Text>
             <IdentifierText identifier={identifier} isSearched={block.isSearched} />
           </SmallGroup>
         )
@@ -228,7 +205,7 @@ const getSyntaxBlockStyle = block => {
         <SmallGroup>
           <Text fs={"italic"} c={"purple"}>function</Text>
           <IdentifierText identifier={`${block.data.identifier}:`} isSearched={block.isSearched} />
-          <Text fs={"italic"} c={"purple"}>{formatType(block.data.returnType)}</Text>
+          <Text fs={"italic"} c={"purple"}>{typeToString(block.data.returnType, block.data.returnTypeParams)}</Text>
         </SmallGroup>
       )
       break
@@ -307,44 +284,6 @@ const getSyntaxBlockStyle = block => {
     text,
     Icon
   }
-  // switch (node.outlineKind) {
-  //   case OutlineKind.Group: {
-  //     const Icon = outlineBlockTypeIcons[node.type] ?? IconBraces
-  //
-  //     return {
-  //       text: <Group justify={"space-between"}>
-  //         <Text>
-  //           <Text c={"blue"} span>{formatScopeBlockType(node.type)}</Text>
-  //           {' '}
-  //           <Text span>{node.text || ""}</Text>
-  //         </Text>
-  //         <Text size={"xs"} c={"dimmed"} px={"sm"}>{node.position.startPosition.line} :{node.position.startPosition.column + 1}</Text>
-  //       </Group>, // `${formatScopeBlockType(node.type)} ${node.text || ""}`,
-  //       icon: <Icon size={12} />
-  //     }
-  //   }
-  //
-  //   case OutlineKind.Identifier: {
-  //     const Icon = outlineIdentKindIcons[node.kind] ?? IconLetterI
-  //
-  //     return {
-  //       text: <Group justify={"space-between"}>
-  //         <Text>
-  //           <Text c={"purple"} span>{node.kind === IdentifierKind.FnParam ? "param" : formatType(node.type)}</Text>
-  //           {' '}
-  //           {node.text}
-  //         </Text>
-  //
-  //         <Group>
-  //           <Text size={"xs"} c={"dimmed"}>{formatKindDescription(node.kind)}</Text>
-  //           <Text size={"xs"} c={"dimmed"} px={"sm"}>{node.position.startPosition.line}:{node.position.startPosition.column + 1}</Text>
-  //         </Group>
-  //
-  //       </Group>,
-  //       icon: <Icon size={12} />
-  //     }
-  //   }
-  // }
 }
 
 const StructureNode = ({node, depth = 1, onJump}) => {
