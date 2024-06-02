@@ -28,6 +28,26 @@ export const useEditorExecutionStore = create((set, get) => ({
   errorMessage: "",
   setErrorMessage: errorMessage => set({errorMessage}),
 
+  info: null,
+  setInfo: info => set({info}),
+
+  isLoadingInfo: false,
+  setIsLoadingInfo: isLoadingInfo => set({isLoadingInfo}),
+
+  refreshServerInfo: async execServerUrl => {
+    const {setInfo, setIsLoadingInfo} = get()
+    setIsLoadingInfo(true)
+    try {
+      const info = await fetch(execServerUrl).then(resp => resp.json())
+      setInfo(info?.data)
+    } catch (e) {
+      console.log("failed to fetch execution server info", e)
+      setInfo(null)
+    } finally {
+      setIsLoadingInfo(false)
+    }
+  }
+
   // resultVizStates: new Map(),
   // traceVizStates: new Map(),
   // resetVizStates: () => set({resultVizStates: new Map(), traceVizStates: new Map()}),

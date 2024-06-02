@@ -117,7 +117,7 @@ export const SettingsPopover = ({children}) => {
   }
   // 280
   return (
-    <Popover width={500} trapFocus position="bottom" withArrow shadow="md">
+    <Popover width={600} trapFocus position="bottom" withArrow shadow="md">
       <Popover.Target>
         {children}
       </Popover.Target>
@@ -196,11 +196,11 @@ export const SettingsPopover = ({children}) => {
 
               <Divider />
 
-              <Group maw={220}>
+              <Group maw={240}>
                 <TextInput
                   label={"Execution Server"}
                   description={<>
-                    Define preferred execution server to execute Cyclone's code remotely. Server could be <a target={`_blank`} href={"https://github.com/lucid-brndmg/cyclone-online-editor?tab=readme-ov-file#execution-server-1"}>deployed locally</a>
+                    Define preferred server to check Cyclone spec remotely. Server could be <a target={`_blank`} href={"https://github.com/lucid-brndmg/cyclone-online-editor?tab=readme-ov-file#execution-server-1"}>deployed locally</a>
                   </>}
                   placeholder={"https://..."}
                   onChange={e => setUExecServer(e.currentTarget.value)}
@@ -222,7 +222,7 @@ export const SettingsPopover = ({children}) => {
                   max={MAX_POLL_WAIT}
                 />
                 <Text size={"xs"} c={"dimmed"}>
-                  Timeout for polling result from execution under queue mode. Will have no effect if the server isn't under queue mode.
+                  Timeout for polling result from execution under <b>queue mode</b>.
                 </Text>
               </div>
 

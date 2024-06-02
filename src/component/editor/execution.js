@@ -10,7 +10,7 @@ import {
   translateErrorResponse
 } from "@/core/execution";
 import {useEffect, useMemo, useRef, useState} from "react";
-import {IconArrowsMaximize, IconCopy, IconTerminal2, IconX} from "@tabler/icons-react";
+import {IconArrowsMaximize, IconCopy, IconRefresh, IconTerminal2, IconX} from "@tabler/icons-react";
 import {
   Box,
   Button,
@@ -190,6 +190,80 @@ export const CodeExecutionButton = ({...props}) => {
 //       ? <Text span c={"#fa5252"} fw={700}>Unknown Result</Text>
 //       : <Text span  fw={700}>Unknown result, see message for details</Text>
 
+const ServerInfoDisplay = () => {
+  const {
+    refreshServerInfo,
+    isLoadingInfo,
+    info
+  } = useEditorExecutionStore()
+
+  const {executionServer} = useEditorSettingsStore()
+
+  const server = useMemo(() => {
+    const execServerAddr = process.env.NEXT_PUBLIC_CYCLONE_EXEC_SERVER
+      ?? Config.executionServer.url
+    const trimmed = executionServer.trim()
+    return {
+      url: trimmed || execServerAddr,
+      isCustom: !!trimmed
+    }
+  }, [executionServer])
+
+  const getInfo = () => {
+    // const execServerAddr = process.env.NEXT_PUBLIC_CYCLONE_EXEC_SERVER
+    //   ?? Config.executionServer.url
+    const {url} = server
+    return refreshServerInfo(url)
+  }
+
+  const serverInfo = useMemo(() => {
+    if (!info) {
+      return (
+        <Text c={"red"} fz={"sm"}>
+          Execution server didn't supply any information
+          <br/>
+          URL: {server.url}
+        </Text>
+      )
+    }
+
+    return (
+      <Box fz={"sm"}>
+        <Box><Text span c={"dimmed"} fz={"sm"}>Version: </Text> <Text span fz={"sm"} fw={500}>{info.version?.replace(/(?:\r\n|\r|\n)/g, " ") ?? "unknown"}</Text></Box>
+
+        <Box><Text span c={"dimmed"} fz={"sm"}>Disabled Compiler Options: </Text> <Text span c={"red"} fz={"sm"}>{info.disabledOptions?.map(o => `option-${o}`)?.join(", ") ?? "None / Unknown"}</Text></Box>
+
+        <Box><Text span c={"dimmed"} fz={"sm"}>Spec Checking Timeout: </Text> <Text span fz={"sm"} fw={500}>{info.timeout ? `${info.timeout}ms (${Math.round(info.timeout / 1000)}s)` : "None / Unknown"}</Text></Box>
+
+        <Box><Text span c={"dimmed"} fz={"sm"}>Request Mode: </Text> {info.isQueueMode ? "Queue Mode" : "Synchronous Execution"}</Box>
+
+        <Box><Text span c={"dimmed"} fz={"sm"}>Server: </Text> {server.isCustom ? "[custom]" : "[default]"} {server.url}</Box>
+
+        <Box><Text span c={"dimmed"} fz={"sm"}>Message from Server: </Text> <div dangerouslySetInnerHTML={{__html: info.message ?? "None"}} /></Box>
+      </Box>
+    )
+  }, [info])
+
+  return isLoadingInfo
+    ? (
+      <Box mt={"sm"}>
+        <Divider label={<>Execution Server Information </>} labelPosition="center" />
+        <Loader />
+        <Text fz={"sm"}>Loading Server Information ...</Text>
+      </Box>
+    )
+    : (
+      <Box mt={"sm"}>
+        <Divider label={<>Execution Server Information </>} labelPosition="center" />
+        <Group justify={"right"}>
+          <Button size={"compact-sm"} onClick={getInfo} variant={"subtle"} leftSection={<IconRefresh size={16} />}>Refresh</Button>
+        </Group>
+        {serverInfo}
+      </Box>
+    )
+
+}
+
 export const CodeConsoleResultSection = () => {
   // const placeholder = `Code execution result will be presented here ...`
   const [resultMode, setResultMode] = useState("Result")
@@ -343,39 +417,49 @@ export const CodeConsoleResultSection = () => {
 
       <Divider />
 
-      {
-        executionResult
-          ? <Box>
-            {resultMode === "Result"
-              // Result panel
-              ? sanitized.title
-              // Trace panel
-              : parsedTraces
-                ? parsedTraces.length
-                  ? <Text fw={500} size={"sm"}>Generated {parsedTraces.length} traces</Text>
-                  : <Text fw={500} size={"sm"}>No trace generated</Text>
-                : traceIsGraphviz
-                  ? <Text fw={500} size={"sm"}>Trace generated in Graphviz format</Text>
-                  : <Text fw={500} size={"sm"}>No trace generated</Text>
-            }
+      <Box style={{overflowY: "auto"}} ref={viewport}>
+        {
+          executionResult
+            ? <Box>
+              {resultMode === "Result"
+                // Result panel
+                ? sanitized.title
+                // Trace panel
+                : parsedTraces
+                  ? parsedTraces.length
+                    ? <Text fw={500} size={"sm"}>Generated {parsedTraces.length} traces</Text>
+                    : <Text fw={500} size={"sm"}>No trace generated</Text>
+                  : traceIsGraphviz
+                    ? <Text fw={500} size={"sm"}>Trace generated in Graphviz format</Text>
+                    : <Text fw={500} size={"sm"}>No trace generated</Text>
+              }
 
-            <ScrollArea.Autosize viewportRef={viewport} mah={`${resultHeight - 12}svh`} p={0} type="auto" mt={"sm"}>
               {resultMode === "Result"
                 ? <TypographyStylesProvider fz={"sm"} p={0}>
                   <div dangerouslySetInnerHTML={{__html: sanitized.sanitized}} />
                 </TypographyStylesProvider>
                 : <Code block={true}>{executionResult.trace}</Code>
               }
-            </ScrollArea.Autosize>
-          </Box>
-          : isError
-            ? <Text c={"red"} size={"sm"} fw={500}>
-              {errorMessage}
-            </Text>
-            : <Text c={"dimmed"} size={"sm"}>
-              Press 'run' to execute the code and see checking results.
-            </Text>
-      }
+
+              {/*<ScrollArea.Autosize viewportRef={viewport} mah={`${resultHeight - 12}svh`} p={0} type="auto" mt={"sm"}>*/}
+              {/*  {resultMode === "Result"*/}
+              {/*    ? <TypographyStylesProvider fz={"sm"} p={0}>*/}
+              {/*      <div dangerouslySetInnerHTML={{__html: sanitized.sanitized}} />*/}
+              {/*    </TypographyStylesProvider>*/}
+              {/*    : <Code block={true}>{executionResult.trace}</Code>*/}
+              {/*  }*/}
+              {/*</ScrollArea.Autosize>*/}
+            </Box>
+            : isError
+              ? <Text c={"red"} size={"sm"} fw={500}>
+                {errorMessage}
+              </Text>
+              : <Text c={"dimmed"} size={"sm"}>
+                Press 'run' to execute the code and see checking results.
+              </Text>
+        }
+        <ServerInfoDisplay />
+      </Box>
 
     </Stack>
   )

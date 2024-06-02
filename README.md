@@ -496,8 +496,8 @@ For example, if one wants to catch all the `NullPointerException` in the compile
 
 **Please be careful when configuring the execution logger**, because the logger might output some very large text (we don't know what the user would input or what the compiler would output). Make sure to set the reasonable file size and collect & clear log files constantly.
 
-#### Build Your Own Server
-If you don't like the existing execution server, you could build your own. Just make sure that the server could execute Cyclone's source code and get the result & trace.
+#### Implement Your Own Server
+If you don't like the existing execution server, you could implement your own. Just make sure that the server could execute Cyclone's source code and get the result & trace.
 
 The server is required to have a `POST /exec` API that accepts a JSON structure of:
 ```json
@@ -568,19 +568,30 @@ You may design your server asynchronously, and it doesn't have to return the res
 
 If you want to execute Cyclone program in async mode, return `ResponseCode.Enqueued` (integer: 7) as `code` inside `POST /exec`'s response and put a generated request id as string inside `data`. Then implement the `GET /get` API which takes the query parameter `id` and returning its execution result when ready. For more, please read [execution server](#execution-server-1).
 
-##### Get Cyclone's Version
-The server could have a `GET /version` API. This API should return a string data that represents the current version of the Cyclone instance that handles `POST /exec`. The version string should be obtained by executing the current command:
+##### Server Information & Get Cyclone's Version
+The server should supply a `GET /` API. This API should return an object data that containing the following fields (Each field is optional but good to have):
 
-```shell
-java -jar cyclone.jar --version
-```
+- `version`: Current version of Cyclone, should be obtained (once, at server startup) by `java -jar cyclone.jar --version`. This should be the version of Cyclone instance that used by `POST /exec`. 
+- `disabledOptions`: Array of string that representing compiler options disabled by this server. Each element of the array should have no `option-` prefix.
+- `timeout`: Server's execution timeout in milliseconds as a number.
+- `isQueueMode`: Boolean value representing that is the server currently under queue mode in execution (should be polled by editor).
+- `message`: Custom text message returned by the server (supports HTML). The message will be displayed at Execution Result panel.
 
-This API should return a `ResponseCode.Success` (integer: 0) as `code`, and a string in `data` that represents the current version of Cyclone. Example response:
+This API should return a `ResponseCode.Success` (integer: 1) as `code`. Example response:
 
 ```json
 {
   "code": 1,
-  "data": "Cyclone: 1.08.801 - 64 bit (0699)\r\nSolver: Z3 4.12.2.0\r\n"
+  "data": {
+    "version": "Cyclone: 1.08.801 - 64 bit (0699)\r\nSolver: Z3 4.12.2.0\r\n",
+    "disabledOptions": [
+      "debug",
+      "log"
+    ],
+    "timeout": 2000,
+    "isQueueMode": false,
+    "message": "Server ready"
+  }
 }
 ```
 

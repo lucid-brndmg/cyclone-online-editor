@@ -6,7 +6,7 @@ import {
   Text, ThemeIcon, ActionIcon, Space, useMantineColorScheme, useComputedColorScheme, Tooltip
 } from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import classes from "../../styles/modules/LayoutHeader.module.css";
 import NextImage from 'next/image';
 import logo from '../../../resource/image/logo.png'
@@ -33,10 +33,9 @@ const links = [
 
 const CycloneLogo = ({...props}) => {
   const router = useRouter()
-
   return (
     <Group {...props} gap={"xs"} style={{cursor: "pointer", userSelect: "none"}} onClick={() => router.push(PublicUrl.HomeBase)}>
-      <Image width={28} height={28} component={NextImage} src={logo} alt="cyclone logo" />
+      <NextImage width={28} height={28}  src={logo} alt="cyclone logo" />
       <Text fw={500} size={"lg"}>CYCLONE</Text>
     </Group>
   )

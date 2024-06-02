@@ -54,11 +54,11 @@ const eTypeMismatchVarDecl = ({ident, expected, got}) => {
   return `type mismatch when declaring variable '${ident}', expected ${typeToString(expected)}, defined ${typeToString(got)}`
 }
 
-const eTypeMismatchExpr = ({expected, got, minLength}) => {
-  const hasMinLength = minLength != null
-  const minLengthMsg = hasMinLength ? ` at least ${minLength}` : ""
+const eTypeMismatchExpr = ({expected, got, length}) => {
+  const hasMinLength = length != null
+  const minLengthMsg = hasMinLength ? ` ${length} of` : ""
   const expectedMsg = hasMinLength
-    ? `(...${typeToString(expected[0])})`
+    ? `(${new Array(length).fill(typeToString(expected[0])).join(", ")})`
     : expected.length > 1 ? formatTypes(expected) : typeToString(expected[0])
 
   return `type mismatch: expecting${minLengthMsg} ${expectedMsg}, received ${got.length > 1 ? formatTypes(got) : typeToString(got[0])}`

@@ -95,11 +95,19 @@ router.get("/get", async ctx => {
   // }
 })
 
-// get the current version of Cyclone
-router.get("/version", async ctx => {
-  const logCtx = {path: "/version", ip: ctx.ip}
+router.get("/", async ctx => {
+  const logCtx = {path: "/", ip: ctx.ip}
   serviceLogger.info("incoming request", logCtx)
-  ctx.body = {code: ResponseCode.Success, data: getCycloneVersion()}
+  ctx.body = {
+    code: ResponseCode.Success,
+    data: {
+      version: getCycloneVersion(),
+      disabledOptions: config.cyclone.disabledOptions ?? [],
+      timeout: config.cyclone.mandatoryTimeoutMs,
+      isQueueMode: config.queue.enabled,
+      message: "Server ready"
+    }
+  }
 })
 
 export const serve = () => {

@@ -9,6 +9,7 @@ import {StatusBar, Toolbar} from "@/component/editor/bars";
 import {useEffect, useRef} from "react";
 import localforage from "localforage";
 import Config from "../../../resource/config.json"
+import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 
 export const CycloneEditorForm = ({
   light = false,
@@ -132,6 +133,16 @@ export const CycloneExecutionResultForm = () => {
     window.addEventListener("mouseup", onMouseUp)
     window.addEventListener('selectstart', disableSelect);
   }
+
+  const {executionServer} = useEditorSettingsStore()
+  const {refreshServerInfo} = useEditorExecutionStore()
+
+  useEffect(() => {
+    const execServerAddr = process.env.NEXT_PUBLIC_CYCLONE_EXEC_SERVER
+      ?? Config.executionServer.url
+    const trimmed = executionServer.trim()
+    refreshServerInfo(trimmed || execServerAddr)
+  }, [executionServer]);
 
   return (
     // <Paper
