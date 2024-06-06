@@ -12,4 +12,3 @@ export const ExtendedErrorType = {
   SyntaxError: 1001,
   RemoteError: 1002
 }
-

@@ -1,5 +1,6 @@
 import cycloneAnalyzer from "cyclone-analyzer";
 import {ErrorSource, ExtendedErrorType} from "@/core/definitions";
+import {SemanticErrorDefinitions} from "@/core/specification";
 
 const {
   IdentifierKind,
@@ -279,8 +280,12 @@ export const formatErrorMessage = (type, params, source = null) => {
   //   case ErrorSource.Semantic:
   //   default: return msg;
   // }
+  let desc = ""
+  if (source === ErrorSource.Semantic) {
+    desc = ` (${SemanticErrorDefinitions[type]})`
+  }
 
-  const pref = source ? `${errorSourceToText[source]}: ` : ""
+  const pref = source ? `${errorSourceToText[source]}${desc}: ` : ""
 
   return `${pref}${errorMessageFormatter[type](params)}`
 }

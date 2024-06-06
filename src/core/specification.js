@@ -2,6 +2,7 @@ import spec from "../../resource/cyclone_spec.json"
 import cycloneAnalyzer from "cyclone-analyzer";
 import {ExtendedErrorType} from "@/core/definitions";
 
+const SemanticErrorType = cycloneAnalyzer.language.definitions.SemanticErrorType
 
 export const cycloneLiterals = spec.literals
 
@@ -42,6 +43,14 @@ const errorTypeInfos = new Set([
   ExtendedErrorType.NodeUnconnected,
   ExtendedErrorType.IdentifierNeverUsed
 ])
+
+export const SemanticErrorDefinitions = (() => {
+  const o = {}
+  for (let key of Object.keys(SemanticErrorType)) {
+    o[SemanticErrorType[key]] = key
+  }
+  return o
+})()
 
 export const isWarning = errorType => errorTypeWarnings.has(errorType)
 
