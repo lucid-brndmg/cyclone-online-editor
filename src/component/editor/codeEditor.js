@@ -58,6 +58,7 @@ export const CycloneCodeEditor = ({
   onAnalyzerError,
   ready,
   onReady,
+  customCodeSnippets,
   ...props
 }) => {
   const [monacoCtx, setMonacoCtx] = useState(null)
@@ -71,10 +72,16 @@ export const CycloneCodeEditor = ({
   const editorSemanticContextRef = useRef(null)
   const disposersRef = useRef([])
   const codeOptionsRef = useRef(codeOptions)
+  const codeSnippetRef = useRef(customCodeSnippets)
+
+  // console.log(customCodeSnippets)
 
   useEffect(() => {
     codeOptionsRef.current = codeOptions
   }, [codeOptions]);
+  useEffect(() => {
+    codeSnippetRef.current = customCodeSnippets ?? []
+  }, [customCodeSnippets]);
 
   // const onCodeError = e => {
   //   errorsRef.current.setError(e)
@@ -139,33 +146,6 @@ export const CycloneCodeEditor = ({
       console.log("An error occurred when analyzing:", e)
       onAnalyzerError && onAnalyzerError(e, true)
     }
-
-    // const analyzer = new cycloneAnalyzer.analyzer.SemanticAnalyzer()
-    //
-    // // editorCtx.attach(analyzer)
-    // // analyzer.on("errors", (_, es) => errorsRef.current.setErrors(es.map(e => ({...e, source: ErrorSource.Semantic}))))
-    //
-    //
-    // const result = parseCycloneSyntax({
-    //   input: debouncedCode,
-    //   onError: onCodeError
-    // })
-    //
-    // if (result.syntaxErrorsCount === 0) {
-    //   try {
-    //     // ParseTreeWalker.DEFAULT.walk(new SemanticListener(analyzer), result.tree)
-    //     cycloneAnalyzer.utils.antlr.listenerWalk(
-    //       new cycloneAnalyzer.analyzer.SemanticParserListener(analyzer),
-    //       result.tree
-    //     )
-    //     // console.log(graphBuilder.context)
-    //     editorSemanticContextRef.current = editorCtx // semanticAnalyzerRef.current.getEditorSemanticContext()
-    //     onEditorContext && onEditorContext(editorSemanticContextRef.current)
-    //   } catch (e) {
-    //     console.log("An error occurred when analyzing:", e)
-    //     onAnalyzerError && onAnalyzerError(e, true)
-    //   }
-    // }
   }
 
   useEffect(analyzeCode, [debouncedCode]);
@@ -194,7 +174,13 @@ export const CycloneCodeEditor = ({
     const {dispose: disposeCompletionProvider} = monaco.languages.registerCompletionItemProvider(CycloneLanguageId, {
       provideCompletionItems(model, position, context, token) {
         const {startColumn, word} = model.getWordUntilPosition(position)
-        const defaultItems = getDefaultCompletionItems(monaco)
+        const additionalCompletion = codeSnippetRef.current.map(({label, insertText}) => ({
+          label, insertText,
+          kind: monaco.languages.CompletionItemKind.Snippet,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+        }))
+
+        const defaultItems = getDefaultCompletionItems(monaco, additionalCompletion)
 
         if (editorSemanticContextRef.current) {
           const line = position.lineNumber, column = startColumn ?? position.column

@@ -60,6 +60,30 @@ export const useEditorSettingsStore = create((set, get) => ({
   fileBrowserExpanded: ["examples", "saved"],
   setFileBrowserExpanded: fileBrowserExpanded => set({fileBrowserExpanded}),
 
+  customSnippets: [],
+  setCustomSnippets: customSnippets => set({customSnippets}),
+  editCustomSnippet: (label, insertText) => {
+    const {
+      customSnippets
+    } = get()
+
+    const newSnippets = []
+
+    for (let sn of customSnippets) {
+      if (sn.label !== label) {
+        newSnippets.push(sn)
+      }
+    }
+
+    newSnippets.push({label, insertText})
+    set({customSnippets: newSnippets})
+  },
+
+  removeCustomSnippet: (index) => {
+    const {customSnippets} = get()
+    customSnippets.splice(index, 1)
+    set({customSnippets: [...customSnippets]})
+  },
 
   initOnLoad: async () => {
     const settings = await localforage.getItem("editor_settings")
@@ -82,7 +106,8 @@ export const useEditorSettingsStore = create((set, get) => ({
       executionServer,
       execPollWait,
       init,
-      fileBrowserExpanded
+      fileBrowserExpanded,
+      customSnippets
     } = get()
 
     if (!init) {
@@ -99,13 +124,14 @@ export const useEditorSettingsStore = create((set, get) => ({
       graphviz,
       executionServer,
       execPollWait,
-      fileBrowserExpanded
+      fileBrowserExpanded,
+      customSnippets
     }
 
     await localforage.setItem("editor_settings", save)
   },
 
-  setSettings: ({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait, fileBrowserExpanded}) => {
-    set({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait, fileBrowserExpanded})
+  setSettings: ({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait, fileBrowserExpanded, customSnippets}) => {
+    set({height, width, monacoOptions, editorCodeOptions, monacoTheme, graphviz, resultHeight, executionServer, execPollWait, fileBrowserExpanded, customSnippets})
   }
 }))

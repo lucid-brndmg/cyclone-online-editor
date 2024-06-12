@@ -9,7 +9,7 @@ const defaultSuggestionLabels = {
   snippets: snippets
 }
 
-export const getDefaultCompletionItems = (monaco) => {
+export const getDefaultCompletionItems = (monaco, additional = []) => {
   return {
     suggestions: [
       ...defaultSuggestionLabels.keywords.map(word => ({
@@ -41,7 +41,8 @@ export const getDefaultCompletionItems = (monaco) => {
         insertText: insert,
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         kind: monaco.languages.CompletionItemKind.Snippet
-      }))
+      })),
+      ...additional
     ]
   }
 }

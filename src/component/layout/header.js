@@ -47,6 +47,7 @@ export const LayoutHeader = () => {
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
   const destColorMode = computedColorScheme === "light" ? "dark" : "light"
   const [helpOpened, setHelpOpened] = useState(false)
+  const [settingsOpened, setSettingsOpened] = useState(false)
 
   const path = router.basePath + router.pathname
   // This state & effect is needed to please NextJS from throwing "Hydration failed because the initial UI does not match what was rendered on the server"
@@ -85,9 +86,9 @@ export const LayoutHeader = () => {
           {items}
         </Group>
         <Group>
-          <SettingsPopover>
+          <SettingsPopover opened={settingsOpened} onChange={setSettingsOpened}>
             <Tooltip label="Settings">
-              <ActionIcon size={"lg"} variant="default" aria-label="Settings">
+              <ActionIcon size={"lg"} variant="default" aria-label="Settings" onClick={() => setSettingsOpened(true)}>
                 <IconSettings style={{ width: '70%', height: '70%' }} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
