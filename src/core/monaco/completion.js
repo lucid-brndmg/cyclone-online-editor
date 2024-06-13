@@ -9,6 +9,8 @@ const defaultSuggestionLabels = {
   snippets: snippets
 }
 
+export const snippetLabelSet = new Set(snippets.map(it => it.label))
+
 export const getDefaultCompletionItems = (monaco, additional = []) => {
   return {
     suggestions: [

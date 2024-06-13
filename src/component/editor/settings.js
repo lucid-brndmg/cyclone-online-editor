@@ -22,6 +22,7 @@ import {downloadTextFile} from "@/lib/dom";
 import {animationSpeedOptions, availableGraphvizEngines, displayDirectionOptions} from "@/core/graphviz";
 import {useDebouncedValue} from "@mantine/hooks";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
+import {snippetLabelSet} from "@/core/monaco/completion";
 
 const CodeSnippetModal = ({opened, onClose}) => {
   const [editingSnippet, setEditingSnippet] = useState(null)
@@ -31,12 +32,15 @@ const CodeSnippetModal = ({opened, onClose}) => {
     setEditingSnippet({label: "", insertText: ""})
   }
 
+  const trimmedLabel = editingSnippet?.label.trim()
+
   const onSave = () => {
-    editCustomSnippet(editingSnippet.label.trim(), editingSnippet.insertText)
+    editCustomSnippet(trimmedLabel, editingSnippet.insertText)
     setEditingSnippet(null)
   }
 
-  const isInvalid = editingSnippet && (!editingSnippet.label.trim() || !editingSnippet.insertText.trim())
+
+  const isInvalid = editingSnippet && (!trimmedLabel || !editingSnippet.insertText.trim())
 
   return (
     <Modal size={"lg"} opened={opened} onClose={onClose} title="Manage Code Snippets" centered>
@@ -49,6 +53,7 @@ const CodeSnippetModal = ({opened, onClose}) => {
               description={"Should be unique and will overwrite previous on duplication"}
               value={editingSnippet.label}
               onChange={e => setEditingSnippet({...editingSnippet, label: e.currentTarget.value})}
+              error={snippetLabelSet.has(trimmedLabel) ? "snippet label already existed as builtin" : null}
             />
             <Textarea
               label={"Code"}
