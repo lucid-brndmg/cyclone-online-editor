@@ -56,6 +56,8 @@ const CodeSnippetModal = ({opened, onClose}) => {
               description={<>The content of the snippet template which takes the same <Anchor size={"sm"} target={"_blank"} href={"https://code.visualstudio.com/docs/editor/userdefinedsnippets"}>syntax</Anchor> as VSCode</>}
               value={editingSnippet.insertText}
               onChange={e => setEditingSnippet({...editingSnippet, insertText: e.currentTarget.value})}
+              resize="vertical"
+              autosize
             />
             <Group grow>
               <Button onClick={onSave} disabled={isInvalid}>Save</Button>
