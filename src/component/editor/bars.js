@@ -15,7 +15,6 @@ import {
 import {downloadTextFile} from "@/lib/dom";
 import {CodeExecutionButton} from "@/component/editor/execution";
 import {FileSaveButton, FileStatusBar, NewFileButton} from "@/component/editor/storage";
-import {SettingsPopover} from "@/component/editor/settings";
 import {locateToCode} from "@/core/utils/monaco";
 import {pos} from "@/lib/position";
 import {sieveCount} from "@/lib/list";

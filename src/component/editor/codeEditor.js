@@ -1,7 +1,5 @@
 import {useEffect, useRef, useState} from "react";
 import {Editor, loader} from "@monaco-editor/react";
-import ErrorStorage from "@/core/utils/errorStorage";
-import Config from "../../../resource/config.json";
 import EditorSemanticContext from "@/core/editorSemanticContext";
 import cycloneAnalyzer from "cyclone-analyzer";
 import {
@@ -63,11 +61,10 @@ export const CycloneCodeEditor = ({
 }) => {
   const [monacoCtx, setMonacoCtx] = useState(null)
 
-  const errorsRef = useRef(new ErrorStorage(Config.editor.errorStorageLimit, {
-    // onError: () => onErrors(errorsRef.current.getAll()),
-    onErrors: () => onErrors(errorsRef.current.getAll()),
-    onClear: () => onErrors([])
-  }))
+  // const errorsRef = useRef(new ErrorStorage(Config.editor.errorStorageLimit, {
+  //   onErrors: () => onErrors(errorsRef.current.getAll()),
+  //   onClear: () => onErrors([])
+  // }))
   // const semanticAnalyzerRef = useRef(new SemanticAnalyzer())
   const editorSemanticContextRef = useRef(null)
   const disposersRef = useRef([])
@@ -82,11 +79,6 @@ export const CycloneCodeEditor = ({
   useEffect(() => {
     codeSnippetRef.current = customCodeSnippets ?? []
   }, [customCodeSnippets]);
-
-  // const onCodeError = e => {
-  //   errorsRef.current.setError(e)
-  //   // setErrorUpdated(!errorUpdated)
-  // }
 
   useEffect(() => {
     return () => {
@@ -103,12 +95,13 @@ export const CycloneCodeEditor = ({
     }
 
     onAnalyzerError && onAnalyzerError(null, false)
+    let errors = []
 
-
-    errorsRef.current.clear()
+    // errorsRef.current.clear()
     if (debouncedCode.trim().length === 0) {
       editorSemanticContextRef.current = null
       onEditorContext && onEditorContext(null)
+      onErrors(errors)
       return
     }
     const editorCtx = new EditorSemanticContext(buildSyntaxBlockTree)
@@ -118,7 +111,7 @@ export const CycloneCodeEditor = ({
       })
       if (result.hasSyntaxError()) {
         for (let {line, column, msg} of result.lexerErrors) {
-          errorsRef.current.setError({
+          errors.push({
             source: ErrorSource.Lexer,
             startPosition: pos(line, column),
             type: ExtendedErrorType.SyntaxError,
@@ -126,7 +119,7 @@ export const CycloneCodeEditor = ({
           })
         }
         for (let {line, column, msg} of result.parserErrors) {
-          errorsRef.current.setError({
+          errors.push({
             source: ErrorSource.Parser,
             startPosition: pos(line, column),
             type: ExtendedErrorType.SyntaxError,
@@ -135,7 +128,7 @@ export const CycloneCodeEditor = ({
         }
       } else {
         if (result.semanticErrors.length) {
-          errorsRef.current.setErrors(result.semanticErrors.map(e => ({...e, source: ErrorSource.Semantic})))
+          errors = result.semanticErrors.map(e => ({...e, source: ErrorSource.Semantic}))
         }
 
         // console.log(graphBuilder.context)
@@ -146,6 +139,8 @@ export const CycloneCodeEditor = ({
       console.log("An error occurred when analyzing:", e)
       onAnalyzerError && onAnalyzerError(e, true)
     }
+
+    onErrors(errors)
   }
 
   useEffect(analyzeCode, [debouncedCode]);
