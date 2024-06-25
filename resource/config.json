@@ -1,6 +1,5 @@
 {
   "editor": {
-    "errorStorageLimit": 1000,
     "editorDefaultTab": "browser",
     "monacoEnableCDN": true
   },

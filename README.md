@@ -613,8 +613,6 @@ The website config is the `resource/config.json` file. In this file you could ch
 ```json5
 {
   "editor": {
-    // Editor's maximum error display amount
-    "errorStorageLimit": 1000,
     // Which tab to initialize when /editor page gets refreshed
     // available values:
     // browser, reference, outline, visual
