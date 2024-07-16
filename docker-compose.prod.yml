@@ -5,7 +5,7 @@ services:
     build:
       target: prod
       args:
-        PUBLIC_URL: /
+        PUBLIC_URL: ""
         EXEC_SERVER: /server
     ports:
       - 127.0.0.1:${CI_FRONTEND_PORT}:3000
