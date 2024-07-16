@@ -14,10 +14,10 @@ stages:
 
 # setting PUBLIC_URL here will propagate to the other jobs
 # and will create an optimized production build that can be hosted on
-# our fyp server. The same variable can be used to set up the
+# the departmental server. The same variable can be used to set up the
 # environment within the gitlab GUI
 variables:
-  PUBLIC_URL: "/projects/FYP24WH008"
+  PUBLIC_URL: "/"
 
 build frontend:
   extends:
@@ -39,15 +39,15 @@ build exec server:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     - docker compose -f docker-compose.yml -f docker-compose.prod.yml build --pull --push exec-server
 
-deploy to fyp server:
+deploy to prod server:
   stage: deploy
   tags:
-    - fyp
+    - wc2
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   environment:
     name: prod
-    url: https://fyp.cs.nuim.ie${PUBLIC_URL}
+    url: https://cyclone.cs.nuim.ie
   script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     - docker compose -f docker-compose.yml -f docker-compose.prod.yml down
