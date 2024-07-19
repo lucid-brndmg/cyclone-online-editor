@@ -210,8 +210,6 @@ const ServerInfoDisplay = () => {
   }, [executionServer])
 
   const getInfo = () => {
-    // const execServerAddr = process.env.NEXT_PUBLIC_CYCLONE_EXEC_SERVER
-    //   ?? Config.executionServer.url
     const {url} = server
     return refreshServerInfo(url)
   }

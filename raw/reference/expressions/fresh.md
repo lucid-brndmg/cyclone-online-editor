@@ -1,5 +1,5 @@
 ---
-title: "Fresh ()" # title of the document
+title: "fresh" # title of the document
 keywords: ["fresh"] # keywords of cyclone which user can trigger by hovering cursor on 
 id: "fresh"
 ---

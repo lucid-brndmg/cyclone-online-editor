@@ -1,0 +1,45 @@
+<p>The assert statement specifies a content condition to be met by Cyclone.</p>
+<h5>Syntax</h5>
+<p>The syntax of an assert statement is as follows:</p>
+<pre><code class="language-cyclone">assert expression [in (state1,state2...staten)];
+</code></pre>
+<p>The <strong>expression</strong> here must be a boolean expression. An assert statement may explicitly specify a set of nodes (states), each nodei must be a defined node (with <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/normal-key.html" rel="nofollow" target="_blank">normal</a> modifier).</p>
+<h5>Scope</h5>
+<p>The assert statement must be used in the <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/goal-expr.html" rel="nofollow" target="_blank">goal</a> section. A goal section can contain zero or more assert statements.</p>
+<h5>Semantics</h5>
+<p>The assert statement asserts a boolean expression that describes a content condition. This content condition is joined with path conditions (specified in <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/condition-expr.html" rel="nofollow" target="_blank">condition</a> statement) to describe a path to be discovered. There are four ways of using an assert statement:</p>
+<ul>
+<li>If an assert statement asserts a boolean expression <strong>b</strong> without using an in clause, then this means that this <strong>b</strong> must hold in the <strong>last</strong> node of a path to be discovered. This is useful for discovering a path that can make <strong>b</strong> hold.</li>
+<li>If an assert statement asserts a boolean expression <strong>b</strong> using an in clause, then this means that this <strong>b</strong> must hold in one of the nodes specified by an in clause. This is useful for verifying whether <strong>b</strong> holds in one of the nodes.</li>
+<li>If an assert statement is used with the modifier some, this means that the condition must hold at some node(s) of the path to be discovered by Cyclone. This is similar to <strong>EF</strong> operator in CTL.</li>
+<li>If an assert statement is used with the modifier always, this means that the condition must hold at all the node(s) of the path to be discovered by Cyclone. This is similar to <strong>EG</strong> operator in CTL, comparing to an <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/invariant.html" rel="nofollow" target="_blank">invariant</a> in <strong>AG</strong> in CTL.</li>
+</ul>
+<h5>Example 1.</h5>
+<pre><code class="language-cyclone">goal  { 
+  assert  (x>=5 &#x26;&#x26; x&#x3C;=10); 
+  check for 6 condition ( !(S1->S1) ) reach (S0) 
+} 
+</code></pre>
+<p>The above goal section asks Cyclone to discover a path:</p>
+<ul>
+<li>has a length of 6.</li>
+<li>cannot contain a path pattern: S1->S1.</li>
+<li>must reach S0.</li>
+<li>when S0 is reached, x must stay between 5 and 10 in S0.</li>
+</ul>
+<p>Hence, if a discovered path is: S0->S1->S2->S3->S4->S5->S0, then the boolean expression <strong>x>=5 &#x26;&#x26; x&#x3C;=10</strong> only needs to be satisfied in the node (S0).</p>
+<h5>Example 2.</h5>
+<p>Note the difference (bold font) between the following example and the one above.</p>
+<pre><code class="language-cyclone">goal  { 
+  assert  (x>=5 &#x26;&#x26; x&#x3C;=10) in (S0,S4,S5); 
+  check for 6 condition ( !(S1->S1) ) reach (S0) 
+} 
+</code></pre>
+<p>The above goal section asks Cyclone to discover a path:</p>
+<ul>
+<li>has a length of 6.</li>
+<li>cannot contain a path pattern: S1->S1.</li>
+<li>must reach S0.</li>
+<li>x must stay between 5 and 10 in <strong>S0 or S4 or S5</strong>.</li>
+</ul>
+<p>Thus, if a discovered path (containing multiple S0) is: S0->S1->S6->S0->S2->S3->S0, then the boolean expression <strong>x>=5 &#x26;&#x26; x&#x3C;=10</strong> must hold in every S0 in this path.</p>

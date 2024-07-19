@@ -1,0 +1,24 @@
+<p>The condition statement specifies one or more path conditions over a path <strong>p</strong> to be discovered by Cyclone.</p>
+<h5>Syntax</h5>
+<p>The syntax of a condition statement is as follows:</p>
+<pre><code class="language-cyclone">[condition|via] (PathCondition1,PathCondition2,...,PathConditionn) 
+</code></pre>
+<p>Each <strong>PathCondition</strong> here can either be a compound path condition or a simple path condition.</p>
+<p>Here is an example:</p>
+<pre><code class="language-cyclone">condition ( (S1->S2) &#x26;&#x26; !(S2->S3), S4^{2}) 
+</code></pre>
+<h5>Scope</h5>
+<p>The condition statement can only appear in either a <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/check-expr.html" rel="nofollow" target="_blank">check</a> or <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/enumerate-expr.html" rel="nofollow" target="_blank">enumeration</a> statement which can only appear in the goal section. The condition statement cannot be used alone. Typically, the condition statement is used as a part of a check or enumeration statement.</p>
+<pre><code class="language-cyclone">   check for 6 condition ( 
+       (>>2(S1->S2) &#x26;&#x26; (S3->_->S4)) || 
+       (!(S5->S6) &#x26;&#x26; !(S2->S4)) ) 
+   reach (S0)
+</code></pre>
+<p>However, the condition statement can also be optional for check or enumeration statement.</p>
+<h5>Semantics</h5>
+<p>The condition statement specifies the kinds of path(s) to be discovered by Cyclone. The list of path conditions specified within the condition statement are logically conjoined.</p>
+<pre><code class="language-cyclone">condition ( (S3->S4->S5), S2, (S5->S6)^{3}) 
+</code></pre>
+<p>is the same as</p>
+<pre><code class="language-cyclone">condition ( ((S3->S4->S5) &#x26;&#x26; S2 &#x26;&#x26; (S5->S6)^{3}) ) 
+</code></pre>

@@ -1,0 +1,13 @@
+<p>The const modifier is used to create a constant.</p>
+<h5>Syntax</h5>
+<p>The syntax of const modifier is as follows:</p>
+<pre><code class="language-cyclone">const &#x3C;type> name = &#x3C;initializer>
+</code></pre>
+<p>The <strong></strong> here must be predefined type in Cyclone, and the <strong></strong> could be a value or an expression that evaluates to a value.</p>
+<h5>Scope</h5>
+<p>The const modifier must appear in front of a type declaration.</p>
+<h5>Semantics</h5>
+<p>A constant is always compiled into a pre-defined value and cannot be re-assigned (changed). A constant cannot be used with <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/fresh.html" rel="nofollow" target="_blank">fresh</a> or <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/initial.html" rel="nofollow" target="_blank">initial</a> expressions.</p>
+<h5>An Example</h5>
+<pre><code class="language-cyclone">const real PI=3.14;
+</code></pre>

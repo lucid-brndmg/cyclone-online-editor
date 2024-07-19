@@ -1,0 +1,27 @@
+<p>The check statement specifies Cyclone to discover a single path that meets path conditions.</p>
+<h5>Syntax</h5>
+<p>The syntax of a check statement is as follows:</p>
+<pre><code class="language-cyclone">check (for|each) INT[,INT]*[condition(&#x3C;PathCondition>)][reach (&#x3C;Nodes>)]
+</code></pre>
+<p>A list of integers (separated by a comma) can be specified with for or each statement. Each integer here indicates the length of a path and this integer must be an integer that is greater or equal to 1. In a check statement, both <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/condition-expr.html" rel="nofollow" target="_blank">condition </a>and <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/reach-expr.html" rel="nofollow" target="_blank">reach </a>statements are optional.</p>
+<p>Here is an example:</p>
+<pre><code class="language-cyclone">check for  5 
+</code></pre>
+<p>It asks Cyclone to discover a path that has a length of 5.</p>
+<h5>Scope</h5>
+<p>The check statement can only appear in the goal section. A Cyclone specification cannot have more than one check statements.</p>
+<h5>Semantics</h5>
+<p>The check statement issues a query to Cyclone's compiler to discover a path <strong>p</strong> (with a length k) that provably meets the set of path conditions defined over this <strong>p</strong>.</p>
+<p>Compare to the <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/enumerate-expr.html" rel="nofollow" target="_blank">enumerate</a> statement, the check statement can quickly decide whether a graph has such path <strong>p</strong> or not. You can use the check statement in the following two ways:</p>
+<p>When the for statement specifies a list of path lengths (each path length is separated by a comma), the compiler generates multiple conditions for every specified path length (in the list), combines them into a single condition and performs one check. Hence, it is also referred as <strong>combo mode</strong> in Cyclone. If there exists at least one path (with specified path length in the list) meets defined path conditions, the compiler will return a solution. Typically, the compiler returns any one of the valid paths if there are many. Hence, it is particularly useful for scenarios that you are not sure if there exists a valid path <strong>p</strong> with multiple different path lengths.</p>
+<p>When the each statement is used to include a list of path lengths, the compiler generates multiple conditions for every specified path length (in the list) and performs a check individually for each specified path length. Thus, the compiler returns a path <strong>p</strong> for each specified path length that meets path conditions. This kind of checks is referred as <strong>separation mode</strong> in Cyclone. This is useful for scenarios that you would like to know individually whether a path with a particular length (from the list) is valid or not. Compare to <strong>combo mode</strong>, this is slightly more expensive since the compiler performs individual check for every specified path length.</p>
+<h5>Examples</h5>
+<pre><code class="language-cyclone">check for 12 condition ((S5->S6->S7)^{3}) reach (S0,S3,S7)
+</code></pre>
+<p>The above check statement asks Cyclone whether current graph has a path <strong>p</strong> that has a length of 12 and reaches one of the nodes (S0,S3,S7) with one path condition that S5->S6->S7 must appear exactly <strong>three</strong> times in <strong>p</strong>.</p>
+<pre><code class="language-cyclone">check for 4,7,8,10,3 condition (S0->S1->S2) reach (S1)
+</code></pre>
+<p>The above check statement asks Cyclone to decide if there exists one path <strong>p</strong> with one of the lengths (4,7,8,10,3) that goes through S0->S1->S2 and reaches node S1.</p>
+<pre><code class="language-cyclone">check each 4,7,8,10,3 condition (S0->S1->S2) reach (S1)
+</code></pre>
+<p>The above check statement asks Cyclone to decide 5 paths individually with specified path lengths (4,7,8,10,3) that can go through S0->S1->S2 and reach node S1.</p>
