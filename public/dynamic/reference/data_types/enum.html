@@ -1,0 +1,19 @@
+<p>The enum keyword is used to declare an enum type variable.</p>
+<h5>Syntax</h5>
+<p>The syntax is as follows:</p>
+<pre><code class="language-cyclone"> enum {value1,value2,...valuen} var[=initializer];
+</code></pre>
+<p>The <strong>var</strong> here must be a legal variable name.</p>
+<h5>Scope</h5>
+<p>It is used in the variable declaration.</p>
+<h5>Semantics</h5>
+<p>Declare an enum type variable. An enum type variable must be equal to one of the pre-defined values. The pre-defined values are constant so it is recommended to use uppercase letters.</p>
+<h5>Examples</h5>
+<pre><code class="language-cyclone"> //lights can only be: RED, AMBER or GREEN.
+ enum {RED, AMBER, GREEN} lights;
+</code></pre>
+<pre><code class="language-cyclone"> enum {ON, OFF} switch;
+ normal state PowerOff{
+        switch=#OFF;
+}
+</code></pre>

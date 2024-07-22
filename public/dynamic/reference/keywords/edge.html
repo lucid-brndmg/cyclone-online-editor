@@ -1,0 +1,32 @@
+<p>The edge statement allows you to declare an edge in a graph.</p>
+<h5>Syntax</h5>
+<p>The syntax of an edge statement is as follows:</p>
+<pre><code class="language-cyclone"> [edge|trans|transition] [name] { &#x3C;path expression> [where &#x3C;condition> ]} [label/on string]
+</code></pre>
+<p>An edge in a graph must be declared with an edge statement. A path expression is an expression that specifies a link between two nodes. The arrow '->' is used to specify the direction from one node to another. The keyword label/on can specify a string that describes an edge. The keyword where specifies a transition guard. The name here is optional if <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/anonymous-edges.html" rel="nofollow" target="_blank">anonymous edge</a> is enabled.</p>
+<pre><code class="language-cyclone"> edge t1 {S1->S2} label "switch is on" 
+</code></pre>
+<p><code>S1->S2</code> is a path expression.</p>
+<h5>Scope</h5>
+<p>Once an edge is declared, a link in a graph is established. An edge must use the nodes that are declared in the <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/node-expr.html" rel="nofollow" target="_blank">node</a> section.</p>
+<h5>Semantics</h5>
+<p>Each edge that is declared in edge section is compiled by Cyclone into a path condition along with other conditions that can be solved by an SMT solver. The keyword label/on can be used to specify a string over an edge. However, the compiler ignores this string and it doesn't get compiled into a path condition.</p>
+<p>An edge can also be declared as a conditional edge (transition) through a <a href="https://classicwuhao.github.io/cyclone_tutorial/expr/where.html" rel="nofollow" target="_blank">where</a> clause.</p>
+<h4>Short-handed Notations</h4>
+<p>Creating a edge at a time is tedious. In Cyclone, users can use short-handed notations to create a set of different edges a time. In the current version of Cyclone, we provide the following short-handed notations for creating a set of edges.</p>
+<h5>1. Bidirectional Transition (edge)</h5>
+<p>Notation: <code>A &#x3C;-> B</code></p>
+<p>creates two transitions from node A to B and vice versa.</p>
+<h5>2. Closure</h5>
+<p>Notation: <code>A -> *</code>. For each node in a graph, create a transition from A including A itself.</p>
+<h5>3. Positive Closure</h5>
+<p>Notation: <code>A -> +</code>. For each node in a graph, create a transition from A exclude A itself.</p>
+<h5>4. Exclusion List</h5>
+<p>Users can also use an exclusion list to specifically exclude a list of nodes.</p>
+<p>Notation: <code>[N1,N2,...,Ni]</code>.</p>
+<p><code>A -> + [B,C]</code>. Create an edge from A to every node in the graph except for node A, B and C.</p>
+<h5>Some examples</h5>
+<ul>
+<li><code>A -> * [B]</code> create edges from A to every node in the graph except for B.</li>
+<li><code>A -> + where x >0;</code> create conditional transitions from A to every node in the graph except for A. For each transition created, the condition x≥0 must be satisfied in order to make a transition from A to other nodes.</li>
+</ul>
