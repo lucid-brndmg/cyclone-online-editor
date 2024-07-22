@@ -9,7 +9,7 @@ import {
   Text, TextInput,
   TypographyStylesProvider
 } from "@mantine/core";
-import {IconChevronRight, IconCircleFilled} from "@tabler/icons-react";
+import {IconArticle, IconChevronRight, IconCircleFilled} from "@tabler/icons-react";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {getDocumentById, getGroupDocument} from "@/core/resources/referenceDocs";
 import {useDebouncedValue} from "@mantine/hooks";
@@ -36,7 +36,7 @@ const DocItem = ({group, doc}) => {
   }, [docContent])
   
   return (
-    <TypographyStylesProvider p={0} fz={"sm"} pos={"relative"}>
+    <TypographyStylesProvider className={"docItem"} mt={"sm"} mb={"sm"} p={0} fz={"sm"} pos={"relative"}>
       {/* <LoadingOverlay visible={parsed == null} /> */}
       {/* <div dangerouslySetInnerHTML={{ __html: docContent ?? '??' }} /> */}
       {parsed ?? "loading"}
@@ -91,7 +91,17 @@ const GroupItem = ({group}) => {
             const id = doc.id
             const opened = openedDocs.has(id)
             return (
-              <NavLink rightSection={<IconChevronRight size="0.8rem" stroke={1.5} />} opened={opened} onClick={() => onOpen(!opened, id)} onChange={o => onOpen(o, id)} childrenOffset={0} key={j} label={<Text size={"sm"} fw={500}>{doc.title}</Text>}>
+              <NavLink
+                variant={"filled"}
+                active={opened}
+                leftSection={<Box style={{display: "flex", alignItems: "baseline"}} c={opened ? undefined : "blue"}>{<IconCircleFilled size={14} />}</Box>}
+                rightSection={<IconChevronRight size="0.8rem" stroke={1.5} />}
+                opened={opened}
+                onClick={() => onOpen(!opened, id)} onChange={o => onOpen(o, id)}
+                childrenOffset={0}
+                key={j}
+                label={<Text c={opened ? undefined : "blue"} size={"sm"} fw={500}>{doc.title}</Text>}
+              >
                 {opened ? <DocItem doc={doc} group={group} /> : null}
               </NavLink>
             )

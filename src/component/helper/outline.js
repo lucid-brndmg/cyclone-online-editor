@@ -95,6 +95,8 @@ const IdentifierText = ({identifier, fallback, isSearched}) => {
   return <Text c={isSearched ? "red" : identifier ? undefined : "dimmed"}>{identifier ?? fallback}</Text>
 }
 
+const OUTLINE_COLOR = "blue"
+
 const getSyntaxBlockStyle = block => {
   let children = null, text = null, Icon = null// , displayPosition = true
 
@@ -102,7 +104,7 @@ const getSyntaxBlockStyle = block => {
     case SyntaxBlockKind.CompilerOption: {
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>option-</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>option-</Text>
           <IdentifierText identifier={block.data.name} isSearched={block.isSearched} />
         </SmallGroup>
       )
@@ -112,7 +114,7 @@ const getSyntaxBlockStyle = block => {
       children = block.children
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>{block.data.keyword}</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>{block.data.keyword}</Text>
           {/* <Text>{}</Text> */}
           <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
         </SmallGroup>
@@ -122,7 +124,7 @@ const getSyntaxBlockStyle = block => {
     case SyntaxBlockKind.State: {
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>{block.data.attributes?.join(" ") ?? "node"}</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>{block.data.attributes?.join(" ") ?? "node"}</Text>
           <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
 
         </SmallGroup>
@@ -133,7 +135,7 @@ const getSyntaxBlockStyle = block => {
       const {identifier, operators} = block.data
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>{block.data.keyword}</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>{block.data.keyword}</Text>
           {/* <Text c={identifier ? undefined : "dimmed"}>{identifier ?? "anonymous"}</Text> */}
           {identifier
             ? <IdentifierText identifier={identifier} isSearched={block.isSearched} />
@@ -149,7 +151,7 @@ const getSyntaxBlockStyle = block => {
     }
     case SyntaxBlockKind.Assertion: {
       text = (
-        <Text fs={"italic"} c={"purple"}>assert</Text>
+        <Text fs={"italic"} c={OUTLINE_COLOR}>assert</Text>
       )
       break
     }
@@ -163,7 +165,7 @@ const getSyntaxBlockStyle = block => {
         case IdentifierKind.GlobalConst:
           text = (
             <SmallGroup>
-              <Text fs={"italic"} c={"purple"}>const {typeToString(type, typeParams)}</Text>
+              <Text fs={"italic"} c={OUTLINE_COLOR}>const {typeToString(type, typeParams)}</Text>
               <IdentifierText identifier={`${identifier}`} isSearched={block.isSearched} />
             </SmallGroup>
           )
@@ -173,7 +175,7 @@ const getSyntaxBlockStyle = block => {
           text = (
             <SmallGroup>
               <IdentifierText identifier={`${identifier}:`} isSearched={block.isSearched} />
-              <Text fs={"italic"} c={"purple"}>{typeToString(type, typeParams)}</Text>
+              <Text fs={"italic"} c={OUTLINE_COLOR}>{typeToString(type, typeParams)}</Text>
             </SmallGroup>
           )
           Icon = IconVariable // IconLetterP
@@ -191,7 +193,7 @@ const getSyntaxBlockStyle = block => {
       if (!text) {
         text = (
           <SmallGroup>
-            <Text fs={"italic"} c={"purple"}>{typeToString(type, typeParams)}</Text>
+            <Text fs={"italic"} c={OUTLINE_COLOR}>{typeToString(type, typeParams)}</Text>
             <IdentifierText identifier={identifier} isSearched={block.isSearched} />
           </SmallGroup>
         )
@@ -203,9 +205,9 @@ const getSyntaxBlockStyle = block => {
       children = block.children.filter(ch => ch.kind === SyntaxBlockKind.Variable)
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>function</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>function</Text>
           <IdentifierText identifier={`${block.data.identifier}:`} isSearched={block.isSearched} />
-          <Text fs={"italic"} c={"purple"}>{typeToString(block.data.returnType, block.data.returnTypeParams)}</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>{typeToString(block.data.returnType, block.data.returnTypeParams)}</Text>
         </SmallGroup>
       )
       break
@@ -213,7 +215,7 @@ const getSyntaxBlockStyle = block => {
     case SyntaxBlockKind.Goal: {
       children = block.children
       text = (
-        <Text fs={"italic"} c={"purple"}>
+        <Text fs={"italic"} c={OUTLINE_COLOR}>
           goal
         </Text>
       )
@@ -223,7 +225,7 @@ const getSyntaxBlockStyle = block => {
     case SyntaxBlockKind.Invariant: {
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>invariant</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>invariant</Text>
           <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
         </SmallGroup>
       )
@@ -233,7 +235,7 @@ const getSyntaxBlockStyle = block => {
     case SyntaxBlockKind.PathVariable: {
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>let</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>let</Text>
           <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
         </SmallGroup>
       )
@@ -251,7 +253,7 @@ const getSyntaxBlockStyle = block => {
       children = block.children
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>record</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>record</Text>
           <IdentifierText identifier={block.data.identifier} isSearched={block.isSearched} />
         </SmallGroup>
       )
@@ -262,8 +264,8 @@ const getSyntaxBlockStyle = block => {
 
       text = (
         <SmallGroup>
-          <Text fs={"italic"} c={"purple"}>{checkKeyword}</Text>
-          <Text fs={"italic"} c={"purple"}>{forKeyword}</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>{checkKeyword}</Text>
+          <Text fs={"italic"} c={OUTLINE_COLOR}>{forKeyword}</Text>
         </SmallGroup>
       )
       break
