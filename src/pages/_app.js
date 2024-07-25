@@ -2,9 +2,8 @@ import '@mantine/core/styles.css';
 import {createTheme, MantineProvider, useComputedColorScheme} from '@mantine/core';
 import {LayoutHeader} from "@/component/layout/header";
 import {ModalsProvider} from "@mantine/modals";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
-// import "../styles/hljsOneLight.css"
 import {useDebouncedValue} from "@mantine/hooks";
 import "../styles/global.css"
 

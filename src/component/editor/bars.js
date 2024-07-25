@@ -1,7 +1,7 @@
 import {useEditorStore} from "@/state/editorStore";
 import {useRouter} from "next/router";
 import localforage from "localforage";
-import {Button, FileButton, Group, NumberInput, Popover, Space, Stack, Text} from "@mantine/core";
+import {Button, FileButton, Group, Loader, NumberInput, Popover, Space, Stack, Text} from "@mantine/core";
 import {
   IconAlertCircleFilled,
   IconAlertTriangleFilled,
@@ -187,7 +187,7 @@ const ErrorsDisplay = ({onClick}) => {
     : <Space />
 }
 
-export const StatusBar = ({onClickErrors}) => {
+export const StatusBar = ({onClickErrors, loading}) => {
   const {isAnalyzerError} = useEditorStore()
   return (
     <Group justify={"space-between"}>
@@ -199,6 +199,7 @@ export const StatusBar = ({onClickErrors}) => {
         </Text>
         : null
       }
+      {loading ? <Loader size={"sm"} /> : null}
       <ErrorsDisplay onClick={onClickErrors} />
       <PositionLocator />
     </Group>

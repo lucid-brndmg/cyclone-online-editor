@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Anchor,
   Box,
   Button,
@@ -7,22 +8,24 @@ import {
   Group, Image,
   List, Paper,
   rem,
-  ScrollArea, SimpleGrid, Space,
+  ScrollArea, Select, SimpleGrid, Space,
   Stack,
   Text,
   ThemeIcon,
   Title,
   TypographyStylesProvider,
 } from "@mantine/core";
-import {IconCheck} from "@tabler/icons-react";
+import {IconCheck, IconRefresh} from "@tabler/icons-react";
 import classes from "../../styles/modules/HeroSection.module.css"
 import Config from "../../../resource/config.json"
 import {ExecutableCycloneCode} from "@/component/utils/code";
 import localforage from "localforage";
 import {useRouter} from "next/router";
-import {PublicUrl} from "@/core/utils/resource";
+import {dynamicCodeExample, PublicUrl} from "@/core/utils/resource";
 import logo from '../../../resource/image/logo.png'
 import getConfig from "next/config";
+import {useEffect, useMemo, useState} from "react";
+import examplesManifest from "../../../resource/code_example_manifest.json"
 
 /*
 * Hero section of home page
@@ -31,14 +34,63 @@ import getConfig from "next/config";
 
 const { publicRuntimeConfig } = getConfig()
 
-const HeroSection = () => {
-  // const [exampleCode, setExampleCode] = useState("")
+const CodeDemo = () => {
   const router = useRouter()
+  const [exampleId, setExampleId] = useState()
+  const [code, setCode] = useState(Config.home.initExampleCode)
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (!exampleId) {
+      return
+    }
+    setIsLoading(true)
+    fetch(dynamicCodeExample(exampleId)).then(async resp => {
+      setCode(await resp.text())
+    }).finally(() => setIsLoading(false))
+  }, [exampleId]);
 
   const onTry = async () => {
-    await localforage.setItem("tmp_code", Config.home.exampleCode)
+    await localforage.setItem("tmp_code", code)
     await router.push(PublicUrl.EditorBase)
   }
+
+  const loadRandom = () => {
+    setExampleId(examplesManifest[Math.floor(Math.random() * examplesManifest.length)].id)
+  }
+
+  return (
+    <Box className={classes.codeDemo}>
+      <Paper>
+        <Group>
+          <Select
+            data={examplesManifest.map(({id, title}) => ({
+              label: title,
+              value: id
+            }))}
+            style={{flexGrow: 1}}
+            value={exampleId}
+            onChange={setExampleId}
+            placeholder={"Select an example"}
+          />
+          <ActionIcon
+            variant={"default"}
+            size={"lg"}
+            loading={isLoading}
+            onClick={loadRandom}
+          >
+            <IconRefresh size={24} />
+          </ActionIcon>
+        </Group>
+      </Paper>
+      <TypographyStylesProvider fz={"sm"} p={0}>
+        <ExecutableCycloneCode className={classes.codeDemoBlock + " customScroll"} tip={"Open in editor"} code={code} onTry={onTry} />
+      </TypographyStylesProvider>
+    </Box>
+  )
+}
+
+const HeroSection = () => {
     return (
     <Container size="xl">
       <div className={classes.inner}>
@@ -83,11 +135,7 @@ const HeroSection = () => {
             </Button>
           </Group>
         </div>
-        <ScrollArea className={classes.display}>
-          <TypographyStylesProvider fz={"sm"} p={0}>
-            <ExecutableCycloneCode code={Config.home.exampleCode} onTry={onTry} />
-          </TypographyStylesProvider>
-        </ScrollArea>
+        <CodeDemo />
       </div>
     </Container>
   )

@@ -23,6 +23,7 @@ import {animationSpeedOptions, availableGraphvizEngines, displayDirectionOptions
 import {useDebouncedValue} from "@mantine/hooks";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import {snippetLabelSet} from "@/core/monaco/completion";
+import {useRouter} from "next/router";
 
 const CodeSnippetModal = ({opened, onClose}) => {
   const [editingSnippet, setEditingSnippet] = useState(null)
@@ -127,6 +128,7 @@ const themeSelectData = [
     value: ident
   }
 })
+
 export const SettingsPopover = ({children, opened, onChange}) => {
   const {
     height, width,
@@ -144,12 +146,13 @@ export const SettingsPopover = ({children, opened, onChange}) => {
     customSnippets
 
   } = useEditorSettingsStore()
-  const [isLoadingTheme, setIsLoadingTheme] = useState(false)
+  // const [isLoadingTheme, setIsLoadingTheme] = useState(false)
   const [customSnippetModalOpened, setCustomSnippetModalOpened] = useState(false)
   const [uExecServer, setUExecServer] = useState(executionServer)
   const [debouncedExecServer] = useDebouncedValue(uExecServer, 200)
   const {isLoading, pollId} = useEditorExecutionStore()
-  const {monacoCtx} = useEditorStore()
+  const router = useRouter()
+  // const {monacoCtx} = useEditorStore()
 
   const minHeight = height <= MIN_H
   const minWidth = width <= MIN_W
@@ -157,32 +160,11 @@ export const SettingsPopover = ({children, opened, onChange}) => {
 
   const execServerValid = useMemo(() => uExecServer.trim().length === 0 || /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/.test(uExecServer), [uExecServer])
 
-  const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
 
   const isExec = useMemo(() => {
     return isLoading || !!pollId
   }, [isLoading, pollId])
 
-  useEffect(() => {
-    if (monacoCtx) {
-      const editor = monacoCtx.monaco.editor
-      if (monacoTheme) {
-        setIsLoadingTheme(true)
-        fetch(dynamicTheme(monacoTheme)).then(async resp => {
-          setIsLoadingTheme(false)
-          const data = await resp.json()
-          editor.defineTheme(monacoTheme, data)
-          editor.setTheme(monacoTheme)
-        }).catch(e => {
-          console.log(e)
-          setIsLoadingTheme(false)
-        })
-      } else {
-        editor.setTheme(computedColorScheme === "light" ? "vs" : "vs-dark")
-        // monacoCtx.editor.setTheme("vs-dark")
-      }
-    }
-  }, [monacoTheme, monacoCtx, computedColorScheme])
 
   useEffect(() => {
     if (execServerValid) {
@@ -231,7 +213,6 @@ export const SettingsPopover = ({children, opened, onChange}) => {
                 <NativeSelect
                   label={"Theme"}
                   data={themeSelectData}
-                  disabled={isLoadingTheme}
                   value={monacoTheme}
                   onChange={e => setMonacoTheme(e.currentTarget.value)}
                 />

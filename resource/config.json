@@ -8,6 +8,6 @@
     "pollInterval": 1000
   },
   "home": {
-    "exampleCode": " /* A Simple Graph\n  * Demonstrate how to use path conditions.\n  */\n\ngraph G{\n\n    /* the set of nodes */\n    abstract start node S1{}\n    abstract node S2{}\n    \n    \n    /* the set of edges */\n    edge { S1 -> S1 }\n    edge { S1 -> S2 }\n    edge { S2 -> S1 }\n    edge { S2 -> S2 }\n    \n    goal{\n\n        /*\n         * Find a path (starts from node S1) that \n         *  has a length of 5, \n         *  must not include self-loops,\n         *  and eventually reach S2.\n         */\n        check for 5 condition (!(S1->S1) && !(S2->S2)) reach (S2)\n    }\n\n}"
+    "initExampleCode": " /* A Simple Graph\n  * Demonstrate how to use path conditions.\n  */\n\ngraph G{\n\n    /* the set of nodes */\n    abstract start node S1{}\n    abstract node S2{}\n    \n    \n    /* the set of edges */\n    edge { S1 -> S1 }\n    edge { S1 -> S2 }\n    edge { S2 -> S1 }\n    edge { S2 -> S2 }\n    \n    goal{\n\n        /*\n         * Find a path (starts from node S1) that \n         *  has a length of 5, \n         *  must not include self-loops,\n         *  and eventually reach S2.\n         */\n        check for 5 condition (!(S1->S1) && !(S2->S2)) reach (S2)\n    }\n\n}"
   }
 }

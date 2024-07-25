@@ -446,39 +446,14 @@ export const genGraphvizExecutionResultPaths = ({states, edges}, options, visual
       if (nextState) {
         pieces.push(`${state} -> ${nextState}[label=" ${j + 1} "];`)
       }
-
-      // if (hasOverall) {
-      //   if (statePaths.has(state)) {
-      //     statePaths.get(state).add(i)
-      //   } else {
-      //     statePaths.set(state, new Set([i]))
-      //   }
-      // }
     }
 
     const joined = pieces.join("\n")
-
-    // if (hasOverall) {
-    //   overall.push(`${joined}[label=" p${i} "];`)
-    // }
     const statesDef = [...new Set(edge)]
       .map(s => stateAttrMap.get(s))
       .join("\n")
     codes.push(`digraph {\n\nrankdir=${dir};<start>[shape=none, label = ""];\n${statesDef}\n${joined}\n\n}`)
   }
-
-  // let stateDef = ""
-  // if (hasOverall) {
-  //   const pieces = []
-  //   for (let [state, indices] of statePaths) {
-  //     pieces.push(`${state}[label="${state}\\n{${[...indices].map(i => `p${i}`).join(", ")}}"];`)
-  //   }
-  //
-  //   stateDef = pieces.join("\n")
-  // }
-  // const overallCode = hasOverall
-  //   ? `digraph {\n\nrankdir=${overallDir};\n\n${stateDef}\n\n${overall.join(`\n`)}\n\n}`
-  //   : null
 
   return codes
 }

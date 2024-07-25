@@ -1,10 +1,4 @@
 const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
-const monacoRules = [
-  {
-    test: /\.ttf$/,
-    type: 'asset/resource'
-  }
-]
 /** @type {import('next').NextConfig} */
 
 const baseUrl = process.env.PUBLIC_URL || ''
@@ -14,6 +8,21 @@ const nextConfig = {
   basePath: baseUrl,
   env: {
     PUBLIC_URL: process.env.PUBLIC_URL || ""
+  },
+  async headers() {
+    return [
+      {
+        // A hack to force Next.js to cache static resources in /public/*
+        source: '/:all*(^\\/(?:public|dynamic|vs)\\/(?:.*)\\.(?:cyclone|json|js|ttf|html|css)$)',
+        locale: false,
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, must-revalidate',
+          }
+        ],
+      },
+    ]
   },
   webpack: (config, {isServer}) => {
     if(!isServer) {

@@ -8,11 +8,19 @@ CODE FROM https://ui.mantine.dev/category/hero/
     align-items: center;
     padding-top: var(--mantine-spacing-xl);
     padding-bottom: var(--mantine-spacing-lg);
+    padding-left: var(--mantine-spacing-lg);
+    padding-right: var(--mantine-spacing-lg);
+
+    @media (max-width: $mantine-breakpoint-md) {
+        flex-direction: column;
+        padding-left: 0;
+        padding-right: 0;
+    }
 }
 
 .content {
     max-width: rem(720px);
-    margin-right: calc(var(--mantine-spacing-xl) * 3);
+    margin-right: var(--mantine-spacing-xl);
 
     @media (max-width: $mantine-breakpoint-md) {
         max-width: 100%;
@@ -27,6 +35,10 @@ CODE FROM https://ui.mantine.dev/category/hero/
     line-height: 1.2;
     font-weight: 900;
 
+    @media (max-width: $mantine-breakpoint-md) {
+        font-size: rem(32px);
+    }
+
     @media (max-width: $mantine-breakpoint-xs) {
         font-size: rem(28px);
     }
@@ -38,12 +50,22 @@ CODE FROM https://ui.mantine.dev/category/hero/
     }
 }
 
-.display {
-    width: rem(640px);
-    height: rem(600px);
-
+.codeDemoBlock {
+    min-width: rem(320px);
+    max-width: rem(640px);
+    max-height: rem(740px);
+    overflow: auto;
+    font-size: rem(14px);
     @media (max-width: $mantine-breakpoint-md) {
-        display: none;
+        max-width: 100%;
+        max-height: 100%;
+    }
+}
+
+.codeDemo {
+    @media (max-width: $mantine-breakpoint-md) {
+        margin-top: var(--mantine-spacing-lg);
+        width: 100%;
     }
 }
 

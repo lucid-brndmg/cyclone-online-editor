@@ -1,4 +1,4 @@
-import {Box, Divider, Paper, Stack} from "@mantine/core";
+import {Box, Divider, Paper, Stack, useComputedColorScheme} from "@mantine/core";
 import {CycloneCodeEditor} from "@/component/editor/codeEditor";
 import {useEditorStore} from "@/state/editorStore";
 import {disableSelect, pxToVh, pxToVw} from "@/lib/dom";
@@ -6,21 +6,22 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {useDebouncedValue} from "@mantine/hooks";
 import {CodeConsoleResultSection} from "@/component/editor/execution";
 import {StatusBar, Toolbar} from "@/component/editor/bars";
-import {useEffect, useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 import localforage from "localforage";
 import Config from "../../../resource/config.json"
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
+import {dynamicTheme} from "@/core/utils/resource";
 
 export const CycloneEditorForm = ({
   light = false,
   commands,
   onClickErrorDisplay
 }) => {
-  const {code, setCode, errors, setErrors, setPosition, setEditorCtx, setMonacoCtx, editorReady, setEditorReady, setIsAnalyzerError} = useEditorStore()
+  const {code, setCode, errors, setErrors, setPosition, setEditorCtx, setMonacoCtx, editorReady, setEditorReady, setIsAnalyzerError, monacoCtx} = useEditorStore()
   const [debouncedCode] = useDebouncedValue(code, 200)
-
-  const {height, width, monacoOptions, setWidth, setHeight, editorCodeOptions, customSnippets} = useEditorSettingsStore()
-
+  const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
+  const {height, width, monacoOptions, setWidth, setHeight, editorCodeOptions, customSnippets, monacoTheme} = useEditorSettingsStore()
+  const [isLoadingTheme, setIsLoadingTheme] = useState(false)
   const initRef = useRef(false)
 
   useEffect(() => {
@@ -34,6 +35,26 @@ export const CycloneEditorForm = ({
     localforage.setItem("tmp_code", debouncedCode)// .then(() => console.log("progress saved"))
 
   }, [debouncedCode])
+
+  useEffect(() => {
+    if (monacoCtx) {
+      const editor = monacoCtx.monaco.editor
+      if (monacoTheme) {
+        setIsLoadingTheme(true)
+        fetch(dynamicTheme(monacoTheme)).then(async resp => {
+          setIsLoadingTheme(false)
+          const data = await resp.json()
+          editor.defineTheme(monacoTheme, data)
+          editor.setTheme(monacoTheme)
+        }).catch(e => {
+          console.log(e)
+          setIsLoadingTheme(false)
+        })
+      } else {
+        editor.setTheme(computedColorScheme === "light" ? "vs" : "vs-dark")
+      }
+    }
+  }, [monacoTheme, monacoCtx, computedColorScheme]);
 
   const onMouseDown = e => {
     const [initX, initY] = [e.clientX, e.clientY]
@@ -107,7 +128,7 @@ export const CycloneEditorForm = ({
           onAnalyzerError={(e, isE) => setIsAnalyzerError(isE)}
           customCodeSnippets={customSnippets}
         />
-        <StatusBar onClickErrors={onClickErrorDisplay}/>
+        <StatusBar loading={isLoadingTheme} onClickErrors={onClickErrorDisplay}/>
       </Stack>
     </Paper>
   )

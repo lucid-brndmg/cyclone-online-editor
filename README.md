@@ -632,7 +632,7 @@ The website config is the `resource/config.json` file. In this file you could ch
   },
   "home": {
     // The code example that on the home page
-    "exampleCode": "graph G { /* ... code to show ... */ }"
+    "initExampleCode": "graph G { /* ... code to show ... */ }"
   }
 }
 ```

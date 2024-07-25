@@ -1,6 +1,6 @@
 import {Box, Button, Code, CopyButton, Group, Tooltip, useComputedColorScheme} from "@mantine/core";
 import {IconCopy, IconDownload, IconPlayerPlayFilled} from "@tabler/icons-react";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import hljs from "highlight.js";
 import {CycloneLanguageId} from "@/core/monaco/language";
 import hljsCyclone from "@/core/utils/highlight";
@@ -9,27 +9,41 @@ import {isCycloneExecutableCode} from "@/core/utils/language";
 import {PublicUrl} from "@/core/utils/resource";
 
 // Code highlight for Cyclone
-export const HighlightedCycloneCode = ({code}) => {
-  const [hlResult, setHlResult] = useState("")
+export const HighlightedCycloneCode = ({code, ...props}) => {
+  // const [hlResult, setHlResult] = useState("")
 
-  useEffect(() => {
+  const hlResult = useMemo(() => {
     if (!hljs.listLanguages().includes(CycloneLanguageId)) {
       hljs.registerLanguage(CycloneLanguageId, hljsCyclone)
     }
-    const highlightedCode = hljs.highlight(
+    return hljs.highlight(
       code,
       { language: CycloneLanguageId }
     ).value
-    setHlResult(highlightedCode)
-  }, [])
+  }, [code])
+
+  // useEffect(() => {
+  //   if (!hljs.listLanguages().includes(CycloneLanguageId)) {
+  //     hljs.registerLanguage(CycloneLanguageId, hljsCyclone)
+  //   }
+  //   const highlightedCode = hljs.highlight(
+  //     code,
+  //     { language: CycloneLanguageId }
+  //   ).value
+  //   setHlResult(highlightedCode)
+  // }, [])
 
   return (
-    <pre style={{whiteSpace: "pre-wrap"}} dangerouslySetInnerHTML={{__html: hlResult}} />
+    <pre
+      style={{whiteSpace: "pre-wrap"}}
+      dangerouslySetInnerHTML={{__html: hlResult}}
+      {...props}
+    />
   )
 }
 
 // Code block that supports copy and load to editor
-export const ExecutableCycloneCode = ({code, onTry}) => {
+export const ExecutableCycloneCode = ({code, onTry, tip, ...props}) => {
 
   return (
     <Box pos={"relative"}>
@@ -41,11 +55,11 @@ export const ExecutableCycloneCode = ({code, onTry}) => {
             </Button>
           )}
         </CopyButton>
-        <Tooltip label={"Click 'run' to see results"}>
+        <Tooltip label={tip ?? "Click 'run' to see results"}>
           <Button size={"compact-sm"} rightSection={<IconPlayerPlayFilled size={14} />} onClick={onTry}>Try</Button>
         </Tooltip>
       </Group>
-      <HighlightedCycloneCode code={code} />
+      <HighlightedCycloneCode code={code} {...props} />
     </Box>
   )
 }
