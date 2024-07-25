@@ -6,6 +6,7 @@ import {useEffect, useRef, useState} from "react";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {useDebouncedValue} from "@mantine/hooks";
 import "../styles/global.css"
+import {hljsTheme} from "@/core/utils/highlight";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -15,11 +16,11 @@ const CodeHighlightProvider = ({children}) => {
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
 
   useEffect(() => {
-    if (computedColorScheme === "light") {
-      import("../styles/hljsOneLight.css")
-    } else {
-      import("../styles/hljsOneDark.css")
-    }
+    document.querySelector("#hljs-theme")?.remove()
+    const style = document.createElement("style")
+    style.id = "hljs-theme"
+    style.textContent = hljsTheme[computedColorScheme]
+    document.head.appendChild(style)
   }, [computedColorScheme]);
 
   return children
