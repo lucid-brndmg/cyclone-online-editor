@@ -36,6 +36,7 @@ export const useEditorSettingsStore = create((set, get) => ({
   monacoOptions: {
     minimap: {enabled: false},
     fontSize: 14,
+    wordWrap: "off"
   },
   setMonacoOptions: monacoOptions => set({monacoOptions}),
 

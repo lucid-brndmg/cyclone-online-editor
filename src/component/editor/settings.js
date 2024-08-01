@@ -227,6 +227,12 @@ export const SettingsPopover = ({children, opened, onChange}) => {
                 />
 
                 <Switch
+                  label={"Word Wrap"}
+                  checked={monacoOptions.wordWrap === "on"}
+                  onChange={e => setMonacoOptions({...monacoOptions, wordWrap: e.currentTarget.checked ? "on" : "off"})}
+                />
+
+                <Switch
                   label={"Code Lens For Nodes"}
                   checked={editorCodeOptions.lensStateEnabled}
                   onChange={e => {
