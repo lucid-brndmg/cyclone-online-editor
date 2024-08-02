@@ -3,7 +3,7 @@ import {pos} from "@/lib/position";
 
 export const useEditorStore = create((set, get) => ({
   code: "",
-  setCode: code => set(() => ({ code })),
+  setCode: code => set({ code }),
 
   position: pos(1, 1),
   setPosition: position => set(() => ({position})),

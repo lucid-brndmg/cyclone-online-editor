@@ -167,30 +167,6 @@ export const CycloneExecutionResultForm = () => {
   }, [executionServer]);
 
   return (
-    // <Paper
-    //   shadow="none"
-    //   withBorder={true}
-    //   w={"100%"}
-    //   radius={"md"}
-    //   p="xs"
-    //   pos={"relative"}
-    //   h={`${resultHeight}vh`}
-    // >
-    //   <div
-    //     style={{
-    //       position: "absolute",
-    //       top: 0,
-    //       left: 0,
-    //       width: "100%",
-    //       height: "100%",
-    //       cursor: "move",
-    //       zIndex: 100
-    //     }}
-    //     onMouseDown={onMouseDown}
-    //   />
-    //   <div style={{zIndex: 120, position: "relative"}}><CodeConsoleResultSection/></div>
-    // </Paper>
-
     <Paper
       style={{
         // border: "4px solid transparent",
