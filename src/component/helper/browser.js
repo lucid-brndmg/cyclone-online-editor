@@ -38,10 +38,12 @@ export const FileStateWrapper = () => {
         if (router.pathname === PublicUrl.EditorBase) {
           const code = await localforage.getItem("tmp_code")
           if (code) {
+            setTimeout(() => {
+                setCode(code)
+                // setTimeout(() => setCode(code), 100)
+                setIsSaved(false)
+            }, 0)
             // await localforage.removeItem("tmp_code")
-            setCode(code)
-            // setTimeout(() => setCode(code), 100)
-            setIsSaved(false)
             return
           }
         }

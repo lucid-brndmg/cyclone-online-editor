@@ -130,7 +130,7 @@ export const TutorialPanel = ({html, id}) => {
   }, [router.asPath]);
 
   useEffect(() => {
-    localforage.getItem("tmp_code").then(c => setCode(c ?? ""))
+    localforage.getItem("tmp_code").then(c => setTimeout(() => setCode(c ?? ""), 0))
   }, []);
 
   const parsed = parse(html, htmlCodeUrlReplacer(code => setCode(code)))
