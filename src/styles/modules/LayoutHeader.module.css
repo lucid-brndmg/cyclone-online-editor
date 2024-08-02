@@ -1,6 +1,6 @@
 .header {
     min-height: rem(64px);
-    margin-bottom: rem(24px);
+    margin-bottom: rem(12px);
     background-color: var(--mantine-color-body);
     border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 }
@@ -10,6 +10,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    @media (max-width: $mantine-breakpoint-md) {
+        flex-direction: column;
+        padding-top: var(--mantine-spacing-sm);
+        padding-bottom: var(--mantine-spacing-sm);
+        justify-content: center;
+    }
 }
 
 .link {

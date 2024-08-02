@@ -21,7 +21,7 @@ const EditorMainContent = () => {
     <Stack align={"flex-start"}>
       <FileStateWrapper />
       <Flex
-        px={"md"}
+        px={"xs"}
         w={"100%"}
         direction={{ base: 'column', md: 'row' }}
         gap={4}

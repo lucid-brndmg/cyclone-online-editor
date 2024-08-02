@@ -37,6 +37,8 @@ const {
   edgeLengths
 } = cycloneAnalyzer.utils.edge
 
+const DEFAULT_MAX_RESULTS = 50
+
 const PreviewPanel = () => {
   const {editorCtx} = useEditorStore()
   const {graphviz} = useEditorSettingsStore()
@@ -59,28 +61,9 @@ const PreviewPanel = () => {
     }
   }, [editorCtx]);
 
-  // const onInit = e => {
-  //   if (codePreviewLastHeight) {
-  //     console.log(e.style.height = `${codePreviewLastHeight}px`)
-  //   }
-  // }
-
   const onHeight = (height) => {
     setCodePreviewLastHeight(height)
   }
-
-  // const onZoom = (id) => {
-  //   const elem = document.querySelector(`#${id} > svg > g`)
-  //   const val = elem.attributes.getNamedItem("transform").value
-  //   setCodePreviewTrans(val)
-  //   // const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
-  //   // console.log(val)
-  //   // const [, transX, transY, scale] = regex.exec(val)
-  //   // setCodePreviewTrans({
-  //   //   transform: [parseInt(transX), parseInt(transY)],
-  //   //   scale: parseInt(scale)
-  //   // })
-  // }
 
   return (
     <Stack>
@@ -149,7 +132,7 @@ const ExecPanel = () => {
       ps.push(idx)
       return {label: `Path ${i}`, value: idx}
     }))
-    setSelectedPath(ps)
+    setSelectedPath(ps.slice(0, DEFAULT_MAX_RESULTS))
   }, [codes]);
 
   const filtered = useMemo(() => {
@@ -207,7 +190,7 @@ const ExecPanel = () => {
       {codes.length
         ? <>
           <MultiSelect
-            label="Displayed Paths"
+            label={`Displayed Paths (${selectedPath.length}/${incPath.length})`}
             placeholder="Pick Path"
             data={incPath}
             maxDropdownHeight={200}
@@ -298,7 +281,7 @@ const TracePanel = () => {
       ps.push(idx)
       return {label: `Trace ${i}`, value: idx}
     }))
-    setSelectedPath(ps)
+    setSelectedPath(ps.slice(0, DEFAULT_MAX_RESULTS))
   }, [traceCtx]);
 
   const filtered = useMemo(() => {
@@ -313,19 +296,6 @@ const TracePanel = () => {
     insertTraceVisualStates(i, "initHeight", height)
   }
 
-  // const onZoom = (i, id) => {
-  //   const elem = document.querySelector(`#${id} > svg > g`)
-  //   const val = elem.attributes.getNamedItem("transform").value
-  //   insertTraceVisualStates(i, "initTransform", val)
-  //   // const regex = /(?:translate\(([\-0-9\.]+)\,([\-0-9\.]+)\))\s+(?:scale\(([\-0-9\.]+)\))/
-  //   // console.log(val)
-  //   // const [, transX, transY, scale] = regex.exec(val)
-  //   // setCodePreviewTrans({
-  //   //   transform: [parseInt(transX), parseInt(transY)],
-  //   //   scale: parseInt(scale)
-  //   // })
-  // }
-
   return (
     <Stack>
       <Text size={"md"} fw={700}>Trace</Text>
@@ -333,7 +303,7 @@ const TracePanel = () => {
         ? <>
           {!traceCtx.isRemote
             ? <MultiSelect
-              label="Displayed Traces"
+              label={`Displayed Traces (${selectedPath.length}/${incPath.length})`}
               placeholder="Pick Trace"
               data={incPath}
               maxDropdownHeight={200}
@@ -423,9 +393,6 @@ export const VisualizationPanel = () => {
               <IconArrowRightCircle style={{ width: rem(16), height: rem(16) }} />
               <Group ml={10} gap={"xs"}>
                 <Box>Trace</Box>
-                {/* <Badge style={{display: hasTrace ? "" : "none"}} size="sm" variant="filled" color="red" p={4} h={16} w={16}> */}
-                {/*   ! */}
-                {/* </Badge> */}
                 <Indicator disabled={!hasTrace} color={"red"} />
               </Group>
             </Center>

@@ -59,7 +59,7 @@ export const CycloneCodeEditor = ({
   customCodeSnippets,
   ...props
 }) => {
-  const [monacoCtx, setMonacoCtx] = useState(null)
+  const monacoCtxRef = useRef()
 
   // const errorsRef = useRef(new ErrorStorage(Config.editor.errorStorageLimit, {
   //   onErrors: () => onErrors(errorsRef.current.getAll()),
@@ -90,7 +90,7 @@ export const CycloneCodeEditor = ({
   }, []);
 
   const analyzeCode = () => {
-    if (!monacoCtx?.model) {
+    if (!monacoCtxRef.current) {
       return
     }
 
@@ -146,15 +146,16 @@ export const CycloneCodeEditor = ({
   useEffect(analyzeCode, [debouncedCode]);
 
   const prepareLanguage = () => {
+    const monacoCtx = monacoCtxRef.current
     const monaco = monacoCtx.monaco
-
-    const model = monaco.editor.createModel(code, CycloneLanguageId)
+    const model = monaco.editor.getModels()[0] // monaco.editor.createModel(code, CycloneLanguageId)
+    monacoCtx.model = model
     // setMonacoModel(model)
-    const newMonacoCtx = {
-      ...monacoCtx,
-      model
-    }
-    setMonacoCtx(newMonacoCtx)
+    // const newMonacoCtx = {
+    //   ...monacoCtx,
+    //   model
+    // }
+    // setMonacoCtx(newMonacoCtx)
     monacoCtx.editor.setModel(model)
     monacoCtx.editor.onDidChangeCursorPosition(({position}) => {
       onCursorPosition && onCursorPosition(pos(position.lineNumber, position.column))
@@ -398,18 +399,27 @@ export const CycloneCodeEditor = ({
       disposeOnStateLensCommand
     )
 
-    onMonacoReady && onMonacoReady(newMonacoCtx)
+    onMonacoReady && onMonacoReady(monacoCtxRef.current)
   }
 
   const prepareEditor = (editor, monaco) => {
     // editorRef.current = editor;
     // setMonaco(monaco)
 
-    setMonacoCtx({
+    // setMonacoCtx({
+    //   editor,
+    //   monaco,
+    //   model: null
+    // })
+
+    monacoCtxRef.current = {
       editor,
       monaco,
       model: null
-    })
+    }
+
+    setTimeout(analyzeCode, 0)
+    prepareLanguage()
 
     if (enableCDN) {
       onReady(true)
@@ -418,20 +428,22 @@ export const CycloneCodeEditor = ({
     // editor.setModel()
   }
 
-  useEffect(() => {
-    if (monacoCtx == null || monacoCtx.model != null) {
-      if (monacoCtx?.model != null) {
-        requestAnimationFrame(analyzeCode)
-      }
-      return
-    }
-    prepareLanguage()
-  }, [monacoCtx]);
+  // useEffect(() => {
+  //   if (monacoCtxRef.current == null || monacoCtxRef.current.model != null) {
+  //     if (monacoCtxRef.current?.model != null) {
+  //       setTimeout(analyzeCode, 0)
+  //     }
+  //     return
+  //   }
+  //   prepareLanguage()
+  // }, []);
 
   useEffect(() => {
-    if (!monacoCtx?.model) {
+    if (!monacoCtxRef.current) {
       return
     }
+
+    const monacoCtx = monacoCtxRef.current
 
     const monaco = monacoCtx.monaco
 
@@ -460,9 +472,7 @@ export const CycloneCodeEditor = ({
   const editor = <Editor
     defaultLanguage={CycloneLanguageId}
     value={code}
-    onChange={(v) => {
-      onCode(v)
-    }}
+    onChange={onCode}
     options={monacoOptions}
     onMount={prepareEditor}
     {...props}
