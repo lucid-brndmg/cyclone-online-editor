@@ -5,7 +5,7 @@ import {ErrorSource, ExtendedErrorType} from "@/core/definitions";
 const regexFindPathInResultNG = /\w+->\w+(->\w+)*/
 const regexFindPathInResult = /\w+->\w+(->\w+)*/g
 const regexFindStateInTrace = /\[\d+\]\.@\w+/
-const regexFindErrorInResult = /(line\s*:\s*\d+)|(position\s*:\d+)/gi
+const regexFindErrorInResult = /(line\s*:\s*\d+)|(position\s*:\s*\d+)/gi
 const regexFindLengthInResult = /<\d+>\s*\w+->/g
 const regexNoCounterExample = /no\s+counter[\s-]+example\s+found/i
 const regexNoPath = /no\s+path\s+found/i

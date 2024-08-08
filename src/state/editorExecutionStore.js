@@ -38,7 +38,7 @@ export const useEditorExecutionStore = create((set, get) => ({
     const {setInfo, setIsLoadingInfo} = get()
     setIsLoadingInfo(true)
     try {
-      const info = await fetch(execServerUrl).then(resp => resp.json())
+      const info = await fetch(execServerUrl, {mode: "cors"}).then(resp => resp.json())
       setInfo(info?.data)
     } catch (e) {
       console.log("failed to fetch execution server info", e)
