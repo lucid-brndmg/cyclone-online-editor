@@ -414,7 +414,7 @@ export const CodeConsoleResultSection = () => {
 
       <Divider />
 
-      <Box style={{overflowY: "auto"}} className={"customScroll"} ref={viewport}>
+      <Box style={{overflowY: "auto"}} ref={viewport}>
         {
           executionResult
             ? <Box>

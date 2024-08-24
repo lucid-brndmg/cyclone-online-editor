@@ -84,7 +84,7 @@ const CodeDemo = () => {
         </Group>
       </Paper>
       <TypographyStylesProvider fz={"sm"} p={0}>
-        <ExecutableCycloneCode className={classes.codeDemoBlock + " customScroll"} tip={"Open in editor"} code={code} onTry={onTry} />
+        <ExecutableCycloneCode className={classes.codeDemoBlock} tip={"Open in editor"} code={code} onTry={onTry} />
       </TypographyStylesProvider>
     </Box>
   )
