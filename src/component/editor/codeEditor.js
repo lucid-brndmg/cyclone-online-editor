@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {Editor, loader} from "@monaco-editor/react";
 import EditorSemanticContext from "@/core/editorSemanticContext";
 import cycloneAnalyzer from "cyclone-analyzer";
@@ -85,7 +85,7 @@ export const CycloneCodeEditor = ({
     }
   }, []);
 
-  const analyzeCode = () => {
+  const analyzeCode = useCallback(() => {
     if (!monacoCtxRef.current) {
       return
     }
@@ -137,7 +137,7 @@ export const CycloneCodeEditor = ({
     }
 
     onErrors(errors)
-  }
+  }, [onErrors, onEditorContext, buildSyntaxBlockTree, debouncedCode, onAnalyzerError])
 
   useEffect(() => {
     if (init) {
@@ -448,8 +448,8 @@ export const CycloneCodeEditor = ({
   return enableCDN
     ? editor
     : (
-      <MonacoSetup ready={ready} onReady={onReady}>
-        {editor}
-      </MonacoSetup>
+      <MonacoSetup ready={ready} onReady={onReady}
+        children={editor}
+      />
     );
 }

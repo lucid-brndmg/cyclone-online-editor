@@ -202,9 +202,7 @@ export const SettingsPopover = ({children, opened, onChange}) => {
   return (
     <>
       <Popover opened={opened} onChange={onChange} onClose={() => onChange(false)} width={600} trapFocus position="bottom" withArrow shadow="md">
-        <Popover.Target>
-          {children}
-        </Popover.Target>
+        <Popover.Target children={children} />
         <Popover.Dropdown>
           <Stack>
             <SimpleGrid cols={2}>

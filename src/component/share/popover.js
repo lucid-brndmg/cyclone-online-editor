@@ -68,9 +68,9 @@ const ShareUrlPanel = () => {
 export const SharePopover = ({children, opened, onChange}) => {
   return (
     <Popover width={500} opened={opened} onChange={onChange} trapFocus position="bottom" withArrow shadow="md">
-      <Popover.Target>
-        {children}
-      </Popover.Target>
+      <Popover.Target
+        children={children}
+      />
       <Popover.Dropdown>
         <Stack>
           {opened ? <ShareUrlPanel /> : null}

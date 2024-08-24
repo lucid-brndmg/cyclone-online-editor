@@ -175,9 +175,9 @@ const Copyright = () => {
   )
 }
 
-const LinkCard = ({title, desc, url, color, shadow, withBorder, size}) => {
+const LinkCard = ({title, desc, url, color, shadow, withBorder, size, className}) => {
   return (
-    <Paper p={"sm"} withBorder={withBorder} shadow={shadow} style={{cursor: "pointer"}} onClick={() => window.location.href = url}>
+    <Paper p={"sm"} withBorder={withBorder} shadow={shadow} className={className} onClick={() => window.location.href = url}>
       <Text c={color} size={size} fw={500}>{title}</Text>
       <Text size={"sm"} c={"dimmed"}>{desc}</Text>
     </Paper>
@@ -203,13 +203,25 @@ const LinksSection = () => {
         <Stack>
           <Title order={3}>Using Cyclone</Title>
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-            {learningLinks.map((props, i) => <LinkCard size={"lg"} shadow={"md"} color={"orange"} {...props} key={i} />)}
+            {learningLinks.map((props, i) => <LinkCard
+              size={"lg"}
+              shadow={"none"}
+              color={"orange"}
+              {...props}
+              key={i}
+              className={"linkCardPrimary"}
+            />)}
           </SimpleGrid>
         </Stack>
         <Stack mt={"lg"}>
           <Title order={3}>Useful Resources</Title>
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>
-            {resourceLinks.map((props, i) => <LinkCard withBorder={true} {...props} key={i} />)}
+            {resourceLinks.map((props, i) => <LinkCard
+              withBorder={true}
+              {...props}
+              key={i}
+              className={"linkCardSecondary"}
+            />)}
           </SimpleGrid>
         </Stack>
       </Stack>

@@ -31,6 +31,11 @@ const links = [
   { link: PublicUrl.Editor, label: 'Editor' },
 ];
 
+const activeStyle = {
+  backgroundColor: "var(--mantine-color-orange-filled)",
+  color: "var(--mantine-color-white)"
+}
+
 const CycloneLogo = ({...props}) => {
   const router = useRouter()
   return (
@@ -57,18 +62,15 @@ export const LayoutHeader = () => {
   }, [computedColorScheme]);
 
   const items = links.map((link) => {
-    const activeStyle = ((link.link !== PublicUrl.Home && path.startsWith(link.link)) || (link.link === PublicUrl.Home && path === link.link))
-      ? {
-        backgroundColor: "var(--mantine-color-orange-filled)",
-        color: "var(--mantine-color-white)"
-      }
+    const style = ((link.link !== PublicUrl.Home && path.startsWith(link.link)) || (link.link === PublicUrl.Home && path === link.link))
+      ? activeStyle
       : null
     return (
       <a
         key={link.label}
         href={link.link}
         className={classes.link}
-        style={activeStyle}
+        style={style}
         target={link.target ? link.target : undefined}
       >
         {link.label}
@@ -86,13 +88,17 @@ export const LayoutHeader = () => {
           {items}
         </Group>
         <Group>
-          <SettingsPopover opened={settingsOpened} onChange={setSettingsOpened}>
-            <Tooltip label="Settings">
-              <ActionIcon size={"lg"} variant="default" aria-label="Settings" onClick={() => setSettingsOpened(!settingsOpened)}>
-                <IconSettings style={{ width: '70%', height: '70%' }} stroke={1.5} />
-              </ActionIcon>
-            </Tooltip>
-          </SettingsPopover>
+          {path.startsWith(PublicUrl.Editor) || path.startsWith(PublicUrl.Tutorial)
+            ? <SettingsPopover opened={settingsOpened} onChange={setSettingsOpened}>
+              <Tooltip label="Settings">
+                <ActionIcon size={"lg"} variant="default" aria-label="Settings" onClick={() => setSettingsOpened(!settingsOpened)}>
+                  <IconSettings style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                </ActionIcon>
+              </Tooltip>
+            </SettingsPopover>
+            : null
+          }
+
 
           <Tooltip label="Source Code">
             <ActionIcon component={"a"} target="_blank" href={"https://github.com/lucid-brndmg/cyclone-online-editor"} size={"lg"} variant="default" aria-label="Source Code">

@@ -280,7 +280,6 @@ export const CodeConsoleResultSection = () => {
     setTraceIsGraphviz,
 
   } = useEditorExecutionStore()
-  const {resultHeight, executionServer} = useEditorSettingsStore()
   const {setErrors} = useEditorStore()
   const viewport = useRef(null)
   const [examineOpened, setExamineOpened] = useState(false)
@@ -438,15 +437,6 @@ export const CodeConsoleResultSection = () => {
                 </TypographyStylesProvider>
                 : <Code block={true}>{executionResult.trace}</Code>
               }
-
-              {/*<ScrollArea.Autosize viewportRef={viewport} mah={`${resultHeight - 12}svh`} p={0} type="auto" mt={"sm"}>*/}
-              {/*  {resultMode === "Result"*/}
-              {/*    ? <TypographyStylesProvider fz={"sm"} p={0}>*/}
-              {/*      <div dangerouslySetInnerHTML={{__html: sanitized.sanitized}} />*/}
-              {/*    </TypographyStylesProvider>*/}
-              {/*    : <Code block={true}>{executionResult.trace}</Code>*/}
-              {/*  }*/}
-              {/*</ScrollArea.Autosize>*/}
             </Box>
             : isError
               ? <Text c={"red"} size={"sm"} fw={500}>
