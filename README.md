@@ -67,6 +67,8 @@ npm run prep # prepare environment
 
 ### Execution Server
 
+**NOTE:** A more portable and easier to use version of the execution server can be found [here](https://github.com/lucid-brndmg/cyclone-execution-server-rs).
+
 If there is no existing execution server ready, it must be prepared as well:
 
 ```shell
@@ -498,6 +500,8 @@ For example, if one wants to catch all the `NullPointerException` in the compile
 
 #### Implement Your Own Server
 If you don't like the existing execution server, you could implement your own. Just make sure that the server could execute Cyclone's source code and get the result & trace.
+
+[This project](https://github.com/lucid-brndmg/cyclone-execution-server-rs) is an example implementation of execution server in Rust.
 
 The server is required to have a `POST /exec` API that accepts a JSON structure of:
 ```json

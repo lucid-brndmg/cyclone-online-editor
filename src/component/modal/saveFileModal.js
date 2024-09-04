@@ -4,7 +4,7 @@ import {useEditorPersistentStore, useEditorSaveStatusStore} from "@/state/editor
 import {useEditorStore} from "@/state/editorStore";
 import {downloadTextFile} from "@/lib/dom";
 
-export const SaveFileModal = ({opened, onOpened}) => {
+const SaveFileModal = ({opened, onOpened}) => {
   const [title, setTitle] = useState("")
   const [isDownload, setIsDownload] = useState(false)
 
@@ -47,3 +47,4 @@ export const SaveFileModal = ({opened, onOpened}) => {
     </Modal>
   )
 }
+export default SaveFileModal

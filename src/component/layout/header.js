@@ -21,7 +21,7 @@ import {
   IconShare2,
   IconShare3
 } from "@tabler/icons-react";
-import {HelpModal} from "@/component/modal/helpModal";
+import HelpModal from "@/component/modal/helpModal";
 import {SettingsPopover} from "@/component/editor/settings";
 import {PublicUrl} from "@/core/utils/resource";
 

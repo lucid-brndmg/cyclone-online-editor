@@ -14,9 +14,8 @@ import {
   ThemeIcon
 } from "@mantine/core";
 import {IconBook2, IconCircleCheck, IconEye, IconFolder, IconListTree} from "@tabler/icons-react";
-import {PublicUrl} from "@/core/utils/resource";
 
-export const HelpModal = ({opened, onOpened}) => {
+const HelpModal = ({opened, onOpened}) => {
   const editorItems = [
     {icon: IconFolder, bold: "File Browser", text: "Include all tutorial examples and save user-defined Cyclone specifications in the browser."},
     {icon: IconBook2, bold: "Reference", text: "Quick reference to Cyclone keywords, operators and built-in functions."},
@@ -111,3 +110,5 @@ export const HelpModal = ({opened, onOpened}) => {
     </Modal>
   )
 }
+
+export default HelpModal

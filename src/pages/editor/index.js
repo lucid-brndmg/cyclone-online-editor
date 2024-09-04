@@ -5,6 +5,7 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {FileStateWrapper} from "@/component/helper/browser";
 import Head from "next/head";
 import {useEditorHelperStore} from "@/state/editorHelperStore";
+import ExecutionServerModal from "@/component/modal/executionServerModal";
 
 const EditorMainContent = () => {
   const {width} = useEditorSettingsStore()
@@ -20,6 +21,7 @@ const EditorMainContent = () => {
   return (
     <Stack align={"flex-start"}>
       <FileStateWrapper />
+      <ExecutionServerModal />
       <Flex
         px={"xs"}
         w={"100%"}
