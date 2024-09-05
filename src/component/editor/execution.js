@@ -200,6 +200,7 @@ const ServerInfoDisplay = () => {
   const {executionServer, setExecutionServer} = useEditorSettingsStore()
 
   const server = useMemo(() => {
+    console.log(executionServer)
     const execServerAddr = process.env.NEXT_PUBLIC_CYCLONE_EXEC_SERVER
       ?? Config.executionServer.url
     const trimmed = executionServer.trim()
@@ -214,33 +215,40 @@ const ServerInfoDisplay = () => {
     return refreshServerInfo(url)
   }
 
-  const serverInfo = useMemo(() => {
-    if (!info) {
-      return (
-        <Text c={"red"} fz={"sm"}>
-          Execution server didn't supply any information
-          <br/>
-          URL: {server.url}
-        </Text>
-      )
-    }
+  // const serverInfo = useMemo(() => {
+  //   const resetBtn = <Button c={"red"} variant={"light"} size={"compact-sm"} onClick={() => setExecutionServer("")}>Reset</Button>
+  //   console.log(info)
+  //   if (!info) {
+  //     return (
+  //       <Box>
+  //         <Text c={"red"} fz={"sm"}>
+  //           Execution server didn't supply any information
+  //           <br/>
+  //           URL: {server.url} {server.isCustom ? <b>(custom server)</b> : ""}
+  //         </Text>
+  //         {server.isCustom ? resetBtn : ""}
+  //       </Box>
+  //     )
+  //   }
+  //
+  //   return (
+  //     <Box fz={"sm"}>
+  //       <Box><Text span c={"dimmed"} fz={"sm"}>Version: </Text> <Text span fz={"sm"} fw={500}>{info.version?.replace(/(?:\r\n|\r|\n)/g, " ") ?? "unknown"}</Text></Box>
+  //
+  //       <Box><Text span c={"dimmed"} fz={"sm"}>Disabled Compiler Options: </Text> <Text span c={"red"} fz={"sm"}>{info.disabledOptions?.map(o => `option-${o}`)?.join(", ") ?? "None / Unknown"}</Text></Box>
+  //
+  //       <Box><Text span c={"dimmed"} fz={"sm"}>Spec Checking Timeout: </Text> <Text span fz={"sm"} fw={500}>{info.timeout ? `${info.timeout}ms (${Math.round(info.timeout / 1000)}s)` : "None / Unknown"}</Text></Box>
+  //
+  //       <Box><Text span c={"dimmed"} fz={"sm"}>Request Mode: </Text> {info.isQueueMode ? "Queue Mode" : "Synchronous Execution"}</Box>
+  //
+  //       <Box><Text span c={"dimmed"} fz={"sm"}>Server: </Text> {server.isCustom ? <b>[custom]</b> : "[default]"} {server.url}{server.isCustom ? resetBtn : null}</Box>
+  //
+  //       <Box><Text span c={"dimmed"} fz={"sm"}>Message from Server: </Text> <div dangerouslySetInnerHTML={{__html: info.message ?? "None"}} /></Box>
+  //     </Box>
+  //   )
+  // }, [info])
 
-    return (
-      <Box fz={"sm"}>
-        <Box><Text span c={"dimmed"} fz={"sm"}>Version: </Text> <Text span fz={"sm"} fw={500}>{info.version?.replace(/(?:\r\n|\r|\n)/g, " ") ?? "unknown"}</Text></Box>
-
-        <Box><Text span c={"dimmed"} fz={"sm"}>Disabled Compiler Options: </Text> <Text span c={"red"} fz={"sm"}>{info.disabledOptions?.map(o => `option-${o}`)?.join(", ") ?? "None / Unknown"}</Text></Box>
-
-        <Box><Text span c={"dimmed"} fz={"sm"}>Spec Checking Timeout: </Text> <Text span fz={"sm"} fw={500}>{info.timeout ? `${info.timeout}ms (${Math.round(info.timeout / 1000)}s)` : "None / Unknown"}</Text></Box>
-
-        <Box><Text span c={"dimmed"} fz={"sm"}>Request Mode: </Text> {info.isQueueMode ? "Queue Mode" : "Synchronous Execution"}</Box>
-
-        <Box><Text span c={"dimmed"} fz={"sm"}>Server: </Text> {server.isCustom ? <b>[custom]</b> : "[default]"} {server.url}{server.isCustom ? <Button ml={"sm"} c={"red"} variant={"light"} size={"compact-sm"} onClick={() => setExecutionServer("")}>Reset</Button> : null}</Box>
-
-        <Box><Text span c={"dimmed"} fz={"sm"}>Message from Server: </Text> <div dangerouslySetInnerHTML={{__html: info.message ?? "None"}} /></Box>
-      </Box>
-    )
-  }, [info])
+  const resetBtn = <Button c={"red"} variant={"light"} size={"compact-sm"} onClick={() => setExecutionServer("")}>Reset</Button>
 
   return isLoadingInfo
     ? (
@@ -256,7 +264,32 @@ const ServerInfoDisplay = () => {
         <Group justify={"right"}>
           <Button size={"compact-sm"} onClick={getInfo} variant={"subtle"} leftSection={<IconRefresh size={16} />}>Refresh</Button>
         </Group>
-        {serverInfo}
+        {/*{serverInfo}*/}
+        {info
+          ? (
+            <Box fz={"sm"}>
+              <Box><Text span c={"dimmed"} fz={"sm"}>Version: </Text> <Text span fz={"sm"} fw={500}>{info.version?.replace(/(?:\r\n|\r|\n)/g, " ") ?? "unknown"}</Text></Box>
+
+              <Box><Text span c={"dimmed"} fz={"sm"}>Disabled Compiler Options: </Text> <Text span c={"red"} fz={"sm"}>{info.disabledOptions?.map(o => `option-${o}`)?.join(", ") ?? "None / Unknown"}</Text></Box>
+
+              <Box><Text span c={"dimmed"} fz={"sm"}>Spec Checking Timeout: </Text> <Text span fz={"sm"} fw={500}>{info.timeout ? `${info.timeout}ms (${Math.round(info.timeout / 1000)}s)` : "None / Unknown"}</Text></Box>
+
+              <Box><Text span c={"dimmed"} fz={"sm"}>Request Mode: </Text> {info.isQueueMode ? "Queue Mode" : "Synchronous Execution"}</Box>
+
+              <Box><Text span c={"dimmed"} fz={"sm"}>Server: </Text> {server.isCustom ? <b>[custom]</b> : "[default]"} {server.url}{server.isCustom ? resetBtn : null}</Box>
+
+              <Box><Text span c={"dimmed"} fz={"sm"}>Message from Server: </Text> <div dangerouslySetInnerHTML={{__html: info.message ?? "None"}} /></Box>
+            </Box>
+          )
+          : <Box>
+            <Text c={"red"} fz={"sm"}>
+              Execution server didn't supply any information
+              <br/>
+              URL: {server.url} {server.isCustom ? <b>(custom server)</b> : ""}
+            </Text>
+            {server.isCustom ? resetBtn : ""}
+          </Box>
+        }
       </Box>
     )
 
