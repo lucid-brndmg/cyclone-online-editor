@@ -5,11 +5,15 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 const ExecutionServerModal = () => {
   const [opened, setOpened] = useState(false)
   const [address, setAddress] = useState("")
-  const {setExecutionServer, executionServer} = useEditorSettingsStore()
+  const {setExecutionServer, executionServer, init} = useEditorSettingsStore()
+  const [openedOnce, setOpenedOnce] = useState(false)
 
   const execServerValid = useMemo(() => address?.trim().length && /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/.test(address), [address])
 
   useEffect(() => {
+    if (!init || openedOnce) {
+      return
+    }
     const params = new URLSearchParams(window.location.search)
     const execServer = params.get("set_exec_server")
     if (execServer) {
@@ -19,7 +23,13 @@ const ExecutionServerModal = () => {
         setAddress(trimmed)
       }
     }
-  }, []);
+  }, [init, executionServer]);
+
+  useEffect(() => {
+    if (opened) {
+      setOpenedOnce(true)
+    }
+  }, [opened]);
 
   const onClose = () => setOpened(false)
   const onSave = () => {

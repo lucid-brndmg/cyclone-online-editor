@@ -197,7 +197,7 @@ const ServerInfoDisplay = () => {
     info
   } = useEditorExecutionStore()
 
-  const {executionServer} = useEditorSettingsStore()
+  const {executionServer, setExecutionServer} = useEditorSettingsStore()
 
   const server = useMemo(() => {
     const execServerAddr = process.env.NEXT_PUBLIC_CYCLONE_EXEC_SERVER
@@ -235,7 +235,7 @@ const ServerInfoDisplay = () => {
 
         <Box><Text span c={"dimmed"} fz={"sm"}>Request Mode: </Text> {info.isQueueMode ? "Queue Mode" : "Synchronous Execution"}</Box>
 
-        <Box><Text span c={"dimmed"} fz={"sm"}>Server: </Text> {server.isCustom ? "[custom]" : "[default]"} {server.url}</Box>
+        <Box><Text span c={"dimmed"} fz={"sm"}>Server: </Text> {server.isCustom ? <b>[custom]</b> : "[default]"} {server.url}{server.isCustom ? <Button ml={"sm"} c={"red"} variant={"light"} size={"compact-sm"} onClick={() => setExecutionServer("")}>Reset</Button> : null}</Box>
 
         <Box><Text span c={"dimmed"} fz={"sm"}>Message from Server: </Text> <div dangerouslySetInnerHTML={{__html: info.message ?? "None"}} /></Box>
       </Box>
