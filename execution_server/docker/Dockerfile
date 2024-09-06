@@ -16,7 +16,7 @@ ADD --checksum=sha256:${checksum} https://classicwuhao.github.io/cyclone_tutoria
 RUN unzip /Cyclone-${cyclone_version}.zip -d /cyclone/
 
 # enable this line to use the LATEST (experimental?) version of Cyclone
-# ADD http://classicwuhao.github.io/cyclone_tutorial/cyclone.jar /cyclone/
+ADD http://classicwuhao.github.io/cyclone_tutorial/cyclone.jar /cyclone/
 
 ENV CYCLONE_ES_CYCLONE_PATH=/cyclone
 ENV CYCLONE_ES_CYCLONE_SOURCE_PATH=/tmp/cyclone_src
