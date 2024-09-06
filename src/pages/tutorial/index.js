@@ -14,7 +14,14 @@ const TutorialPage = ({html}) => {
   return (
     <>
       <Head>
-        <title>Cyclone Tutorial</title>
+        <title>Cyclone Tutorials</title>
+        <meta name={"description"} content={"Tutorial documents of Cyclone"}/>
+        <meta name={"keywords"} content={"cyclone, tutorial"}/>
+
+        <meta property="og:site_name" content="Cyclone Tutorials" />
+        <meta property="og:type" content="object" />
+        <meta property="og:title" content="Cyclone Tutorials"/>
+        <meta name={"og:description"} content={"Tutorial documents of Cyclone"}/>
       </Head>
       <main>
         <TutorialPanel html={html} id={"_default"} />

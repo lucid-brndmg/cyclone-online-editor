@@ -45,6 +45,13 @@ const EditorPage = () => {
     <>
       <Head>
         <title>Cyclone Editor</title>
+        <meta name={"description"} content={"Interactive online code editor for Cyclone specification language"}/>
+        <meta name={"keywords"} content={"cyclone, code editor"}/>
+
+        <meta property="og:site_name" content="Cyclone Editor" />
+        <meta property="og:type" content="object" />
+        <meta property="og:title" content="Cyclone Editor"/>
+        <meta name={"og:description"} content={"Interactive online code editor for Cyclone specification language"}/>
       </Head>
       <main>
         <EditorMainContent />

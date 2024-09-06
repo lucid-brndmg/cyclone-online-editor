@@ -96,9 +96,9 @@ const HeroSection = () => {
       <div className={classes.inner}>
         <div className={classes.content}>
           <Group style={{flexWrap: "nowrap"}}>
-            <img src={logo.src} width={96} height={96} style={{animation: "spin 4s infinite linear"}} />
+            <img alt={"Cyclone Logo"} src={logo.src} width={96} height={96} style={{animation: "spin 4s infinite linear"}} />
             <Title className={classes.title}>
-              A <span className={classes.highlight}>graph-based</span> specification language
+              Cyclone: A <span className={classes.highlight}>Graph-Based</span> Specification Language
             </Title>
           </Group>
           <Text c="dimmed" mt="md">
@@ -177,7 +177,7 @@ const Copyright = () => {
 
 const LinkCard = ({title, desc, url, color, shadow, withBorder, size, className}) => {
   return (
-    <Paper p={"sm"} withBorder={withBorder} shadow={shadow} className={className} onClick={() => window.location.href = url}>
+    <Paper p={"sm"} withBorder={withBorder} shadow={shadow} className={className} component={"a"} href={url} style={{color: "unset"}} target={"_blank"}>
       <Text c={color} size={size} fw={500}>{title}</Text>
       <Text size={"sm"} c={"dimmed"}>{desc}</Text>
     </Paper>

@@ -19,10 +19,18 @@ export async function getStaticProps(ctx) {
 }
 
 const TutorialChapterPage = ({html, id, title}) => {
+  const fullTitle = `Cyclone Tutorial: ${title}`
   return (
     <>
       <Head>
-        <title>Cyclone Tutorial: {title}</title>
+        <title>{fullTitle}</title>
+        <meta name={"description"} content={"Tutorial documents of Cyclone"}/>
+        <meta name={"keywords"} content={"cyclone, tutorial"}/>
+
+        <meta property="og:site_name" content={fullTitle} />
+        <meta property="og:type" content="object" />
+        <meta property="og:title" content={fullTitle}/>
+        <meta name={"og:description"} content={"Tutorial documents of Cyclone"}/>
       </Head>
       <main>
         <TutorialPanel html={html} id={id} />

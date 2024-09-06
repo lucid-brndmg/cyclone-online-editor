@@ -7,8 +7,13 @@ const Home = () => {
     <>
       <Head>
         <title>Cyclone Specification Language</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* <link rel="icon" href={`${process.env.PUBLIC_URL}/favicon.ico`} /> */}
+        <meta name={"description"} content={"Cyclone is a graph-based specification language"}/>
+        <meta name={"keywords"} content={"cyclone, specification language, graphs"}/>
+
+        <meta property="og:site_name" content="Cyclone" />
+        <meta property="og:type" content="object" />
+        <meta property="og:title" content="Cyclone: A Graph-Based Specification Language"/>
+        <meta name={"og:description"} content={"Cyclone is a graph-based specification language"}/>
       </Head>
       <main>
         <HomePage />
