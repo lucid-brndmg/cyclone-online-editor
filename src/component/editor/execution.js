@@ -200,7 +200,6 @@ const ServerInfoDisplay = () => {
   const {executionServer, setExecutionServer} = useEditorSettingsStore()
 
   const server = useMemo(() => {
-    console.log(executionServer)
     const execServerAddr = process.env.NEXT_PUBLIC_CYCLONE_EXEC_SERVER
       ?? Config.executionServer.url
     const trimmed = executionServer.trim()

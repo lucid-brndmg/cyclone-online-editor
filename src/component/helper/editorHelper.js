@@ -22,7 +22,7 @@ const EditorTabWrap = ({children}) => {
   return (
     <>
       <Divider mb={"md"} mt={"xs"} />
-      <ScrollArea.Autosize mah={`${editorHeight <= 77 ? 77 : (editorHeight + 7)}svh`} type="auto">
+      <ScrollArea.Autosize mah={`${Math.max(editorHeight, 80)}svh`} type="auto">
         <Box pr={"16px"}>
           {children}
         </Box>

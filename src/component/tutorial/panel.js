@@ -155,22 +155,20 @@ export const TutorialPanel = ({html, id}) => {
         justify={{ base: 'center', md: "space-between" }}
       >
         <Paper miw={"280px"} shadow="none" withBorder={false} w={"100%"} radius={"md"}>
-          <Stack gap={"4px"}>
+          <Stack gap={4}>
             {
               id === "_default" || tutorialTable.hasOwnProperty(id)
                 ? <>
                   <TutorialHeadBar id={id} />
                   <Divider />
-                  <ScrollArea.Autosize viewportRef={viewport} mah={`${editorHeight <= 80 ? 80 : (editorHeight + 5)}svh`} type="auto" px={"sm"}>
-                    <Stack>
-                      <TutorialPage>
-                        {parsed}
-                      </TutorialPage>
-                      <Divider />
-                      <TutorialFootBar id={id} />
-                      <Space />
-                    </Stack>
+                  <ScrollArea.Autosize viewportRef={viewport} mah={`${Math.max(editorHeight, 80)}svh`} type="auto" px={"sm"}>
+                    <TutorialPage>
+                      {parsed}
+                    </TutorialPage>
                   </ScrollArea.Autosize>
+                  <Divider />
+                  <Space />
+                  <TutorialFootBar id={id} />
                 </>
                 : <NotFoundPrompt />
             }
@@ -178,7 +176,6 @@ export const TutorialPanel = ({html, id}) => {
         </Paper>
         <CycloneEditorMainSection light={true} style={{flexGrow: 1}} miw={`${width}vw`} commands={editorCommands} />
       </Flex>
-      <Space /> <Space />
     </Stack>
   )
 }
