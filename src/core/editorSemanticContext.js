@@ -194,9 +194,8 @@ export default class EditorSemanticContext {
               break
             }
             case SemanticContextType.InvariantDecl: {
-              // -3 = invariant decl
-              const name = prev.metadata.identifier
-              this.invariants.push({name, identifiers})
+              const identifier = prev.metadata.identifier
+              this.invariants.push({identifier, identifiers})
               break
             }
           }

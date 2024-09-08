@@ -7,7 +7,6 @@ export default function Document() {
       <Head>
         <ColorSchemeScript defaultColorScheme="auto" />
         <link rel="icon" href={`${process.env.PUBLIC_URL}/favicon.ico`} />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <body>
       <Main />

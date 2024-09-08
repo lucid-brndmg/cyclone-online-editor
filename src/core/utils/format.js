@@ -82,7 +82,7 @@ const eStartNodeDuplicated = ({ident}) => {
 }
 
 const eCodeInsideAbstractNode = () => {
-  return `code inside abstract node will be ignored by the compiler`
+  return `code inside abstract node will be ignored by the compiler. Consider remove 'abstract' and add 'normal' attribute`
 }
 
 const eNoGoalDefined = () => {

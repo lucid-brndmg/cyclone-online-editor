@@ -276,15 +276,15 @@ const genGraphvizInvariantsDef = (invariants, statesDef, definedStates, previewO
   const def = []
   const definedInvariants = new Set()
   for (let inv of invariants) {
-    const {name, identifiers} = inv
-    statesDef.push(`${name}[label=" invariant ${name} ", style=dashed, fontcolor=blue, color=blue];`)
-    definedInvariants.add(name)
+    const {identifier, identifiers} = inv
+    statesDef.push(`${identifier}[label=" invariant ${identifier} ", style=dashed, fontcolor=blue, color=blue];`)
+    definedInvariants.add(identifier)
     for (let ident of identifiers) {
       if (!definedStates.has(ident)) {
         statesDef.push(genUndefinedState(ident, previewOptions))
         definedStates.add(ident)
       }
-      def.push(`${name} -> ${ident}[color=blue];`)
+      def.push(`${identifier} -> ${ident}[color=blue];`)
     }
   }
 

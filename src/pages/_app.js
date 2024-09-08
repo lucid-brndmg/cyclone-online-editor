@@ -7,6 +7,7 @@ import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {useDebouncedValue} from "@mantine/hooks";
 import "../styles/global.css"
 import {hljsTheme} from "@/core/utils/highlight";
+import Head from "next/head";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -45,13 +46,18 @@ export default function App({ Component, pageProps }) {
   }, []);
 
   return (
-    <MantineProvider theme={theme}>
-      <ModalsProvider>
-        <LayoutHeader />
-        <CodeHighlightProvider>
-          <Component {...pageProps} />
-        </CodeHighlightProvider>
-      </ModalsProvider>
-    </MantineProvider>
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <MantineProvider theme={theme}>
+        <ModalsProvider>
+          <LayoutHeader />
+          <CodeHighlightProvider>
+            <Component {...pageProps} />
+          </CodeHighlightProvider>
+        </ModalsProvider>
+      </MantineProvider>
+    </>
   )
 }
