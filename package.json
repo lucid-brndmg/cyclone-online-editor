@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node start_with_proxy.mjs",
     "lint": "next lint",
     "prep": "bash ./scripts/prepare_all.sh",
     "gencodeexample": "node ./scripts/generate_code_example.js",
