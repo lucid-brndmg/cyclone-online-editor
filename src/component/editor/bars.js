@@ -7,9 +7,8 @@ import {
   IconAlertTriangleFilled,
   IconCursorText,
   IconDownload,
-  IconFolderOpen, IconInfoCircle, IconInfoCircleFilled, IconPencil,
+  IconFolderOpen, IconPencil,
   IconPlayerPlay,
-  IconSettings, IconShare2,
   IconShare3
 } from "@tabler/icons-react";
 import {downloadTextFile} from "@/lib/dom";
@@ -17,7 +16,6 @@ import {CodeExecutionButton} from "@/component/editor/execution";
 import {FileSaveButton, FileStatusBar, NewFileButton} from "@/component/editor/storage";
 import {locateToCode} from "@/core/utils/monaco";
 import {pos} from "@/lib/position";
-import {sieveCount} from "@/lib/list";
 import {useMemo, useState} from "react";
 import {isInfo, isWarning} from "@/core/specification";
 import {SharePopover} from "@/component/share/popover";

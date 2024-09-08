@@ -5,10 +5,10 @@ import {
   Button,
   Container,
   Divider,
-  Group, Image,
+  Group,
   List, Paper,
   rem,
-  ScrollArea, Select, SimpleGrid, Space,
+  Select, SimpleGrid, Space,
   Stack,
   Text,
   ThemeIcon,
@@ -24,7 +24,7 @@ import {useRouter} from "next/router";
 import {dynamicCodeExample, PublicUrl} from "@/core/utils/resource";
 import logo from '../../../resource/image/logo.png'
 import getConfig from "next/config";
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useState} from "react";
 import examplesManifest from "../../../resource/code_example_manifest.json"
 
 /*

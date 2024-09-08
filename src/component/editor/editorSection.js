@@ -1,4 +1,4 @@
-import {Box, Divider, Paper, Stack, useComputedColorScheme} from "@mantine/core";
+import {Box, Paper, Stack, useComputedColorScheme} from "@mantine/core";
 import {CycloneCodeEditor} from "@/component/editor/codeEditor";
 import {useEditorStore} from "@/state/editorStore";
 import {disableSelect, pxToVh, pxToVw} from "@/lib/dom";

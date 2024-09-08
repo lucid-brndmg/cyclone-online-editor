@@ -2,11 +2,9 @@ import {
   ActionIcon, Badge,
   Box,
   Center,
-  Divider, Group, Indicator,
-  NavLink,
+  Group, NavLink,
   rem,
   SegmentedControl,
-  Space,
   Stack,
   Text, TextInput
 } from "@mantine/core";
@@ -14,27 +12,19 @@ import {
   IconAlertCircleFilled,
   IconAlertTriangleFilled,
   IconArrowNarrowRight,
-  IconArrowRightCircle,
   IconArrowsHorizontal,
-  IconBook2,
   IconBraces,
   IconBug,
-  IconChartCircles,
   IconCheckbox,
   IconChevronRight,
   IconGolf,
-  IconInfoCircleFilled,
   IconLetterC,
-  IconLetterE,
   IconLetterG,
-  IconLetterI,
   IconLetterP,
   IconLetterR,
   IconLetterV,
-  IconListTree,
   IconMathFunction,
   IconPlaystationCircle,
-  IconRoute2,
   IconRouteX,
   IconSearch,
   IconSettings,
@@ -44,7 +34,7 @@ import {
   IconVector,
   IconViewfinder
 } from "@tabler/icons-react";
-import {memo, useCallback, useEffect, useMemo, useState} from "react";
+import {memo, useCallback, useMemo, useState} from "react";
 import {useEditorStore} from "@/state/editorStore";
 import {useEditorHelperStore} from "@/state/editorHelperStore";
 import {eliminateVarGroup, filterText} from "@/core/utils/outline";

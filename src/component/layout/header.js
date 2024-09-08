@@ -1,25 +1,16 @@
 import {
-  Burger,
   Group,
-  Container,
-  Image,
-  Text, ThemeIcon, ActionIcon, Space, useMantineColorScheme, useComputedColorScheme, Tooltip
+  Text, ActionIcon, useMantineColorScheme, useComputedColorScheme, Tooltip
 } from "@mantine/core";
-import {useDisclosure} from "@mantine/hooks";
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useState} from "react";
 import classes from "../../styles/modules/LayoutHeader.module.css";
 import NextImage from 'next/image';
 import logo from '../../../resource/image/logo.png'
-import Link from "next/link";
 import {useRouter} from "next/router";
 import {
   IconBrandGithub,
-  IconBrightnessUp, IconHelpCircle, IconHelpCircleFilled,
-  IconLink,
-  IconMoon,
-  IconQuestionMark, IconSettings,
-  IconShare2,
-  IconShare3
+  IconBrightnessUp, IconHelpCircle, IconMoon,
+  IconSettings
 } from "@tabler/icons-react";
 import HelpModal from "@/component/modal/helpModal";
 import {SettingsPopover} from "@/component/editor/settings";

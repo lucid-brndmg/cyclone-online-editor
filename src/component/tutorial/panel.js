@@ -17,14 +17,10 @@ import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import Link from "next/link";
 import {
-  IconArrowBigLeft,
-  IconArrowBigLeftFilled,
-  IconArrowBigRight,
-  IconArrowBigRightFilled, IconArrowNarrowLeft, IconArrowNarrowRight, IconBook
+  IconArrowNarrowLeft, IconArrowNarrowRight, IconBook
 } from "@tabler/icons-react";
 import parse from 'html-react-parser';
-import {ExecutableCycloneCode, htmlCodeUrlReplacer, HighlightedCycloneCode} from "@/component/utils/code";
-import {isCycloneExecutableCode} from "@/core/utils/language";
+import {htmlCodeUrlReplacer} from "@/component/utils/code";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {tutorialTable} from "@/core/resources/tutorial";
 import {useEditorStore} from "@/state/editorStore";

@@ -1,6 +1,6 @@
-import {Box, Button, Code, CopyButton, Group, Tooltip, useComputedColorScheme} from "@mantine/core";
+import {Box, Button, Code, CopyButton, Group, Tooltip} from "@mantine/core";
 import {IconCopy, IconDownload, IconPlayerPlayFilled} from "@tabler/icons-react";
-import {useEffect, useMemo, useState} from "react";
+import {useMemo} from "react";
 import hljs from "highlight.js";
 import {CycloneLanguageId} from "@/core/monaco/language";
 import hljsCyclone from "@/core/utils/highlight";

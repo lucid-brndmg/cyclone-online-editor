@@ -2,7 +2,7 @@ import {Accordion, ActionIcon, Button, Checkbox, Group, LoadingOverlay, NavLink,
 import examples from "../../../resource/code_example_manifest.json"
 import {useEditorStore} from "@/state/editorStore";
 import {locateToCode} from "@/core/utils/monaco";
-import {IconBulb, IconDownload, IconFile, IconTrash} from "@tabler/icons-react";
+import {IconBulb, IconDownload, IconTrash} from "@tabler/icons-react";
 import {useEditorPersistentStore, useEditorSaveStatusStore} from "@/state/editorPersistentStore";
 import {useEffect, useMemo, useState} from "react";
 import {timeDifference} from "@/lib/time";
@@ -12,7 +12,6 @@ import {modals} from "@mantine/modals";
 import {dynamicCodeExample, PublicUrl} from "@/core/utils/resource";
 import localforage from "localforage";
 import {useRouter} from "next/router";
-import {useGraphvizStore} from "@/state/editorGraphvizStore";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 
 export const FileStateWrapper = () => {

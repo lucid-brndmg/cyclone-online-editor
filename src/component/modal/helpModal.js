@@ -1,6 +1,5 @@
 import {
   Anchor,
-  Box,
   Button,
   Divider,
   Group,

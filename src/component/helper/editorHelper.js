@@ -1,9 +1,7 @@
-import {Badge, Box, Divider, Indicator, Paper, rem, ScrollArea, Space, Tabs} from "@mantine/core";
+import {Box, Divider, Indicator, Paper, ScrollArea, Space, Tabs} from "@mantine/core";
 import {
-  IconAnalyzeFilled,
-  IconArrowRightCircle,
   IconBook2,
-  IconChartCircles, IconEye,
+  IconEye,
   IconFolder,
   IconListTree
 } from "@tabler/icons-react";

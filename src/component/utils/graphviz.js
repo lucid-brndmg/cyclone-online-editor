@@ -4,14 +4,11 @@
 
 import {createRef, forwardRef, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
-import {Box, Button, Code, CopyButton, Group, Menu, ScrollArea, SegmentedControl} from "@mantine/core";
+import {Box, Button, Code, CopyButton, Group, Menu, SegmentedControl} from "@mantine/core";
 import classes from "@/styles/modules/GraphvizPreview.module.css";
 import {
   IconCopy,
   IconDownload,
-  IconFileTypeJpg,
-  IconFileTypePng,
-  IconFileTypeSvg,
   IconZoomIn
 } from "@tabler/icons-react";
 import {
@@ -19,7 +16,6 @@ import {
   downloadBlobFile,
   downloadTextFile,
   getSvgString,
-  serializeSvg,
   svgString2Image
 } from "@/lib/dom";
 import * as d3 from "d3";

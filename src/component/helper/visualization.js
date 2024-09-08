@@ -3,12 +3,9 @@ import {
   Box,
   Button,
   Center,
-  Code,
-  CopyButton,
   Group, Indicator, MultiSelect,
   rem,
-  SegmentedControl, Space,
-  Stack,
+  SegmentedControl, Stack,
   Switch,
   Text
 } from "@mantine/core";
@@ -16,13 +13,14 @@ import {
   IconArrowRightCircle,
   IconPlayerPlay, IconTopologyRing,
 } from "@tabler/icons-react";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useEditorStore} from "@/state/editorStore";
 import {genGraphvizExecutionResultPaths, genGraphvizPreview, genGraphvizTrace} from "@/core/graphviz";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {GraphvizMultiPreview, GraphvizSinglePreview} from "@/component/utils/graphviz";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
-import {graphviz} from "d3-graphviz"; // KEEP THIS LINE
+// KEEP THIS LINE
+import {graphviz} from "d3-graphviz";
 import cycloneAnalyzer from "cyclone-analyzer";
 import {useGraphvizStore} from "@/state/editorGraphvizStore";
 import {

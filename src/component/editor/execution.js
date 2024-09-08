@@ -2,8 +2,6 @@ import {useEditorStore} from "@/state/editorStore";
 import {useEditorExecutionStore} from "@/state/editorExecutionStore";
 import Config from "../../../resource/config.json";
 import {
-  extractGenCondMessage,
-  isNoCounterExampleFound, isNoPathFound, isUnknownResult,
   parseExecutionResultPaths, parseTrace,
   ResponseCode,
   sanitizeResult,
@@ -28,7 +26,6 @@ import {
 } from "@mantine/core";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 import {isGraphviz} from "@/core/utils/language";
-import {useHotkeys} from "@mantine/hooks";
 
 export const CodeExecutionButton = ({...props}) => {
   const {code, editorCtx} = useEditorStore()

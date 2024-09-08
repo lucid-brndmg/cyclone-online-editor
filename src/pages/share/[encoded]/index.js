@@ -1,8 +1,8 @@
 import {useRouter} from "next/router";
 import Head from "next/head";
 import {SharedCodePreview} from "@/component/share/preview";
-import {Container, LoadingOverlay, Text} from "@mantine/core";
-import {useEffect, useMemo, useState} from "react";
+import {Container, LoadingOverlay} from "@mantine/core";
+import {useMemo} from "react";
 import lzString from "lz-string"
 
 

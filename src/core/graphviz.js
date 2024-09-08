@@ -1,5 +1,5 @@
 import {map2elems, searchIndices} from "@/lib/list";
-import {dropRegex, dropRegexes, simplify} from "@/lib/string";
+import {dropRegex, dropRegexes} from "@/lib/string";
 import cycloneAnalyzer from "cyclone-analyzer";
 
 /*

@@ -6,10 +6,9 @@ import {
   ScrollArea,
   Stack,
   Text, Title,
-  Tooltip,
   TypographyStylesProvider
 } from "@mantine/core";
-import {IconCopy, IconPencil, IconPlayerPlayFilled} from "@tabler/icons-react";
+import {IconCopy, IconPencil} from "@tabler/icons-react";
 import localforage from "localforage";
 import {useRouter} from "next/router";
 import {HighlightedCycloneCode} from "@/component/utils/code";

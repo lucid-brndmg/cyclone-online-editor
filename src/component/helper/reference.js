@@ -3,14 +3,14 @@ import {
   Accordion,
   Anchor,
   Box,
-  Divider, LoadingOverlay,
+  LoadingOverlay,
   NavLink,
   Stack,
   Text, TextInput,
   TypographyStylesProvider
 } from "@mantine/core";
-import {IconArticle, IconChevronRight, IconCircleFilled} from "@tabler/icons-react";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {IconChevronRight, IconCircleFilled} from "@tabler/icons-react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {getDocumentById, getGroupDocument} from "@/core/resources/referenceDocs";
 import {useDebouncedValue} from "@mantine/hooks";
 import parse from "html-react-parser";

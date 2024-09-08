@@ -9,15 +9,12 @@ import {
   Stack,
   Switch, Table,
   Text, Textarea,
-  TextInput, Tooltip,
-  useComputedColorScheme
+  TextInput, Tooltip
 } from "@mantine/core";
 import {IconCode, IconDownload, IconEdit, IconMinus, IconPlus, IconTrash, IconUpload} from "@tabler/icons-react";
 import {MAX_POLL_WAIT, MIN_H, MIN_POLL_WAIT, MIN_W, useEditorSettingsStore} from "@/state/editorSettingsStore";
 import thirdPartyThemes from "../../../resource/theme_manifest.json"
-import {useEffect, useMemo, useRef, useState} from "react";
-import {useEditorStore} from "@/state/editorStore";
-import {dynamicTheme} from "@/core/utils/resource";
+import {useEffect, useMemo, useState} from "react";
 import {downloadTextFile} from "@/lib/dom";
 import {animationSpeedOptions, availableGraphvizEngines, displayDirectionOptions} from "@/core/graphviz";
 import {useDebouncedValue} from "@mantine/hooks";

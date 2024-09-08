@@ -5,7 +5,7 @@
 import path from "node:path"
 import fs from "node:fs"
 import config from "./config.js"
-import {execFileAsync, execShellCommand, spawnAsync} from "./lib/system.js"
+import {execFileAsync} from "./lib/system.js"
 import {ResponseCode} from "./definitions.js";
 import {executionLogger, serviceLogger} from "./logger.js";
 import {customSlice} from "./lib/string.js";

@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from "react";
-import {Button, Checkbox, Group, Modal, Stack, TextInput, Text, Anchor} from "@mantine/core";
+import {Button, Group, Modal, Stack, TextInput, Text, Anchor} from "@mantine/core";
 import {useEditorSettingsStore} from "@/state/editorSettingsStore";
 
 const ExecutionServerModal = () => {
