@@ -192,7 +192,7 @@ const eLiteralOutOfBoundary = ({type}) => {
   return `${typeToString(type)} value is out of range. ${bound}`
 }
 
-const eCheckUptoMultiLengths = ({length}) => {
+const eCheckUnsupportedRangeMode = ({length}) => {
   return `upto can not specify multiple path lengths. expecting 1 length specified, received: ${length} path lengths`
 }
 
@@ -262,7 +262,7 @@ const errorMessageFormatter = {
   [ExtendedErrorType.InvalidValueMutation]: eInvalidValueMutation,
   [ExtendedErrorType.OperatingDifferentEnumSources]: eOperatingDifferentEnumSources,
   [ExtendedErrorType.LiteralOutOfBoundary]: eLiteralOutOfBoundary,
-  [ExtendedErrorType.CheckUptoMultiLengths]: eCheckUptoMultiLengths,
+  [ExtendedErrorType.CheckUnsupportedRangeMode]: eCheckUnsupportedRangeMode,
   [ExtendedErrorType.InvalidCheckForModes]: eInvalidCheckForModes,
   [ExtendedErrorType.NoFinalStateOrReachSpecified]: eNoFinalStateOrReachSpecified,
   [ExtendedErrorType.UnreachableCheckForPathLength]: eUnreachableCheckForPathLength,
@@ -286,8 +286,8 @@ export const formatErrorMessage = (type, params, source = null) => {
   }
 
   const pref = source ? `${errorSourceToText[source]}${desc}: ` : ""
-
-  return `${pref}${errorMessageFormatter[type](params)}`
+  let fmt = errorMessageFormatter[type]
+  return `${pref}${fmt?.(params) ?? ""}`
 }
 
 export const formatErrorSource = source => errorSourceToText[source]
