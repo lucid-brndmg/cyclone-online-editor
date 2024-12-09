@@ -1,14 +1,3 @@
-// REFERENCED: https://stackoverflow.com/questions/68122097/how-can-i-ensure-text-is-valid-for-an-svg by vanowm
-export const serializeSvg = svg => {
-  const dummy = document.createElement("div")
-  const svgData = svg.replace(/(&(?!(amp|gt|lt|quot|apos))[^;]+;)/g, a => {
-    dummy.innerHTML = a;
-    return dummy.textContent;
-  })
-  const preface = '<?xml version="1.0" standalone="no"?>\r\n';
-  return preface + svgData
-}
-
 // Acknowledgement: https://gist.github.com/rokotyan/0556f8facbaf344507cdc45dc3622177
 export const getSvgString = svgNode => {
   // const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg")

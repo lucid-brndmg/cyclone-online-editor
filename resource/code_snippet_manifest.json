@@ -57,7 +57,7 @@
   },
   {
     "label": "opt",
-    "insert": "option-${1:name} = ${2:value}"
+    "insert": "option-${1:name} = ${2:value};"
   },
   {
     "label": "trace",
