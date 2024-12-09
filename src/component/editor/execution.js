@@ -452,8 +452,8 @@ export const CodeConsoleResultSection = () => {
                 ? sanitized.title
                 // Trace panel
                 : parsedTraces
-                  ? parsedTraces.length
-                    ? <Text fw={500} size={"sm"}>Generated {parsedTraces.length} traces</Text>
+                  ? parsedTraces.path.length
+                    ? <Text fw={500} size={"sm"}>Generated {parsedTraces.path.length} traces</Text>
                     : <Text fw={500} size={"sm"}>No trace generated</Text>
                   : traceIsGraphviz
                     ? <Text fw={500} size={"sm"}>Trace generated in Graphviz format</Text>

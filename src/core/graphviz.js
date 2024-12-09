@@ -462,8 +462,10 @@ export const genGraphvizExecutionResultPaths = ({states, edges}, options, visual
 // OTHER PARTS ARE WRITTEN ON MY OWN
 export const genGraphvizTrace = (traces, options, visualData) => {
   const codes = []
+  let timestamp = traces.timestamp
+  let label = timestamp ? `\nlabel=\"${visualData.graphIdentifier ? visualData.graphIdentifier + "\n" : ""}${timestamp}\";\nlabelloc=\"b\";\nlabeljust="c";` : ""
 
-  for (let trace of traces) {
+  for (let trace of traces.path) {
     const path = []
     const states = []
     let n = 1
@@ -486,7 +488,7 @@ export const genGraphvizTrace = (traces, options, visualData) => {
       ? path.length <= 6 ? "LR" : "TB"
       : options.direction
 
-    codes.push(`digraph {\n\nrankdir=${dir};\n\n${states.join("\n")}\n\n${path.join("->")};\n\n}`)
+    codes.push(`digraph {\n\nrankdir=${dir};${label}\n\n${states.join("\n")}\n\n${path.join("->")};\n\n}`)
   }
 
   return codes

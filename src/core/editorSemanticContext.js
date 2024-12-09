@@ -1,7 +1,7 @@
 import {positionComparator, posRangeIncludes} from "@/lib/position";
 import cycloneAnalyzer from "cyclone-analyzer";
 
-const {SemanticContextType} = cycloneAnalyzer.language.definitions
+const {SemanticContextType, SyntaxBlockKind} = cycloneAnalyzer.language.definitions
 const {getParentExpression} = cycloneAnalyzer.utils.antlr
 const {scopedContextType} = cycloneAnalyzer.language.specifications
 
@@ -97,12 +97,14 @@ export default class EditorSemanticContext {
   }
 
   getVisualData() {
+    let graphIdentifier = this.syntaxBlockBuilder?.getLatestBlock(SyntaxBlockKind.Machine)?.data.identifier
     return {
       trans: this.transitions,
       states: this.stateTable,
       assertions: this.assertions,
       invariants: this.invariants,
-      goal: this.goal
+      goal: this.goal,
+      graphIdentifier
     }
   }
 

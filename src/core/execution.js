@@ -14,6 +14,7 @@ const regexUnknownResult = /unknown\s+result:/i
 const regexIsError = /(line\s*:\s*\d+)|(position\s*:\d+)/i
 const regexCondUnsuccessful = /generation\s+is\s+unsuccessful/i
 const regexGenerationError = /generation\s+error/i
+const prefixTraceTimestamp = "[Time Stamp]:"
 
 export const ResponseCode = {
   InvalidParams: 0,
@@ -47,11 +48,12 @@ export const translateErrorResponse = (code, data) => {
 
 export const parseTrace = traceContent => {
   const lines = traceContent.split(/[\r\n]+/)
-  const traces = []
+  const path = []
   let inTrace = false
   let currentTraceContext = null
   let currentTrace = []
   let traceCount = 0
+  let timestamp = ""
 
   for (let line of lines) {
     const trimmed = line.trim()
@@ -77,19 +79,21 @@ export const parseTrace = traceContent => {
     } else if (trimmed.startsWith("=") && /TRACE\s*\(\d+\)/.test(trimmed)) {
       inTrace = false
       if (traceCount > 0) {
-        traces.push(currentTrace)
+        path.push(currentTrace)
       }
       currentTrace = []
       traceCount ++
     } else if (inTrace) {
       const [key, value] = trimmed.split(":")
       currentTraceContext?.fields.push({key, value, raw: trimmed})
+    } else if (trimmed.startsWith(prefixTraceTimestamp)) {
+        timestamp = trimmed.slice(prefixTraceTimestamp.length)
     }
   }
 
-  traces.push(currentTrace)
+  path.push(currentTrace)
 
-  return traces
+  return {path, timestamp}
 
   // return traces[0]?.length ? traces : traces.slice(1)
 }
