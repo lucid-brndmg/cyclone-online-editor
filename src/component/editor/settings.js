@@ -338,7 +338,7 @@ export const SettingsPopover = ({children, opened, onChange}) => {
                 />
 
                 <Switch
-                  label={"Display detailed props for nodes"}
+                  label={"Display node modifiers"}
                   checked={graphviz.preview.showNodeProps}
                   onChange={e => setGraphviz({
                     ...graphviz,
@@ -346,7 +346,7 @@ export const SettingsPopover = ({children, opened, onChange}) => {
                   })}
                 />
                 <Switch
-                  label={"Display detailed expression for assertion, invariant or goal"}
+                  label={"Display detailed expressions"}
                   checked={graphviz.preview.showDetailedExpressions}
                   onChange={e => setGraphviz({
                     ...graphviz,

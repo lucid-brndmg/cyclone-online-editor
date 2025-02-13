@@ -248,7 +248,7 @@ export const BrowserPanel = () => {
       <Accordion chevronPosition={"right"} multiple={true} value={fileBrowserExpanded} onChange={setFileBrowserExpanded}>
         <Accordion.Item value={"saved"}>
           <Accordion.Control >
-            <Text fw={500}>Saved Codes</Text>
+            <Text fw={500}>Saved Examples</Text>
           </Accordion.Control>
           <Accordion.Panel>
             <Stack>

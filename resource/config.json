@@ -8,6 +8,6 @@
     "pollInterval": 1000
   },
   "home": {
-    "initExampleCode": " /* A Simple Graph\n  * Demonstrate how to use path conditions.\n  */\n\ngraph G{\n\n    /* the set of nodes */\n    abstract start node S1{}\n    abstract node S2{}\n    \n    \n    /* the set of edges */\n    edge { S1 -> S1 }\n    edge { S1 -> S2 }\n    edge { S2 -> S1 }\n    edge { S2 -> S2 }\n    \n    goal{\n\n        /*\n         * Find a path (starts from node S1) that \n         *  has a length of 5, \n         *  must not include self-loops,\n         *  and eventually reach S2.\n         */\n        check for 5 condition (!(S1->S1) && !(S2->S2)) reach (S2)\n    }\n\n}"
+    "initExampleCode": "/**\n * A simple counting machine has three instructions only:\n * increment the counter.\n * decrement the counter.\n * reset the counter.\n */\ngraph CountingMachine { \n    int c;\n\n    start normal node R { c = 0;     }\n    normal       node I { c = c + 1; }\n    normal       node D { c = c - 1; }\n\n    edge { R -> I, D    }\n    edge { I -> I, D, R }\n    edge { D -> I, D, R }\n\n    goal{\n        /**\n         * Find all possible of instruction sequences that use 6 instructions \n         * to make the counter=3 and must use the decrement instruction somewhere.\n         */\n\n        assert c == 3;\n        enumerate for 5 condition (D) reach (R,I,D)\n    }\n}\n"
   }
 }
