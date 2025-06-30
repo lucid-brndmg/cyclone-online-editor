@@ -1,4 +1,5 @@
-FROM node:21-slim AS base
+# node:21-slim
+FROM node:24.3.0-slim AS base
 WORKDIR /app
 
 # install dependencies
