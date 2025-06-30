@@ -1,5 +1,6 @@
+# node:21-alpine
 # Dockerfile for the next.js based frontend
-FROM node:21-alpine AS base
+FROM node:24.3.0-slim AS base
 WORKDIR /app
 ENTRYPOINT ["/usr/local/bin/npm"]
 
