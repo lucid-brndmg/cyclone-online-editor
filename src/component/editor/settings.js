@@ -354,11 +354,11 @@ export const SettingsPopover = ({children, opened, onChange}) => {
                   })}
                 />
                 <Switch
-                  label={"Display simplified edge description"}
-                  checked={!graphviz.preview.showLabelLiteral}
+                  label={"Display edge description"}
+                  checked={graphviz.preview.showEdgeDesc}
                   onChange={e => setGraphviz({
                     ...graphviz,
-                    preview: {...graphviz.preview, showLabelLiteral: !e.currentTarget.checked}
+                    preview: {...graphviz.preview, showEdgeDesc: e.currentTarget.checked}
                   })}
                 />
                 <Switch

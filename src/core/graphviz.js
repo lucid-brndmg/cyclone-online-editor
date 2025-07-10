@@ -155,7 +155,8 @@ export const availableGraphvizEngines = [
 
 export const graphvizForEditorOptions = {
   showNodeProps: false,
-  showLabelLiteral: false,
+  // showLabelLiteral: false,
+  showEdgeDesc: true,
   // showWhereExpr: true,
   paddingEdgeText: true,
 
@@ -229,28 +230,28 @@ export const genGraphvizTransDef = (definedStates, resultPaths, trans, statesDef
       }
 
       let descriptions = []
-      if (identifier) {
+      if (identifier && previewOptions.showEdgeDesc) {
         descriptions.push(identifier)
       }
 
-      const showWhere = !!whereExpr // && previewOptions.showWhereExpr
-      const showLabel = previewOptions.showLabelLiteral
+      const showWhere = !!whereExpr && previewOptions.showEdgeDesc // && previewOptions.showWhereExpr
+      // const showLabel = previewOptions.showLabelLiteral
       if (showWhere && label) {
         const replacedWhereExpr = previewOptions.showAsMathOperators ? formatCycloneExpr(whereExpr, CycloneParsingEntry.Expr) : whereExpr
-        const content = `where ${replacedWhereExpr}, ${showLabel ? `${labelKeyword ?? "label"}: ` : ""}${label}`
+        const content = `where ${replacedWhereExpr}, ${labelKeyword ?? "label"}: ${label}`
         descriptions.push(identifier
           ? `(${content})`
           : content
         )
       } else if (showWhere) {
         const replacedWhereExpr = previewOptions.showAsMathOperators ? formatCycloneExpr(whereExpr, CycloneParsingEntry.Expr) : whereExpr
-        const content = `${showLabel ? "condition: " : ""}${replacedWhereExpr}`
+        const content = replacedWhereExpr // `${showLabel ? "where: " : ""}${replacedWhereExpr}`
         descriptions.push(identifier
           ? `(${content})`
           : content
         )
-      } else if (label) {
-        const content = `${showLabel ? `${labelKeyword ?? "label"}: ` : ""}${label}`
+      } else if (label && previewOptions.showEdgeDesc) {
+        const content = `${labelKeyword ?? "label"}: ${label}`
         descriptions.push(identifier
           ? `(${content})`
           : content
