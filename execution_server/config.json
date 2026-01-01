@@ -6,7 +6,7 @@
     "sourcePath": "D:\\tmp\\cyclone_src_backend",
     "deleteAfterExec": false,
     "extension": ".cyclone",
-    "disabledOptions": ["debug", "log"],
+    "disabledOptions": ["debug", "log", "generation"],
     "mandatoryTimeoutMs": 10000,
     "appendEnvPath": true,
     "idLength": 8,
