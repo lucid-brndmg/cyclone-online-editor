@@ -12,8 +12,8 @@ RUN npm install
 
 # dev server
 FROM base AS dev
-ARG cyclone_version=1.10.1359-x64
-ARG checksum=5e5dc619ee39782cf5fde5909d69fe141c0608ad82696dd5feef40615da04e6b
+ARG cyclone_version=1.10.1462-x64
+ARG checksum=1a8a28ae3b879292c69319a33f098269f249283f254f185353dcce4a5141d861
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y install unzip openjdk-17-jre-headless
 ADD --checksum=sha256:${checksum} https://classicwuhao.github.io/cyclone_tutorial/Cyclone-${cyclone_version}.zip /
