@@ -1,46 +1,38 @@
-
 /**
- * A zero sum game: 
- * player one wins the game, increase his stake by 1 otherwise decrease his stake by 1.
- * player two wins the game, increase his stake by 1 otherwise decrease his stake by 1.
- * The invariant: winer' stake + loser's stake must be equal to 0.
+ * Two bit counter
  */
-graph zerosum {
+option-trace=true;
+graph TwoBitCounterI{
+    bool l;
+    bool r;
 
-	int stake1; //player1's stake
-	int stake2; //player2's stake
+    /* initial state */
+    /** 
+        * R: l'=(l!=r) /\ r'=~r
+        */
+    normal start node S{
+        l = (l!=r);
+        r = !r;
+    }
 
-	start normal node Start{
-		stake1 = 0;
-		stake2 = 0;
-	}
+    edge { S -> S }
 
-	normal node P1W{
-		stake1 = stake1 + 1;
-		stake2 = stake2 - 1;
-	}
-	
-	normal node P2W{
-		stake1 = stake1 - 1;
-		stake2 = stake2 + 1;
-	}
+    /*
+        * Use invariant to check the following LTL formula
+        * LTL: G (~l \/ ~r)
+        */
+    invariant property { !l || !r;}
 
-	edge {Start -> P1W}
-	edge {Start -> P2W}
-	edge {P1W -> P1W}
-	edge {P1W -> P2W}
-	edge {P2W -> P1W}
-	edge {P2W -> P2W}
-	
-	/* zerosum invariant must hold in all states. */
-	invariant zerosum { stake1 + stake2 == 0; }
+    goal{
 
-	goal{
-		/* play 5 games */
-		check for 1,2,3,4,5 reach (P1W,P2W)
-	}
-	
+        /* initial state: ~l /\ ~r */
+        assert (!initial(l) && !initial(r));
+
+        /*
+            * Alternatively, you can also use the following assert statement
+            * LTL formula: F !(~l \/ ~r)
+            * assert (!(!l || !r));
+            */
+        check for 2,3,4 reach (S)
+    }
 }
-
-
-

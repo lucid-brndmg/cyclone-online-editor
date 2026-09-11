@@ -21,58 +21,19 @@ graph TinyNeuralNetwork{
 	real w23=-2*u,w24=-2*u,w32=-2*u;
 	real w25=u,w26=u,w33=u;
 
-	function min:real (a:real,b:real){
-		real m;
-		(a>=b)=>m==b;
-		(a<b)=>m==a;
-		return m;
-	}
-
 	function tent:real (x:real){
 		return u*min(x,1-x);
 	}
 
 	abstract start node S{}
-	normal node R11{
-		(w11*x0)>=0 => (y11==w11*x0);
-		(w11*x0)<0 => (y11==0);
-	}
-
-	normal node R12{
-		(w12*x0+w13*x1>=0)=>(y12==w12*x0+w13*x1);
-		(w12*x0+w13*x1<0)=>(y12==0);
-	}
-
-	normal node R13{
-		(w14*x1>=0)=>(y13==w14*x1);
-		(w14*x1<0)=>(y13==w14*x1);
-	}
-
-	normal node R21{
-		(w21*y11>=0)=>(y21==w21*y11);
-		(w21*y11<0)=>(y21==0);
-	}	
-
-	normal node R22{
-		(w22*y11+w23*y12+w25*y13>=0)=>(y22==w22*y11+w23*y12+w25*y13);
-		(w22*y11+w23*y12+w25*y13<0)=>(y22==0);
-	}	
-
-	normal node R23{
-		(w24*y12+w26*y13>=0) => (y23==w24*y12+w26*y13);
-		(w24*y12+w26*y13)<0=> (y23==0);
-	}
-
-	normal node R31{
-		(w31*y21>=0)=>(y31==w31*y21);
-		(w31*y21<0)=>(y31==0);
-	}
-
-	normal node R32{
-		(w32*y22+w33*y23>=0)=>(y32==w32*y22+w33*y23);
-		(w32*y22+w33*y23<0)=>(y32==0);
-	}
-
+	normal node R11{y11=max(w11*x0,0);}
+	normal node R12{y12=max(w12*x0+w13*x1,0);}
+	normal node R13{y13=max(w14*x1,0);}
+	normal node R21{y21=max(w21*y11,0);}
+	normal node R22{y22=max(w22*y11+w23*y12+w25*y13,0);}
+	normal node R23{y23=max(w24*y12+w26*y13,0);}
+	normal node R31{y31=max(w31*y21,0);}
+	normal node R32{y32=max(w32*y22+w33*y23,0);}
 	abstract final node F{}
 	
 	edge { S -> R11 }
