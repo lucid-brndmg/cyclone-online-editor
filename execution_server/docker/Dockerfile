@@ -2,7 +2,7 @@ FROM ubuntu:24.04 AS base
 ADD https://deb.nodesource.com/setup_lts.x /nodesource_setup.sh
 RUN chmod 750 /nodesource_setup.sh
 RUN /nodesource_setup.sh
-RUN apt update && apt install -y nodejs
+RUN apt update && apt upgrade -y && apt install -y nodejs
 WORKDIR /app
 
 # install dependencies
