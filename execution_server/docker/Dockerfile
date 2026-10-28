@@ -2,7 +2,10 @@ FROM ubuntu:24.04 AS base
 ADD https://deb.nodesource.com/setup_lts.x /nodesource_setup.sh
 RUN chmod 750 /nodesource_setup.sh
 RUN /nodesource_setup.sh
-RUN apt update && apt upgrade -y && apt install -y nodejs
+# Maybe we don't need a full upgrade "&& apt upgrade -y" only for installing the latest nodejs
+# if we run this, the pipeline can run out of space. 
+# added an autoclean operation
+RUN apt update && apt upgrade -y && apt install -y nodejs && apt-get autoclean -y
 WORKDIR /app
 
 # install dependencies
