@@ -1,9 +1,17 @@
 stages:
+  - test
   - image
   - build
   - test
   - deploy
 
+# enable Static Applicatoin Security Testing
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+
+semgrep-sast:
+  tags:
+    - docker
 # run jobs only for changes to  branches that are sources to a merge request
 # and all changes to the default branch
 # (don't run on commits to branches if there is no merge request from it)

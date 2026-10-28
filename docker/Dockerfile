@@ -1,6 +1,7 @@
 # node:21-alpine
 # Dockerfile for the next.js based frontend
-FROM node:24.3.0-slim AS base
+FROM node:24-slim AS base
+RUN apt update && apt upgrade -y
 WORKDIR /app
 ENTRYPOINT ["/usr/local/bin/npm"]
 
